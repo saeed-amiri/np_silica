@@ -25,7 +25,28 @@ class GetAmino:
         bonds_df = self.__get_bonds(data.Bonds_df)
         angles_df = self.__get_angles(data.Angles_df)
         dihedrals_df = self.__get_dihedrals(data.Dihedrals_df)
-        print(dihedrals_df)
+        self.treat_atoms(data.Masses_df, atoms_df)
+
+    def treat_atoms(self,
+                    masses_df: pd.DataFrame,  # Masses atomic infos
+                    atoms_df: pd.DataFrame  # Selected data from input
+                    ) -> pd.DataFrame:
+        """update atoms type and indeces"""
+        self.update_atom_id(atoms_df)
+
+    def update_atom_id(self,
+                       atoms_df: pd.DataFrame  # Selected data from input
+                       ) -> pd.DataFrame:
+        """add new index"""
+        up_atoms: pd.DataFrame = atoms_df.copy()
+        up_atoms['old_id'] = up_atoms['atom_id']
+        new_id: list[int]  # New atoms' id
+        new_id = list(range(1, len(up_atoms)+1))
+        up_atoms['atom_id'] = new_id
+        up_atoms.reset_index(inplace=True)
+        up_atoms.drop('index', inplace=True, axis=1)
+        up_atoms.index += 1
+        return up_atoms
 
     def __get_atoms(self,
                     atoms: pd.DataFrame  # Atoms LAMMPS format
