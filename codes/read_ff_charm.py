@@ -16,7 +16,7 @@ class CHARMM:
     def __init__(self,
                  fcharm: str  # Charmm file
                  ) -> None:
-        self.__read_charmm
+        self.__read_charmm(fcharm)
 
     def __read_charmm(self,
                       fcharm: str  # Charmm file
@@ -45,13 +45,13 @@ class CHARMM:
                         angletypes, dihedraltypes = False, False, True, False,\
                         False, False
                 if line.startswith('[ pairtypes ]'):
-                    atomtypes, nonbond_params, bondtypes, pairtypes,
-                    angletypes, dihedraltypes = False, False, False, True,\
+                    atomtypes, nonbond_params, bondtypes, pairtypes, \
+                        angletypes, dihedraltypes = False, False, False, True,\
                         False, False
                 if line.startswith('[ angletypes ]'):
-                    atomtypes, nonbond_params, bondtypes, pairtypes,
-                    angletypes, dihedraltypes = False, False, False, False,\
-                        True, False
+                    atomtypes, nonbond_params, bondtypes, pairtypes, \
+                        angletypes, dihedraltypes = False, False, False, \
+                        False, True, False
                 if line.startswith('[ dihedraltypes ]'):
                     atomtypes, nonbond_params, bondtypes, pairtypes,\
                         angletypes, dihedraltypes = False, False, False, \
@@ -85,13 +85,20 @@ class CHARMM:
         del angleList
 
     def __read_atomtypes(self, atomList) -> pd.DataFrame:
-        atom_dict = dict(name=[],
-                         at_num=[],
-                         mass=[],
-                         charge=[],
-                         ptype=[],
-                         sigma=[],
-                         epsilon=[])
+        name: list = []
+        at_num: list = []
+        mass: list = []
+        charge: list = []
+        ptype: list = []
+        sigma: list = []
+        epsilon: list = []
+        atom_dict = {'name': name,
+                     'at_num': at_num,
+                     'mass': mass,
+                     'charge': charge,
+                     'ptype': ptype,
+                     'sigma': sigma,
+                     'epsilon': epsilon}
         for item in atomList:
             i_name, i_at_num, i_mass, i_charge, i_ptype, i_sigma,\
                 i_epsilon = self.__procces_lines(item, 7)
@@ -113,7 +120,16 @@ class CHARMM:
         return pd.DataFrame.from_dict(atom_dict)
 
     def __read_nonbond(self, nonbondList) -> pd.DataFrame:
-        nonbond_dict = dict(ai=[], aj=[], func=[], sigma=[], epsilon=[])
+        ai: list = []
+        aj: list = []
+        func: list = []
+        sigma: list = []
+        epsilon: list = []
+        nonbond_dict: dict[str, list] = {'ai': ai,
+                                         'aj': aj,
+                                         'func': func,
+                                         'sigma': sigma,
+                                         'epsilon': epsilon}
         for item in nonbondList:
             i_ai, i_aj, i_func, i_sigma, i_epsilon\
                 = self.__procces_lines(item, 5)
@@ -131,7 +147,14 @@ class CHARMM:
         return pd.DataFrame.from_dict(nonbond_dict)
 
     def __read_bondtypes(self, bondList) -> pd.DataFrame:
-        bond_dict = dict(bond=[], func=[], b0=[], Kb=[])
+        bond: list[str] = []
+        func: list[str] = []
+        b0: list[str] = []
+        Kb: list[str] = []
+        bond_dict: dict[str, list] = {'bond': bond,
+                                      'func': func,
+                                      'b0': b0,
+                                      'Kb': Kb}
         for item in bondList:
             i_ai, i_aj, i_func, i_b0, i_Kb = self.__procces_lines(item, 5)
             i_ai = i_ai.strip()
@@ -147,7 +170,14 @@ class CHARMM:
         return pd.DataFrame.from_dict(bond_dict)
 
     def __read_pairtypes(self, pairList) -> pd.DataFrame:
-        pair_dict = dict(pairs=[], func=[], sigma=[], epsilon=[])
+        pairs: list[str] = []
+        func: list[str] = []
+        sigma: list[float] = []
+        epsilon: list[float] = []
+        pair_dict: dict[str, list] = {'pairs': pairs,
+                                      'func': func,
+                                      'sigma': sigma,
+                                      'epsilon': epsilon}
         for item in pairList:
             i_ai, i_aj, i_func, i_sigma, i_epsilon \
                 = self.__procces_lines(item, 5)
@@ -165,7 +195,18 @@ class CHARMM:
         return pd.DataFrame.from_dict(pair_dict)
 
     def __read_angletypes(self, angleList) -> pd.DataFrame:
-        angle_dict = dict(angle=[], func=[], th0=[], cth=[], S0=[], Kub=[])
+        angle: list[str] = []
+        func: list[str] = []
+        th0: list[float] = []
+        cth: list[float] = []
+        S0: list[float] = []
+        Kub: list[float] = []
+        angle_dict: dict[str, list] = {'angle': angle,
+                                       'func': func,
+                                       'th0': th0,
+                                       'cth': cth,
+                                       'S0': S0,
+                                       'Kub': Kub}
         for item in angleList:
             i_ai, i_aj, i_ak, i_func, i_th0, i_cth, i_S0, i_Kub = \
                 self.__procces_lines(item, 8)
@@ -192,7 +233,7 @@ class CHARMM:
 
     def __drop_semicolon(self,
                          line: str  # line to replace chrs
-                         ) -> list:
+                         ) -> str:
         return re.sub(r'\;.*', "", line)
 
     def __procces_lines(self,
@@ -200,8 +241,12 @@ class CHARMM:
                         lineLen: int  # To check the length
                         ) -> list:
         line = line.strip()
-        line = line.split(' ')
-        line = [item for item in line if item]
-        if len(line) != lineLen:
+        l_line: list[str] = line.split(' ')
+        l_line = [item for item in l_line if item]
+        if len(l_line) != lineLen:
             exit(f'WRONG LINE in line: {line}, EXIT!')
-        return line
+        return l_line
+
+
+if __name__ == '__main__':
+    charm = CHARMM(sys.argv[1])
