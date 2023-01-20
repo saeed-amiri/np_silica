@@ -2,6 +2,7 @@ import re
 import sys
 import pandas as pd
 
+
 class Doc:
     """read Charm Force fields"""
 
@@ -18,43 +19,43 @@ class CHARMM:
         self.__read_charmm
 
     def __read_charmm(self,
-                    fcharm: str  # Charmm file
-                    ) -> pd.DataFrame:
+                      fcharm: str  # Charmm file
+                      ) -> pd.DataFrame:
         # Define flages
-        atomtypes, nonbond_params, bondtypes, pairtypes, \
-        angletypes, dihedraltypes = False, False, False, False, False, False
+        atomtypes, nonbond_params, bondtypes, pairtypes, angletypes, \
+            dihedraltypes = False, False, False, False, False, False
         # Initiate lists
         atomList, nonbondList, bondList, pairList,  angleList, \
-        dihedralList = [], [], [], [], [], []
+            dihedralList = [], [], [], [], [], []
         with open(fcharm, 'r') as f:
             while True:
                 line = f.readline()
                 if line.startswith(';'):
                     continue
-                if line.startswith('[ atomtypes ]'): 
+                if line.startswith('[ atomtypes ]'):
                     atomtypes, nonbond_params, bondtypes, pairtypes,\
-                    angletypes, dihedraltypes = True, False, False, False,\
-                    False, False
-                if line.startswith('[ nonbond_params ]'): 
+                        angletypes, dihedraltypes = True, False, False, False,\
+                        False, False
+                if line.startswith('[ nonbond_params ]'):
                     atomtypes, nonbond_params, bondtypes, pairtypes,\
-                    angletypes, dihedraltypes = False, True, False, False,\
-                    False, False
-                if line.startswith('[ bondtypes ]'): 
+                        angletypes, dihedraltypes = False, True, False, False,\
+                        False, False
+                if line.startswith('[ bondtypes ]'):
                     atomtypes, nonbond_params, bondtypes, pairtypes,\
-                    angletypes, dihedraltypes = False, False, True, False,\
-                    False, False
-                if line.startswith('[ pairtypes ]'): 
+                        angletypes, dihedraltypes = False, False, True, False,\
+                        False, False
+                if line.startswith('[ pairtypes ]'):
                     atomtypes, nonbond_params, bondtypes, pairtypes,
                     angletypes, dihedraltypes = False, False, False, True,\
-                    False, False
-                if line.startswith('[ angletypes ]'): 
+                        False, False
+                if line.startswith('[ angletypes ]'):
                     atomtypes, nonbond_params, bondtypes, pairtypes,
                     angletypes, dihedraltypes = False, False, False, False,\
-                    True, False
-                if line.startswith('[ dihedraltypes ]'): 
-                    atomtypes, nonbond_params, bondtypes, pairtypes,
-                    angletypes, dihedraltypes = False, False, False, False,\
-                    False, True
+                        True, False
+                if line.startswith('[ dihedraltypes ]'):
+                    atomtypes, nonbond_params, bondtypes, pairtypes,\
+                        angletypes, dihedraltypes = False, False, False, \
+                        False, False, True
                 if line.strip() and atomtypes and not line.startswith('[ '):
                     line = self.__drop_semicolon(line).strip()
                     atomList.append(line)
@@ -68,27 +69,32 @@ class CHARMM:
                 if line.strip() and angletypes and not line.startswith('[ '):
                     angleList.append(line)
                 if line.strip() and dihedraltypes and \
-                    not line.startswith('[ '):
+                        not line.startswith('[ '):
                     dihedralList.append(line)
-                if not line: break
-        self.atomtyps_df = self.__read_atomtypes(atomList); del atomList
-        self.nonbond_df = self.__read_nonbond(nonbondList); del nonbondList
-        self.bond_df = self.__read_bondtypes(bondList); del bondList
-        self.pair_df = self.__read_pairtypes(pairList); del pairList
-        self.angle_df = self.__read_angletypes(angleList); del angleList
-
+                if not line:
+                    break
+        self.atomtyps_df = self.__read_atomtypes(atomList)
+        del atomList
+        self.nonbond_df = self.__read_nonbond(nonbondList)
+        del nonbondList
+        self.bond_df = self.__read_bondtypes(bondList)
+        del bondList
+        self.pair_df = self.__read_pairtypes(pairList)
+        del pairList
+        self.angle_df = self.__read_angletypes(angleList)
+        del angleList
 
     def __read_atomtypes(self, atomList) -> pd.DataFrame:
         atom_dict = dict(name=[],
-                        at_num=[],
-                        mass=[],
-                        charge=[],
-                        ptype=[],
-                        sigma=[],
-                        epsilon=[])
+                         at_num=[],
+                         mass=[],
+                         charge=[],
+                         ptype=[],
+                         sigma=[],
+                         epsilon=[])
         for item in atomList:
             i_name, i_at_num, i_mass, i_charge, i_ptype, i_sigma,\
-                i_epsilon = self.__procces_lines(item,7)
+                i_epsilon = self.__procces_lines(item, 7)
             i_name = i_name.strip()
             i_at_num = int(i_at_num.strip())
             i_mass = float(i_mass.strip())
@@ -104,8 +110,8 @@ class CHARMM:
             atom_dict['sigma'].append(i_sigma)
             atom_dict['epsilon'].append(i_epsilon)
         del atomList
-        return pd.DataFrame.from_dict(atom_dict)    
-    
+        return pd.DataFrame.from_dict(atom_dict)
+
     def __read_nonbond(self, nonbondList) -> pd.DataFrame:
         nonbond_dict = dict(ai=[], aj=[], func=[], sigma=[], epsilon=[])
         for item in nonbondList:
@@ -124,8 +130,6 @@ class CHARMM:
         del nonbondList
         return pd.DataFrame.from_dict(nonbond_dict)
 
-
-        
     def __read_bondtypes(self, bondList) -> pd.DataFrame:
         bond_dict = dict(bond=[], func=[], b0=[], Kb=[])
         for item in bondList:
@@ -187,17 +191,17 @@ class CHARMM:
         pass
 
     def __drop_semicolon(self,
-                       line: str # line to replace chrs
-                       ) -> list:
+                         line: str  # line to replace chrs
+                         ) -> list:
         return re.sub(r'\;.*', "", line)
 
     def __procces_lines(self,
-                      line: str,  # Char to clear 
-                      lineLen: int  # To check the length
-                      ) -> list:
-        line =line.strip()
+                        line: str,  # Char to clear
+                        lineLen: int  # To check the length
+                        ) -> list:
+        line = line.strip()
         line = line.split(' ')
         line = [item for item in line if item]
-        if len(line) != lineLen :
+        if len(line) != lineLen:
             exit(f'WRONG LINE in line: {line}, EXIT!')
         return line
