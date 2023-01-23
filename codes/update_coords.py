@@ -28,12 +28,12 @@ class GetGroups:
                  Ogroup:  list[typing.Any],  # Name | index groups[O] to delete
                  fraction: float = 1  # Fraction of to select from, 0<fr<=1
                  ) -> None:
-        self.__get_silica(Atoms, Sigroup)
+        self.df = self.__get_silica(Atoms, Sigroup)
 
     def __get_silica(self,
                      Atoms: pd.DataFrame,  # Atoms df in the lammps fullatom
                      Sigroup: list[typing.Any],  # Name | index of groups[Si]
-                     ) -> None:
+                     ) -> pd.DataFrame:
         """Get index or name of atoms"""
         Si_list: list[pd.DataFrame] = []  # df with asked Si groups
         for item in Sigroup:
@@ -51,7 +51,7 @@ class GetGroups:
               f'in the choosen area of the system, Max_radius = {max_radius}'
               f'\n{bcolors.ENDC}')
         # Get Azimuth and Polar angle of each atom in df
-        print(df)
+        return df
 
     def __get_radius(self,
                      Atoms: pd.DataFrame,  # Atoms in lammps full atom
@@ -84,6 +84,20 @@ class GetGroups:
         df['azimuth'] = azimuth
         df['polar'] = polar
         return df
+
+class GetAmino(rdlmp.ReadData):
+    """read the main Aminopropyle coordinates and put the Si position
+    to zero"""
+    def __init__(self, fname) -> None:
+        super().__init__(fname)
+        self.__to_origin()
+
+    def __to_origin(self,
+                    Atoms: pd.DataFrame  # Atomic mposition of the structure
+                    ) -> pd.DataFrame:
+        """put the coordinate of Si in Aminopropyle to zero"""
+
+
 
 
 if __name__ == '__main__':
