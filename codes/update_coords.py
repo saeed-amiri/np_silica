@@ -47,7 +47,8 @@ class GetOGroups:
             O_list.append(Atoms[Atoms['name'] == item])
         df: pd.DataFrame = pd.concat(O_list)
         O_delete = self.__get_o_delete(silica.Bonds_df, df_si, df)
-    
+        self.__delete_atoms(silica, O_delete)
+
     def __get_o_delete(self,
                        bonds_df: pd.DataFrame,  # Bonds in the LAMMPS format
                        df_si: pd.DataFrame,  # df with selected group[Si]
@@ -59,8 +60,8 @@ class GetOGroups:
         all_O = [item for item in df['atom_id']]
         all_l = all_Si
         all_l.extend(all_O)
-        delte_list: list[typing.Any] = [] # Rows of bonds DF
-        for item, row in silica.Bonds_df.iterrows():
+        delte_list: list[typing.Any] = []  # Rows of bonds DF
+        for _, row in bonds_df.iterrows():
             if row['ai'] in all_l and row['aj'] in all_l:
                 if row['ai'] in all_O:
                     if row['ai'] not in delte_list:
@@ -69,9 +70,33 @@ class GetOGroups:
                     if row['ai'] not in delte_list:
                         delte_list.append(row['ai'])
         return delte_list
-            
-        
-        
+
+    def __delete_atoms(self,
+                       silica: rdlmp.ReadData,  # Atoms df in lammps full atom
+                       delete_group: list[int]  # Index of the atom to delete
+                       ) -> pd.DataFrame:
+        """delete atoms and return update version in LAMMPS format"""
+        self.__update_atoms(silica.Atoms_df, delete_group)
+
+    def __update_atoms(self,
+                       Atoms_df: pd.DataFrame,  # Atoms in LAMMPS format
+                       delete_group: list[int]  # Index of atom to delete
+                       ) -> pd.DataFrame:
+        """delete atoms and return updated one with a new column"""
+        Atoms_df['old_atom_id'] = Atoms_df['atom_id']
+        df = Atoms_df.copy()
+        for item, row in df.iterrows():
+            if row['atom_id'] in delete_group:
+                Atoms_df.drop(index=[item+1], axis=0, inplace=True)
+        print(f'{bcolors.OKBLUE}{self.__class__.__name__}\n'
+              f'\t {len(delete_group)} is deleted from data file\n'
+              f'{bcolors.ENDC}')
+        del df
+        Atoms_df.reset_index(inplace=True)
+        Atoms_df.index += 1
+        Atoms_df['atom_id'] = Atoms_df.index
+        Atoms_df.drop(columns=['index'], inplace=True)
+        return Atoms_df
 
 
 class GetSiGroups:
