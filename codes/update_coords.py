@@ -45,36 +45,13 @@ class GetGroups:
         print(f'{bcolors.OKGREEN}\tThere are: {len(df)} atoms with selected '
               f'atoms name in the file\n{bcolors.ENDC}')
         max_radius: float = self.__get_radius(Atoms)
-        df = self.__set_radii(Atoms, df)
-        df = df[(df['radius'] >= max_radius - 5)]
+        df = self.__get_angles(df)
+        df = df[(df['rho'] >= max_radius - 5)]
         print(f'{bcolors.OKGREEN}\tThere are: {len(df)} selected atoms '
               f'in the choosen area of the system, Max_radius = {max_radius}'
               f'\n{bcolors.ENDC}')
         # Get Azimuth and Polar angle of each atom in df
-        df = self.__get_angles(df)
         print(df)
-    
-    def __set_radii(self,
-                    Atoms: pd.DataFrame,  # Atoms in lammps full atom
-                    df: pd.DataFrame,  # The Atoms_df for asked silicons
-                    ) -> pd.DataFrame:
-        """add radii for the atoms to drop inner ones later"""
-        # Check the center of mass
-        x_cm: float = np.average(Atoms['x'])
-        y_cm: float = np.average(Atoms['y'])
-        z_cm: float = np.average(Atoms['z'])
-        EPSILON: float = 1e-5  # to consider as zero
-        if x_cm > EPSILON or y_cm > EPSILON or z_cm > EPSILON:
-            exit(f'{bcolors.FAIL}{self.__class__.__name__}\n'
-                 f'\tThe Center of mass is not in zero, Sth is wrong '
-                 f'in reading the main data file\n{bcolors.ENDC}')
-        radii_list: list[float] = []  # radius of the particles
-        for _, row in df.iterrows():
-            vec: np.array = ([row['x'], row['y'], row['z']])
-            radii: float = np.linalg.norm(vec)
-            radii_list.append(radii)
-        df['radius'] = radii_list
-        return df
     
     def __get_radius(self,
                     Atoms: pd.DataFrame,  # Atoms in lammps full atom
