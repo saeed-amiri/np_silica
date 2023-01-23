@@ -18,22 +18,22 @@ class GetData(rdlmp.ReadData):
                  fname: str  # Name of the data file
                  ) -> None:
         super().__init__(fname)
-    
+
 
 class GetGroups:
     """get silinol groups to add cahin to them"""
     def __init__(self,
-                Atoms: pd.DataFrame,  # Atoms df in the form of lammps fullatom
-                Sigroup: list[typing.Any],  # Name | index to select groups[Si]
-                Ogroup:  list[typing.Any],  # Name | index groups[O] to delete
-                fraction: float = 1  # Fraction of to select from, 0<fr<=1
-                ) -> None:
+                 Atoms: pd.DataFrame,  # Atoms df in form of lammps fullatom
+                 Sigroup: list[typing.Any],  # Name | index to select group[Si]
+                 Ogroup:  list[typing.Any],  # Name | index groups[O] to delete
+                 fraction: float = 1  # Fraction of to select from, 0<fr<=1
+                 ) -> None:
         self.__get_silica(Atoms, Sigroup)
 
     def __get_silica(self,
-                    Atoms: pd.DataFrame,  # Atoms df in the form of lammps fullatom
-                    Sigroup: list[typing.Any],  # Name | index to select groups[Si]
-                    ) -> None:
+                     Atoms: pd.DataFrame,  # Atoms df in the lammps fullatom
+                     Sigroup: list[typing.Any],  # Name | index of groups[Si]
+                     ) -> None:
         """Get index or name of atoms"""
         Si_list: list[pd.DataFrame] = []  # df with asked Si groups
         for item in Sigroup:
@@ -52,10 +52,10 @@ class GetGroups:
               f'\n{bcolors.ENDC}')
         # Get Azimuth and Polar angle of each atom in df
         print(df)
-    
+
     def __get_radius(self,
-                    Atoms: pd.DataFrame,  # Atoms in lammps full atom
-                    ) -> float:
+                     Atoms: pd.DataFrame,  # Atoms in lammps full atom
+                     ) -> float:
         """return the radius of the nano-particles"""
         x_max: float = Atoms['x'].abs().max()
         y_max: float = Atoms['y'].abs().max()
@@ -84,6 +84,7 @@ class GetGroups:
         df['azimuth'] = azimuth
         df['polar'] = polar
         return df
+
 
 if __name__ == '__main__':
     fname = sys.argv[1]
