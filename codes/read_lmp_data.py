@@ -1,6 +1,7 @@
 import os
 import sys
 import typing
+import numpy as np
 import pandas as pd
 from colors_text import TextColor as bcolors
 
@@ -336,8 +337,9 @@ class Body(Header):
                         self.get_dihedrals(line.strip())
                 if not line:
                     break
-            self.Atoms_df = pd.DataFrame.from_dict(
+            Atoms_df = pd.DataFrame.from_dict(
                             self.Atoms, orient='columns').T
+            self.Atoms_df = self.com_to_zero(Atoms_df)
             self.Bonds_df = pd.DataFrame.from_dict(self.Bonds).T
             self.Angles_df = pd.DataFrame.from_dict(self.Angles).T
             self.Dihedrals_df = pd.DataFrame.from_dict(self.Dihedrals).T
@@ -406,6 +408,20 @@ class Body(Header):
                                            name=i_name,
                                            b_name=i_bond_name
                                           )
+    def com_to_zero(self,
+                    Atoms: pd.DataFrame  # Atoms dataframe from read from data
+                    ) -> pd.DataFrame:
+        """set the center of mass to zero"""
+        print(f'{bcolors.OKCYAN}\tMove the center of mass to zero\n'
+              f'{bcolors.ENDC}')
+        x_cm: float = np.average(Atoms['x'])
+        y_cm: float = np.average(Atoms['y'])
+        z_cm: float = np.average(Atoms['z'])
+        df: pd.DataFrame = Atoms.copy()
+        df['x'] -= x_cm
+        df['y'] -= y_cm
+        df['z'] -= z_cm
+        return df
 
     def get_atom_style(self, line: str) -> bool:
         """return atom style for the atoms informations
