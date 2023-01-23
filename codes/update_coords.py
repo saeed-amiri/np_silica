@@ -33,25 +33,45 @@ class GetOGroups:
                  Hgroup:  list[typing.Any],  # Name | index groups[H] to delete
                  fraction: float = 1  # Fraction of to select from, 0<fr<=1
                  ) -> None:
-        self.df_O = self.__get_oxgygen(silica.Atoms_df, df_si, Ogroup)
+        self.df_O = self.__get_oxgygen(silica, df_si, Ogroup)
 
     def __get_oxgygen(self,
-                      Atoms: pd.DataFrame,  # Atoms df in lammps fullatom
+                      silica: rdlmp.ReadData,  # Atoms df in lammps full atom
                       df_si: pd.DataFrame,  # df with selected group[Si]
                       Ogroup:  list[typing.Any],  # Name|index groups[O]
                       ) -> None:
         """Find the hydrogen which have bonds with the selected Silicas"""
         O_list: list[pd.DataFrame] = []  # df of all Oxygen groups
+        Atoms = silica.Atoms_df
         for item in Ogroup:
             O_list.append(Atoms[Atoms['name'] == item])
         df: pd.DataFrame = pd.concat(O_list)
+        O_delete = self.__get_o_delete(silica.Bonds_df, df_si, df)
+    
+    def __get_o_delete(self,
+                       bonds_df: pd.DataFrame,  # Bonds in the LAMMPS format
+                       df_si: pd.DataFrame,  # df with selected group[Si]
+                       df: pd.DataFrame  # DF with selected Oxygen
+                       ) -> list[int]:  # index of the O to delete
         # get bonds
         all_l: list[int]  # All atoms in O and Si list
         all_Si = [item for item in df_si['atom_id']]
         all_O = [item for item in df['atom_id']]
         all_l = all_Si
         all_l.extend(all_O)
-        print(all_l)
+        delte_list: list[typing.Any] = [] # Rows of bonds DF
+        for item, row in silica.Bonds_df.iterrows():
+            if row['ai'] in all_l and row['aj'] in all_l:
+                if row['ai'] in all_O:
+                    if row['ai'] not in delte_list:
+                        delte_list.append(row['ai'])
+                if row['aj'] in all_O:
+                    if row['ai'] not in delte_list:
+                        delte_list.append(row['ai'])
+        return delte_list
+            
+        
+        
 
 
 class GetSiGroups:
