@@ -39,6 +39,9 @@ class GetGroups:
         for item in Sigroup:
             Si_list.append(Atoms[Atoms['name'] == item])
         df: pd.DataFrame = pd.concat(Si_list)  # Df of all the Si to replace
+        # Drop some columns
+        df.drop(axis=1, columns=['nx', 'ny', 'nz', 'cmt', 'b_name'],
+                inplace=True)
         print(f'{bcolors.OKGREEN}\tThere are: {len(df)} atoms with selected '
               f'atoms name in the file\n{bcolors.ENDC}')
         max_radius: float = self.__get_radius(Atoms)
@@ -48,7 +51,8 @@ class GetGroups:
               f'in the choosen area of the system, Max_radius = {max_radius}'
               f'\n{bcolors.ENDC}')
         # Get Azimuth and Polar angle of each atom in df
-        self.__set_angles(df)
+        df = self.__get_angles(df)
+        print(df)
     
     def __set_radii(self,
                     Atoms: pd.DataFrame,  # Atoms in lammps full atom
@@ -81,6 +85,28 @@ class GetGroups:
         z_max: float = Atoms['z'].abs().max()
         return np.max([x_max, y_max, z_max])
 
+    def __get_angles(self,
+                     df: pd.DataFrame  # The selected Si group
+                     ) -> pd.DataFrame:
+        """find and set the azimuth and polar angle of the atoms"""
+        rho: list[float] = []  # To add to dataframe
+        azimuth: list[float] = []  # To add to dataframe
+        polar: list[float] = []  # To add to dataframe
+        for _, row in df.iterrows():
+            x = row['x']
+            y = row['y']
+            z = row['z']
+            i_rho: float = np.sqrt(x*x + y*y + z*z)
+            i_azimuth: float = np.arctan2(x, y)
+            i_polar: float = np.arccos(z/i_rho)
+            rho.append(i_rho)
+            azimuth.append(i_azimuth)
+            polar.append(i_polar)
+
+        df['rho'] = rho
+        df['azimuth'] = azimuth
+        df['polar'] = polar
+        return df
 
 if __name__ == '__main__':
     fname = sys.argv[1]
