@@ -20,15 +20,48 @@ class GetData(rdlmp.ReadData):
         super().__init__(fname)
 
 
-class GetGroups:
+class GetOGroups:
+    """get Oxygen and/or Hydrogen groups to delete them and update
+    data file.
+    Oxygen is bonded to the silica and Hydrogen if asked for is bonded
+    to the Oxygen.
+    """
+    def __init__(self,
+                 silica: rdlmp.ReadData,  # Atoms df in form of lammps fullatom
+                 df_si: pd.DataFrame,  # df with selected group[Si]
+                 Ogroup:  list[typing.Any],  # Name | index groups[O] to delete
+                 Hgroup:  list[typing.Any],  # Name | index groups[H] to delete
+                 fraction: float = 1  # Fraction of to select from, 0<fr<=1
+                 ) -> None:
+        self.df_O = self.__get_oxgygen(silica.Atoms_df, df_si, Ogroup)
+
+    def __get_oxgygen(self,
+                      Atoms: pd.DataFrame,  # Atoms df in lammps fullatom
+                      df_si: pd.DataFrame,  # df with selected group[Si]
+                      Ogroup:  list[typing.Any],  # Name|index groups[O]
+                      ) -> None:
+        """Find the hydrogen which have bonds with the selected Silicas"""
+        O_list: list[pd.DataFrame] = []  # df of all Oxygen groups
+        for item in Ogroup:
+            O_list.append(Atoms[Atoms['name'] == item])
+        df: pd.DataFrame = pd.concat(O_list)
+        # get bonds
+        all_l: list[int]  # All atoms in O and Si list
+        all_Si = [item for item in df_si['atom_id']]
+        all_O = [item for item in df['atom_id']]
+        all_l = all_Si
+        all_l.extend(all_O)
+        print(all_l)
+
+
+class GetSiGroups:
     """get silinol groups to add cahin to them"""
     def __init__(self,
                  Atoms: pd.DataFrame,  # Atoms df in form of lammps fullatom
                  Sigroup: list[typing.Any],  # Name | index to select group[Si]
-                 Ogroup:  list[typing.Any],  # Name | index groups[O] to delete
-                 fraction: float = 1  # Fraction of to select from, 0<fr<=1
+                 fraction: float = 1  # Fraction of Silica to remove
                  ) -> None:
-        self.df = self.__get_silica(Atoms, Sigroup)
+        self.df_Si = self.__get_silica(Atoms, Sigroup)
 
     def __get_silica(self,
                      Atoms: pd.DataFrame,  # Atoms df in the lammps fullatom
@@ -85,25 +118,40 @@ class GetGroups:
         df['polar'] = polar
         return df
 
+
 class GetAmino(rdlmp.ReadData):
     """read the main Aminopropyle coordinates and put the Si position
     to zero"""
-    def __init__(self, fname) -> None:
+    def __init__(self) -> None:
+        fname: str = '/scratch/saeed/MyScripts/np_silica/data/aminopropyl.data'
         super().__init__(fname)
+        self.Si = 'Si'
         self.__to_origin()
 
-    def __to_origin(self,
-                    Atoms: pd.DataFrame  # Atomic mposition of the structure
-                    ) -> pd.DataFrame:
+    def __to_origin(self) -> pd.DataFrame:
         """put the coordinate of Si in Aminopropyle to zero"""
-
-
+        df: pd.DataFrame = self.Atoms_df.copy()
+        print(f'{bcolors.OKCYAN}\tMove Aminopropyle [Si] to origin\n'
+              f'{bcolors.ENDC}')
+        x_si: float = self.Atoms_df[self.Atoms_df['name'] == self.Si]['x'][1]
+        y_si: float = self.Atoms_df[self.Atoms_df['name'] == self.Si]['y'][1]
+        z_si: float = self.Atoms_df[self.Atoms_df['name'] == self.Si]['z'][1]
+        df: pd.DataFrame = self.Atoms_df.copy()
+        df['x'] -= x_si
+        df['y'] -= y_si
+        df['z'] -= z_si
+        return df
 
 
 if __name__ == '__main__':
     fname = sys.argv[1]
-    data = GetData(fname)
-    groups = GetGroups(data.Atoms_df,
-                       Sigroup=['SD'],
-                       Ogroup=['OD'],
-                       fraction=1)
+    silica = GetData(fname)
+    si_groups = GetSiGroups(silica.Atoms_df,
+                            Sigroup=['SD'],
+                            fraction=1)
+    oxides = GetOGroups(silica,
+                        si_groups.df_Si,
+                        Ogroup=['OD'],
+                        Hgroup=['HO'],
+                        fraction=1)
+    amino = GetAmino()
