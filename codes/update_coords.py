@@ -40,11 +40,12 @@ class GetGroups:
             Si_list.append(Atoms[Atoms['name'] == item])
         df: pd.DataFrame = pd.concat(Si_list)  # Df of all the Si to replace
         max_radius: float = self.__get_radius(Atoms)
-        self.__set_radii(Atoms, df)
+        self.__set_radii(Atoms, df, max_radius)
     
     def __set_radii(self,
                     Atoms: pd.DataFrame,  # Atoms in lammps full atom
-                    df: pd.DataFrame  # The Atoms_df for asked silicons
+                    df: pd.DataFrame,  # The Atoms_df for asked silicons
+                    max_radius: float  # Radius of the system
                     ) -> pd.DataFrame:
         """add radii for the atoms to drop inner ones later"""
         # Check the center of mass
@@ -65,6 +66,10 @@ class GetGroups:
                     Atoms: pd.DataFrame,  # Atoms in lammps full atom
                     ) -> float:
         """return the radius of the nano-particles"""
+        x_max: float = Atoms['x'].abs().max()
+        y_max: float = Atoms['y'].abs().max()
+        z_max: float = Atoms['z'].abs().max()
+        return np.max([x_max, y_max, z_max])
 
 
 if __name__ == '__main__':
