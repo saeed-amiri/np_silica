@@ -53,8 +53,8 @@ class GetSiGroups:
         return df
 
     def __get_max_radius(self,
-                     Atoms: pd.DataFrame,  # Atoms in lammps full atom
-                     ) -> float:
+                         Atoms: pd.DataFrame,  # Atoms in lammps full atom
+                         ) -> float:
         """return the radius of the nano-particles"""
         x_max: float = Atoms['x'].abs().max()
         y_max: float = Atoms['y'].abs().max()
@@ -132,29 +132,6 @@ class GetOGroups:
               f'\tThere are {len(delete_list)} O atoms bonded to the '
               f'slected Si\n{bcolors.ENDC}')
         return delete_list
-
-
-class GetAmino(rdlmp.ReadData):
-    """read the main Aminopropyle coordinates and put the Si position
-    to zero"""
-    def __init__(self) -> None:
-        fname: str = '/scratch/saeed/MyScripts/np_silica/data/aminopropyl.data'
-        super().__init__(fname)
-        self.Si = 'Si'
-        self.__to_origin()
-
-    def __to_origin(self) -> pd.DataFrame:
-        """put the coordinate of Si in Aminopropyle to zero"""
-        df: pd.DataFrame = self.Atoms_df.copy()
-        print(f'{bcolors.OKCYAN}\tMove Aminopropyle [Si] to origin\n'
-              f'{bcolors.ENDC}')
-        x_si: float = self.Atoms_df[self.Atoms_df['name'] == self.Si]['x'][1]
-        y_si: float = self.Atoms_df[self.Atoms_df['name'] == self.Si]['y'][1]
-        z_si: float = self.Atoms_df[self.Atoms_df['name'] == self.Si]['z'][1]
-        df['x'] -= x_si
-        df['y'] -= y_si
-        df['z'] -= z_si
-        return df
 
 
 class Delete:
