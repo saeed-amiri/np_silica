@@ -33,50 +33,58 @@ class GetOGroups:
                  Hgroup:  list[typing.Any],  # Name | index groups[H] to delete
                  fraction: float = 1  # Fraction of to select from, 0<fr<=1
                  ) -> None:
-        self.df_O = self.__get_oxgygen(silica, df_si, Ogroup)
+        O_delete: list[int] = self.__get_oxgygen(silica, df_si, Ogroup)
+        Si_delete: list[int] = [item for item in df_si['atom_id']]
+        delete_group: list[int] = []  # To extend all selected atoms
+        delete_group.extend(O_delete)
+        delete_group.extend(Si_delete)
+        self.__delete_atoms(silica, delete_group)
 
     def __get_oxgygen(self,
                       silica: rdlmp.ReadData,  # Atoms df in lammps full atom
                       df_si: pd.DataFrame,  # df with selected group[Si]
                       Ogroup:  list[typing.Any],  # Name|index groups[O]
-                      ) -> None:
-        """Find the hydrogen which have bonds with the selected Silicas"""
+                      ) -> list[int]:
+        """Find the hydrogen which have bonds with the selected Silicons"""
         O_list: list[pd.DataFrame] = []  # df of all Oxygen groups
         Atoms = silica.Atoms_df
         for item in Ogroup:
             O_list.append(Atoms[Atoms['name'] == item])
         df: pd.DataFrame = pd.concat(O_list)
         O_delete = self.__get_o_delete(silica.Bonds_df, df_si, df)
-        self.__delete_atoms(silica, O_delete)
+        return O_delete
 
     def __get_o_delete(self,
                        bonds_df: pd.DataFrame,  # Bonds in the LAMMPS format
                        df_si: pd.DataFrame,  # df with selected group[Si]
-                       df: pd.DataFrame  # DF with selected Oxygen
+                       df_o: pd.DataFrame  # DF with selected Oxygen
                        ) -> list[int]:  # index of the O to delete
         # get bonds
-        all_l: list[int]  # All atoms in O and Si list
-        all_Si = [item for item in df_si['atom_id']]
-        all_O = [item for item in df['atom_id']]
-        all_l = all_Si
-        all_l.extend(all_O)
-        delte_list: list[typing.Any] = []  # Rows of bonds DF
+        all_si = [item for item in df_si['atom_id']]
+        all_o = [item for item in df_o['atom_id']]
+        df_o.to_csv('df_o.test', sep=' ', index=False)
+        df_si.to_csv('df_si.test', sep=' ', index=False)
+        delete_list: list[int] = []  # index of the O atoms to delete
         for _, row in bonds_df.iterrows():
-            if row['ai'] in all_l and row['aj'] in all_l:
-                if row['ai'] in all_O:
-                    if row['ai'] not in delte_list:
-                        delte_list.append(row['ai'])
-                if row['aj'] in all_O:
-                    if row['ai'] not in delte_list:
-                        delte_list.append(row['ai'])
-        return delte_list
+            if row['ai'] in all_si or row['aj'] in all_si:
+                if row['ai'] in all_o and row['ai'] not in delete_list:
+                    delete_list.append(row['ai'])
+                    print(delete_list) 
+                if row['aj'] in all_o and row['aj'] not in delete_list:
+                        delete_list.append(row['aj'])
+        return delete_list
 
     def __delete_atoms(self,
                        silica: rdlmp.ReadData,  # Atoms df in lammps full atom
                        delete_group: list[int]  # Index of the atom to delete
                        ) -> pd.DataFrame:
         """delete atoms and return update version in LAMMPS format"""
-        self.__update_atoms(silica.Atoms_df, delete_group)
+        Atoms_df: pd.DataFrame  # DF with removed atoms
+        Atoms_df = self.__update_atoms(silica.Atoms_df, delete_group)
+        old_new_dict: dict[int, int]  # Dict with old and new atom id
+        old_new_dict = dict(
+                       zip(Atoms_df['old_atom_id'], Atoms_df['atom_id']))
+        self.__update_bonds(silica.Bonds_df, old_new_dict, delete_group)
 
     def __update_atoms(self,
                        Atoms_df: pd.DataFrame,  # Atoms in LAMMPS format
@@ -87,7 +95,7 @@ class GetOGroups:
         df = Atoms_df.copy()
         for item, row in df.iterrows():
             if row['atom_id'] in delete_group:
-                Atoms_df.drop(index=[item+1], axis=0, inplace=True)
+                Atoms_df.drop(index=[item-1], axis=0, inplace=True)
         print(f'{bcolors.OKBLUE}{self.__class__.__name__}\n'
               f'\t {len(delete_group)} is deleted from data file\n'
               f'{bcolors.ENDC}')
@@ -96,7 +104,30 @@ class GetOGroups:
         Atoms_df.index += 1
         Atoms_df['atom_id'] = Atoms_df.index
         Atoms_df.drop(columns=['index'], inplace=True)
+        Atoms_df.to_csv('atoms.test', sep=' ', index=False)
         return Atoms_df
+    
+    def __update_bonds(self,
+                       Bonds_df: pd.DataFrame,  # Atoms in LAMMPS format
+                       old_new_dict: dict[int, int],  # Dict old: new atom id
+                       delete_group: list[int]  # Index of atom to delete
+                       ) -> pd.DataFrame:
+        """delete bondds for deleted atoms"""
+        df = Bonds_df.copy()
+        for item, row in df.iterrows():
+            if row['ai'] in delete_group or row['aj'] in delete_group:
+                Bonds_df.drop(index=[item-1], axis=0, inplace=True)
+        new_ai = []
+        new_aj = []
+        Bonds_df.to_csv('bond.test', sep=' ')
+        # print(delete_group)
+        for item, row in Bonds_df.iterrows():
+            ai = row['ai']
+            aj = row['aj']
+            new_aj.append(old_new_dict[aj])
+            new_ai.append(old_new_dict[ai])
+            
+    
 
 
 class GetSiGroups:
