@@ -1,6 +1,4 @@
-import re
 import sys
-import math
 import typing
 import numpy as np
 import pandas as pd
@@ -178,9 +176,8 @@ class Delete:
                      O_delete: list[int],  # Index of O atoms to delete
                      ) -> dict[int, int]:
         delete_group: list[int] = []  # To extend all selected atoms
-        delete_group.extend(Si_delete)
         delete_group.extend(O_delete)
-        old_new_dict: dict[int, int]  # new and old index
+        old_new_dict: dict[int, int]  # new and old index of updated atoms df
         old_new_dict = self.__update_atoms(silica, delete_group)
         self.__update_bonds(silica.Bonds_df, old_new_dict, delete_group)
 
@@ -192,8 +189,7 @@ class Delete:
         Atoms_df: pd.DataFrame  # DF with removed atoms
         Atoms_df = self.__delete_atoms(silica.Atoms_df, delete_group)
         old_new_dict: dict[int, int]  # Dict with old and new atom id
-        old_new_dict = dict(
-                       zip(Atoms_df['old_atom_id'], Atoms_df['atom_id']))
+        old_new_dict = dict(zip(Atoms_df['old_atom_id'], Atoms_df['atom_id']))
         return old_new_dict
 
     def __delete_atoms(self,
@@ -205,8 +201,8 @@ class Delete:
         df = Atoms_df.copy()
         for item, row in df.iterrows():
             if row['atom_id'] in delete_group:
-                Atoms_df.drop(index=[item-1], axis=0, inplace=True)
-        print(f'{bcolors.OKBLUE}{self.__class__.__name__}\n'
+                Atoms_df.drop(index=[item], axis=0, inplace=True)
+        print(f'{bcolors.OKBLUE}{self.__class__.__name__}:\n'
               f'\t {len(delete_group)} is deleted from data file\n'
               f'{bcolors.ENDC}')
         del df
@@ -224,18 +220,18 @@ class Delete:
                        ) -> pd.DataFrame:
         """delete bondds for deleted atoms"""
         df = Bonds_df.copy()
+        Bonds_df.to_csv('bond0.test', sep=' ')
         for item, row in df.iterrows():
             if row['ai'] in delete_group or row['aj'] in delete_group:
-                Bonds_df.drop(index=[item-1], axis=0, inplace=True)
+                Bonds_df.drop(index=[item], axis=0, inplace=True)
         new_ai = []
         new_aj = []
         Bonds_df.to_csv('bond.test', sep=' ')
-        # print(delete_group)
         for item, row in Bonds_df.iterrows():
             ai = row['ai']
             aj = row['aj']
-            new_aj.append(old_new_dict[aj])
             new_ai.append(old_new_dict[ai])
+            new_aj.append(old_new_dict[aj])
 
 
 if __name__ == '__main__':
