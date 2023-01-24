@@ -210,7 +210,6 @@ class Delete:
         Atoms_df.index += 1
         Atoms_df['atom_id'] = Atoms_df.index
         Atoms_df.drop(columns=['index'], inplace=True)
-        Atoms_df.to_csv('atoms.test', sep=' ', index=False)
         return Atoms_df
 
     def __update_bonds(self,
@@ -218,15 +217,13 @@ class Delete:
                        old_new_dict: dict[int, int],  # Dict old: new atom id
                        delete_group: list[int]  # Index of atom to delete
                        ) -> pd.DataFrame:
-        """delete bondds for deleted atoms"""
+        """delete bonds for deleted atoms"""
         df = Bonds_df.copy()
-        Bonds_df.to_csv('bond0.test', sep=' ')
         for item, row in df.iterrows():
             if row['ai'] in delete_group or row['aj'] in delete_group:
                 Bonds_df.drop(index=[item], axis=0, inplace=True)
-        new_ai = []
-        new_aj = []
-        Bonds_df.to_csv('bond.test', sep=' ')
+        new_ai = []  # New index for ai
+        new_aj = []  # New index for aj
         for item, row in Bonds_df.iterrows():
             ai = row['ai']
             aj = row['aj']
