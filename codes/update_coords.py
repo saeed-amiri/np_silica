@@ -3,6 +3,7 @@ import typing
 import numpy as np
 import pandas as pd
 import read_lmp_data as rdlmp
+import write_lmp as wrlmp
 from colors_text import TextColor as bcolors
 
 
@@ -150,7 +151,6 @@ class GetAmino(rdlmp.ReadData):
         x_si: float = self.Atoms_df[self.Atoms_df['name'] == self.Si]['x'][1]
         y_si: float = self.Atoms_df[self.Atoms_df['name'] == self.Si]['y'][1]
         z_si: float = self.Atoms_df[self.Atoms_df['name'] == self.Si]['z'][1]
-        df: pd.DataFrame = self.Atoms_df.copy()
         df['x'] -= x_si
         df['y'] -= y_si
         df['z'] -= z_si
@@ -169,25 +169,29 @@ class Delete:
                              silicons.Si_delete,
                              Ogroup=['OD'],
                              fraction=1)
-        self.__delete_all(silicons.Si_delete, oxygens.O_delete)
+        self.__delete_all(oxygens.O_delete)
 
     def __delete_all(self,
-                     Si_delete: list[int],  # Index of Si atoms to delete
                      O_delete: list[int],  # Index of O atoms to delete
-                     ) -> dict[int, int]:
+                     ) -> None:
         old_new_dict: dict[int, int]  # new and old index of updated atoms df
-        Atoms_df: pd.DataFrame  # Atoms  with updated atoms' index
-        Bonds_df: pd.DataFrame  # Bonds with updated atoms' index
+        self.UAtoms_df: pd.DataFrame  # Atoms  with updated atoms' index
+        self.UVelocities: pd.DataFrame  # Velocities with updated atoms' index
+        self.UBonds_df: pd.DataFrame  # Bonds with updated atoms' index
+        self.UAngles_df: pd.DataFrame  # Angles with updated atoms' index
         delete_group: list[int] = []  # To extend all selected atoms
         delete_group.extend(O_delete)
-        old_new_dict, Atoms_df = self.__update_atoms(silica,
-                                                     delete_group)
-        Bonds_df = self.__update_bonds(silica.Bonds_df,
-                                       old_new_dict,
-                                       delete_group)
-        Angles_df = self.__update_angles(silica.Angles_df,
-                                         old_new_dict,
-                                         delete_group)
+        old_new_dict, self.UAtoms_df = self.__update_atoms(silica,
+                                                           delete_group)
+        self.UVelocities = self.__update_velocities(silica.Velocities_df,
+                                                    old_new_dict,
+                                                    delete_group)
+        self.UBonds_df = self.__update_bonds(silica.Bonds_df,
+                                             old_new_dict,
+                                             delete_group)
+        self.UAngles_df = self.__update_angles(silica.Angles_df,
+                                               old_new_dict,
+                                               delete_group)
 
     def __update_atoms(self,
                        silica: rdlmp.ReadData,  # Atoms df in lammps full atom
@@ -219,6 +223,27 @@ class Delete:
         Atoms_df['atom_id'] = Atoms_df.index
         Atoms_df.drop(columns=['index'], inplace=True)
         return Atoms_df
+
+    def __update_velocities(self,
+                            Velocities_df: pd.DataFrame,  # In LAMMPS format
+                            old_new_dict: dict[int, int],  # old:new atom id
+                            delete_group: list[int]  # Index of atom to delete
+                            ) -> pd.DataFrame:
+        """delete velocities for deleted atoms"""
+        df = Velocities_df.copy()
+        del_counter: int = 0  # count the numbers of deleted velocities
+        for item, row in df.iterrows():
+            if item in delete_group:
+                Velocities_df.drop(index=[item], axis=0, inplace=True)
+                del_counter += 1
+        print(f'{bcolors.OKGREEN}\t {del_counter} velocities are deleted '
+              f'from the data file\n{bcolors.ENDC}')
+        new_ai = []  # New index for ai
+        for item, row in Velocities_df.iterrows():
+            new_ai.append(old_new_dict[item])
+        del df
+        Velocities_df.index = new_ai
+        return Velocities_df
 
     def __update_bonds(self,
                        Bonds_df: pd.DataFrame,  # Atoms in LAMMPS format
@@ -279,8 +304,32 @@ class Delete:
         return Angels_df
 
 
+class UpdateCoors:
+    """update all the attributes to dataframe to the updated data"""
+    def __init__(self,
+                 silica: GetData,  # Main data
+                 update: Delete  # Updated data
+                 ) -> None:
+        self.__set_attrs(silica, update)
+
+    def __set_attrs(self,
+                    silica: GetData,  # Tha main data
+                    update: Delete  # All the data read from file
+                    ) -> None:
+        """update all the attrs"""
+        self.Atoms_df = update.UAtoms_df
+        self.Velocities_df = update.UVelocities
+        self.Bonds_df = update.UBonds_df
+        self.Angles_df = update.UAngles_df
+        self.Masses_df = silica.Masses_df
+
+
 if __name__ == '__main__':
     fname = sys.argv[1]
     silica = GetData(fname)
-    new = Delete(silica)
-    amino = GetAmino()
+    deletes = Delete(silica)
+    update = UpdateCoors(silica, deletes)
+    UpdateCoors(silica=silica, update=deletes)
+    wrt = wrlmp.WriteLmp(obj=update, output='after_del.data')
+    wrt.write_lmp()
+    # amino = GetAmino()
