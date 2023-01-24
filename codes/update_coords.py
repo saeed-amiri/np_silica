@@ -146,9 +146,10 @@ class Delete:
                              silicons.Si_delete,
                              Ogroup=['OD'],
                              fraction=1)
-        self.__delete_all(oxygens.O_delete)
+        self.__delete_all(silica, oxygens.O_delete)
 
     def __delete_all(self,
+                     silica: rdlmp.ReadData,  # Data from LAMMPS
                      O_delete: list[int],  # Index of O atoms to delete
                      ) -> None:
         old_new_dict: dict[int, int]  # new and old index of updated atoms df
@@ -281,12 +282,13 @@ class Delete:
         return Angels_df
 
 
-class UpdateCoors:
+class UpdateCoords:
     """update all the attributes to dataframe to the updated data"""
     def __init__(self,
-                 silica: GetData,  # Main data
-                 update: Delete  # Updated data
+                 fname: str,  # Main data
                  ) -> None:
+        silica = GetData(fname)
+        update = Delete(silica)
         self.__set_attrs(silica, update)
 
     def __set_attrs(self,
@@ -303,10 +305,6 @@ class UpdateCoors:
 
 if __name__ == '__main__':
     fname = sys.argv[1]
-    silica = GetData(fname)
-    deletes = Delete(silica)
-    update = UpdateCoors(silica, deletes)
-    UpdateCoors(silica=silica, update=deletes)
+    update = UpdateCoords(fname)
     wrt = wrlmp.WriteLmp(obj=update, output='after_del.data')
     wrt.write_lmp()
-    # amino = GetAmino()
