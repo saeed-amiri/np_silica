@@ -160,7 +160,7 @@ class WriteLmp(GetData):
 
     def write_masses(self, df: pd.DataFrame, f: typing.TextIO) -> None:
         """write mass section"""
-        columns: list[str] = ['typ', 'mass', 'cmt', 'name', 'b_name']
+        columns: list[str] = ['typ', 'mass', 'cmt', 'name']
         f.write(f"\n")
         f.write(f"Masses\n")
         f.write(f"\n")
@@ -209,10 +209,14 @@ class WriteLmp(GetData):
         if not df.empty:
             f.write(f'Bonds\n')
             f.write(f'\n')
-            columns = ['typ', 'ai', 'aj', 'cmt', 'name', 'type_name']
-            df.to_csv(f, sep=' ', index=True, columns=columns, header=None)
+            try:
+                columns = ['typ', 'ai', 'aj', 'cmt', 'name', 'type_name']
+                df.to_csv(f, sep=' ', index=True, columns=columns, header=None)
+            except KeyError:
+                columns = ['typ', 'ai', 'aj', 'cmt', 'name']
+                df.to_csv(f, sep=' ', index=True, columns=columns, header=None)
             f.write(f'\n')
-            self.write_BoAnDi_infos(df, 'bonds')
+            # self.write_BoAnDi_infos(df, 'bonds')
         else:
             print(f'{bcolors.WARNING}'
                   f'\tWARNING: Bonds section is empty{bcolors.ENDC}\n')
@@ -222,10 +226,14 @@ class WriteLmp(GetData):
         if not df.empty:
             f.write(f'Angles\n')
             f.write(f'\n')
-            columns = ['typ', 'ai', 'aj', 'ak', 'cmt', 'name', 'type_name']
-            df.to_csv(f, sep=' ', index=True, columns=columns, header=None)
+            try:
+                columns = ['typ', 'ai', 'aj', 'ak', 'cmt', 'name', 'type_name']
+                df.to_csv(f, sep=' ', index=True, columns=columns, header=None)
+            except KeyError:
+                columns = ['typ', 'ai', 'aj', 'ak']
+                df.to_csv(f, sep=' ', index=True, columns=columns, header=None)
             f.write(f'\n')
-            self.write_BoAnDi_infos(df, 'angles')
+            # self.write_BoAnDi_infos(df, 'angles')
         else:
             print(f'{bcolors.WARNING}'
                   f'\tWARNING: Angels section is empty{bcolors.ENDC}\n')
@@ -239,7 +247,7 @@ class WriteLmp(GetData):
                        'type_name']
             df.to_csv(f, sep=' ', index=True, columns=columns, header=None)
             f.write(f'\n')
-            self.write_BoAnDi_infos(df, 'dihedrals')
+            # self.write_BoAnDi_infos(df, 'dihedrals')
         else:
             print(f'{bcolors.WARNING}'
                   f'\tWARNING: Dihedrals section is empty{bcolors.ENDC}\n')
