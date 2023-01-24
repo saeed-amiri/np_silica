@@ -175,22 +175,30 @@ class Delete:
                      Si_delete: list[int],  # Index of Si atoms to delete
                      O_delete: list[int],  # Index of O atoms to delete
                      ) -> dict[int, int]:
+        old_new_dict: dict[int, int]  # new and old index of updated atoms df
+        Atoms_df: pd.DataFrame  # Atoms  with updated atoms' index
+        Bonds_df: pd.DataFrame  # Bonds with updated atoms' index
         delete_group: list[int] = []  # To extend all selected atoms
         delete_group.extend(O_delete)
-        old_new_dict: dict[int, int]  # new and old index of updated atoms df
-        old_new_dict = self.__update_atoms(silica, delete_group)
-        self.__update_bonds(silica.Bonds_df, old_new_dict, delete_group)
+        old_new_dict, Atoms_df = self.__update_atoms(silica,
+                                                     delete_group)
+        Bonds_df = self.__update_bonds(silica.Bonds_df,
+                                       old_new_dict,
+                                       delete_group)
+        Angles_df = self.__update_angles(silica.Angles_df,
+                                         old_new_dict,
+                                         delete_group)
 
     def __update_atoms(self,
                        silica: rdlmp.ReadData,  # Atoms df in lammps full atom
                        delete_group: list[int]  # Index of the atom to delete
-                       ) -> dict[int, int]:
+                       ) -> tuple[dict[int, int], pd.DataFrame]:
         """delete atoms and return update version in LAMMPS format"""
         Atoms_df: pd.DataFrame  # DF with removed atoms
         Atoms_df = self.__delete_atoms(silica.Atoms_df, delete_group)
         old_new_dict: dict[int, int]  # Dict with old and new atom id
         old_new_dict = dict(zip(Atoms_df['old_atom_id'], Atoms_df['atom_id']))
-        return old_new_dict
+        return old_new_dict, Atoms_df
 
     def __delete_atoms(self,
                        Atoms_df: pd.DataFrame,  # Atoms in LAMMPS format
@@ -203,7 +211,7 @@ class Delete:
             if row['atom_id'] in delete_group:
                 Atoms_df.drop(index=[item], axis=0, inplace=True)
         print(f'{bcolors.OKBLUE}{self.__class__.__name__}:\n'
-              f'\t {len(delete_group)} is deleted from data file\n'
+              f'\t {len(delete_group)} atoms is deleted from data file\n'
               f'{bcolors.ENDC}')
         del df
         Atoms_df.reset_index(inplace=True)
@@ -219,9 +227,13 @@ class Delete:
                        ) -> pd.DataFrame:
         """delete bonds for deleted atoms"""
         df = Bonds_df.copy()
+        del_counter: int = 0  # count the numbers of deleted bonds
         for item, row in df.iterrows():
             if row['ai'] in delete_group or row['aj'] in delete_group:
                 Bonds_df.drop(index=[item], axis=0, inplace=True)
+                del_counter += 1
+        print(f'{bcolors.OKGREEN}\t {del_counter} bonds are deleted '
+              f'from the data file\n{bcolors.ENDC}')
         new_ai = []  # New index for ai
         new_aj = []  # New index for aj
         for item, row in Bonds_df.iterrows():
@@ -229,6 +241,42 @@ class Delete:
             aj = row['aj']
             new_ai.append(old_new_dict[ai])
             new_aj.append(old_new_dict[aj])
+        del df
+        Bonds_df['ai'] = new_ai
+        Bonds_df['aj'] = new_aj
+        return Bonds_df
+
+    def __update_angles(self,
+                        Angels_df: pd.DataFrame,  # Atoms in LAMMPS format
+                        old_new_dict: dict[int, int],  # Dict old: new atom id
+                        delete_group: list[int]  # Index of atom to delete
+                        ) -> pd.DataFrame:
+        """delete angles for deleted atoms"""
+        df = Angels_df.copy()
+        del_counter: int = 0  # count the numbers of deleted angles
+        for item, row in df.iterrows():
+            if row['ai'] in delete_group\
+               or row['aj'] in delete_group\
+               or row['ak'] in delete_group:
+                Angels_df.drop(index=[item], axis=0, inplace=True)
+                del_counter += 1
+        print(f'{bcolors.OKGREEN}\t {del_counter} angles are deleted '
+              f'from the data file\n{bcolors.ENDC}')
+        new_ai = []  # New index for ai
+        new_aj = []  # New index for aj
+        new_ak = []  # New index for ak
+        for item, row in Angels_df.iterrows():
+            ai = row['ai']
+            aj = row['aj']
+            ak = row['ak']
+            new_ai.append(old_new_dict[ai])
+            new_aj.append(old_new_dict[aj])
+            new_ak.append(old_new_dict[ak])
+        del df
+        Angels_df['ai'] = new_ai
+        Angels_df['aj'] = new_aj
+        Angels_df['ak'] = new_ak
+        return Angels_df
 
 
 if __name__ == '__main__':
