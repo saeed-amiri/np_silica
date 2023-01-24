@@ -44,7 +44,7 @@ class GetSiGroups:
         print(f'{bcolors.OKGREEN}{self.__class__.__name__}:\n'
               f'\tThere are: {len(df)} atoms with selected '
               f'atoms name [Si] in the file\n{bcolors.ENDC}')
-        max_radius: float = self.__get_radius(Atoms)
+        max_radius: float = self.__get_max_radius(Atoms)
         df = self.__get_angles(df)
         df = df[(df['rho'] >= max_radius - 5)]
         print(f'{bcolors.OKGREEN}\tThere are: {len(df)} Si atoms in the '
@@ -52,7 +52,7 @@ class GetSiGroups:
               f'\n{bcolors.ENDC}')
         return df
 
-    def __get_radius(self,
+    def __get_max_radius(self,
                      Atoms: pd.DataFrame,  # Atoms in lammps full atom
                      ) -> float:
         """return the radius of the nano-particles"""
