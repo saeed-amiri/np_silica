@@ -69,9 +69,9 @@ class GetOGroups:
             if row['ai'] in all_si or row['aj'] in all_si:
                 if row['ai'] in all_o and row['ai'] not in delete_list:
                     delete_list.append(row['ai'])
-                    print(delete_list) 
+                    print(delete_list)
                 if row['aj'] in all_o and row['aj'] not in delete_list:
-                        delete_list.append(row['aj'])
+                    delete_list.append(row['aj'])
         return delete_list
 
     def __delete_atoms(self,
@@ -106,7 +106,7 @@ class GetOGroups:
         Atoms_df.drop(columns=['index'], inplace=True)
         Atoms_df.to_csv('atoms.test', sep=' ', index=False)
         return Atoms_df
-    
+
     def __update_bonds(self,
                        Bonds_df: pd.DataFrame,  # Atoms in LAMMPS format
                        old_new_dict: dict[int, int],  # Dict old: new atom id
@@ -126,8 +126,6 @@ class GetOGroups:
             aj = row['aj']
             new_aj.append(old_new_dict[aj])
             new_ai.append(old_new_dict[ai])
-            
-    
 
 
 class GetSiGroups:
