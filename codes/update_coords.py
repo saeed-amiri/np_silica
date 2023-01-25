@@ -147,6 +147,7 @@ class Delete:
                              Ogroup=['OD'],
                              fraction=1)
         self.__delete_all(silica, oxygens.O_delete)
+        self.Si_df = silicons.df_Si
 
     def __delete_all(self,
                      silica: rdlmp.ReadData,  # Data from LAMMPS
@@ -301,6 +302,7 @@ class UpdateCoords:
         self.Bonds_df = update.UBonds_df
         self.Angles_df = update.UAngles_df
         self.Masses_df = silica.Masses_df
+        self.Si_df = update.Si_df
 
 
 if __name__ == '__main__':
