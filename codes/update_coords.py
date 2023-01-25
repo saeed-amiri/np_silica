@@ -303,6 +303,8 @@ class UpdateCoords:
         self.Angles_df = update.UAngles_df
         self.Masses_df = silica.Masses_df
         self.Si_df = update.Si_df
+        self.NAtoms = len(update.UAtoms_df)
+        self.Nmols = np.max(update.UAtoms_df['mol'])
 
 
 if __name__ == '__main__':
