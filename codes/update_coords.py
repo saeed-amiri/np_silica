@@ -146,8 +146,8 @@ class Delete:
                              silicons.Si_delete,
                              Ogroup=['OD'],
                              fraction=1)
-        self.__delete_all(silica, oxygens.O_delete)
         self.Si_df = silicons.df_Si
+        self.__delete_all(silica, oxygens.O_delete)
 
     def __delete_all(self,
                      silica: rdlmp.ReadData,  # Data from LAMMPS
@@ -171,6 +171,18 @@ class Delete:
         self.UAngles_df = self.__update_angles(silica.Angles_df,
                                                old_new_dict,
                                                delete_group)
+        self.USi_df = self.__update_selected_Si(old_new_dict)
+
+    def __update_selected_Si(self,
+                             old_new_dict: dict[int, int]  # old:new atom id
+                             ) -> pd.DataFrame:
+        """update atom index of the deleted atoms indes"""
+        df: pd.DataFrame = self.Si_df.copy()
+        new_ai = []  # New index for ai
+        for item, row in df.iterrows():
+            new_ai.append(old_new_dict[item])
+        df['atom_id'] = new_ai
+        return df
 
     def __update_atoms(self,
                        silica: rdlmp.ReadData,  # Atoms df in lammps full atom
@@ -302,7 +314,7 @@ class UpdateCoords:
         self.Bonds_df = update.UBonds_df
         self.Angles_df = update.UAngles_df
         self.Masses_df = silica.Masses_df
-        self.Si_df = update.Si_df
+        self.Si_df = update.USi_df
         self.NAtoms = len(update.UAtoms_df)
         self.Nmols = np.max(update.UAtoms_df['mol'])
 
