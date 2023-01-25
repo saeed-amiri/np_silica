@@ -200,19 +200,35 @@ class UpdateBoAnDiMa:
         """call all the functions"""
         dict_atom_id: dict[int, int]  # to update the indeces
         dict_atom_id = {k: v for k, v in zip(rot_amino.Atoms_df['old_id'],
-                                            rot_amino.Atoms_df['atom_id'])}
+                                             rot_amino.Atoms_df['atom_id'])}
         print(dict_atom_id)
-        self.__update_bonds(rot_amino.Bonds_df, dict_atom_id)
+        rot_amino.Bonds_df = self.__update_bonds(
+                             rot_amino.Bonds_df, dict_atom_id)
+        rot_amino.Angles_df = self.__update_angles(
+                             rot_amino.Angles_df, dict_atom_id)
+        print(rot_amino.Angles_df)
 
     def __update_bonds(self,
                        Bonds_df: pd.DataFrame,  # Bonds data frame
-                       dict_id: dict[int, int]  # Atoms ids 
+                       dict_id: dict[int, int]  # Atoms ids
                        ) -> pd.DataFrame:
         """update atom indexs in the bonds"""
         for item, row in Bonds_df.iterrows():
             Bonds_df.at[item, 'ai'] = dict_id[row['ai']]
             Bonds_df.at[item, 'aj'] = dict_id[row['aj']]
         return Bonds_df
+
+    def __update_angles(self,
+                        Angles_df: pd.DataFrame,  # Bonds data frame
+                        dict_id: dict[int, int]  # Atoms ids
+                        ) -> pd.DataFrame:
+        """update atom indexs in the angles"""
+        for item, row in Angles_df.iterrows():
+            Angles_df.at[item, 'ai'] = dict_id[row['ai']]
+            Angles_df.at[item, 'aj'] = dict_id[row['aj']]
+            Angles_df.at[item, 'ak'] = dict_id[row['ak']]
+        return Angles_df
+
 
 if __name__ == '__main__':
     fname = sys.argv[1]
