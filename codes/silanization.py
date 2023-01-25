@@ -55,7 +55,7 @@ class PrepareAmino:
         Angles_list: list[pd.DataFrame] = []  # Keep all the aminos to concate
         Dihedrals_list: list[pd.DataFrame] = []  # Keep all the aminos> concate
         for item, row in si_df.iterrows():
-            if item < 5:
+            if item < 15:
                 # Si from amino will be deleted later, so the rest of
                 # atoms must start on lower
                 atom_level: int = (item - 1) * \
@@ -272,8 +272,14 @@ class UpdateBoAnDi:
         return df
 
 
+class ConcatAll:
+    """append all the aminopropyle to the silicon data file"""
+    def __init__(self) -> None:
+        pass
+
+
 if __name__ == '__main__':
     fname = sys.argv[1]
-    update = upcord.UpdateCoords(fname)
+    update = upcord.UpdateCoords(fname)  # Updated data for silica
     amino = GetAmino()
     up_aminos = PrepareAmino(update, amino)
