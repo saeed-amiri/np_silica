@@ -51,7 +51,7 @@ class PrepareAmino:
         Atoms_df = self.__to_origin(amino.Atoms_df)
         Atoms_df = self.__get_azimuths(Atoms_df)
         for item, row in si_df.iterrows():
-            if item < 8:
+            if item == 1:
                 # Si from amino will be deleted later, so the rest of
                 # atoms must start on lower
                 atom_level: int = (item - 1) * \
@@ -61,8 +61,8 @@ class PrepareAmino:
                                                row,
                                                atom_level,
                                                mol_level)
-                update.Atoms_df = i_amino
-                self.__update_BoAnDiMa(update)
+                amino.Atoms_df = i_amino
+                UpdateBoAnDiMa(amino)
             else:
                 break
 
@@ -198,7 +198,21 @@ class UpdateBoAnDiMa:
                      rot_amino: PrepareAmino  # Amino data with rotated pos
                      ) -> None:
         """call all the functions"""
+        dict_atom_id: dict[int, int]  # to update the indeces
+        dict_atom_id = {k: v for k, v in zip(rot_amino.Atoms_df['old_id'],
+                                            rot_amino.Atoms_df['atom_id'])}
+        print(dict_atom_id)
+        self.__update_bonds(rot_amino.Bonds_df, dict_atom_id)
 
+    def __update_bonds(self,
+                       Bonds_df: pd.DataFrame,  # Bonds data frame
+                       dict_id: dict[int, int]  # Atoms ids 
+                       ) -> pd.DataFrame:
+        """update atom indexs in the bonds"""
+        for item, row in Bonds_df.iterrows():
+            Bonds_df.at[item, 'ai'] = dict_id[row['ai']]
+            Bonds_df.at[item, 'aj'] = dict_id[row['aj']]
+        return Bonds_df
 
 if __name__ == '__main__':
     fname = sys.argv[1]
