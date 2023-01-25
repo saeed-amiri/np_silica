@@ -206,7 +206,9 @@ class UpdateBoAnDiMa:
                              rot_amino.Bonds_df, dict_atom_id)
         rot_amino.Angles_df = self.__update_angles(
                              rot_amino.Angles_df, dict_atom_id)
-        print(rot_amino.Angles_df)
+        rot_amino.Dihedrals_df = self.__update_dihedrals(
+                             rot_amino.Dihedrals_df, dict_atom_id)
+        print(rot_amino.Dihedrals_df)
 
     def __update_bonds(self,
                        Bonds_df: pd.DataFrame,  # Bonds data frame
@@ -228,6 +230,18 @@ class UpdateBoAnDiMa:
             Angles_df.at[item, 'aj'] = dict_id[row['aj']]
             Angles_df.at[item, 'ak'] = dict_id[row['ak']]
         return Angles_df
+
+    def __update_dihedrals(self,
+                           Dihedrlas_df: pd.DataFrame,  # Bonds data frame
+                           dict_id: dict[int, int]  # Atoms ids
+                           ) -> pd.DataFrame:
+        """update atom indexs in the dihedrals"""
+        for item, row in Dihedrlas_df.iterrows():
+            Dihedrlas_df.at[item, 'ai'] = dict_id[row['ai']]
+            Dihedrlas_df.at[item, 'aj'] = dict_id[row['aj']]
+            Dihedrlas_df.at[item, 'ak'] = dict_id[row['ak']]
+            Dihedrlas_df.at[item, 'ah'] = dict_id[row['ah']]
+        return Dihedrlas_df
 
 
 if __name__ == '__main__':
