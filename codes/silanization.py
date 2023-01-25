@@ -66,7 +66,7 @@ class PrepareAmino:
                                                atom_level,
                                                mol_level)
                 amino.Atoms_df = i_amino
-                Atoms_list.append(i_amino)
+                Atoms_list.append(self.__drop_si(i_amino))
                 boandi = UpdateBoAnDi(amino)  # Update bonds, angles, dihedrals
                 Bonds_list.append(boandi.Bonds_df)
                 Angles_list.append(boandi.Angles_df)
@@ -105,6 +105,17 @@ class PrepareAmino:
                 amino_atoms.at[item, 'azimuth'] = si_row['azimuth']
                 amino_atoms.at[item, 'polar'] = si_row['polar']
         return self.__rotate_amino(amino_atoms)
+
+    def __drop_si(self,
+                  amino_atoms: pd.DataFrame  # Rotated Atoms_df
+                  ) -> pd.DataFrame:
+        """drop the silicon, since it is already in the main data"""
+        df: pd.DataFrame = amino_atoms.copy()
+        df.drop(amino_atoms[amino_atoms['name'] == 'Si'].index, inplace=True)
+        df.reset_index(inplace=True)
+        df.drop(columns=['index', 'old_id'], inplace=True, axis=1)
+        df.index += 1
+        return df
 
     def __rotate_amino(self,
                        amino_atoms: pd.DataFrame  # Updated amino
