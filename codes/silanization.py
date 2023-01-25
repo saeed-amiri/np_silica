@@ -50,8 +50,12 @@ class PrepareAmino:
         self.Si = 'Si'
         Atoms_df = self.__to_origin(amino.Atoms_df)
         Atoms_df = self.__get_azimuths(Atoms_df)
+        Atoms_list: list[pd.DataFrame] = []  # Keep all the aminos to concate
+        Bonds_list: list[pd.DataFrame] = []  # Keep all the aminos to concate
+        Angles_list: list[pd.DataFrame] = []  # Keep all the aminos to concate
+        Dihedrals_list: list[pd.DataFrame] = []  # Keep all the aminos> concate
         for item, row in si_df.iterrows():
-            if item == 1:
+            if item < 5:
                 # Si from amino will be deleted later, so the rest of
                 # atoms must start on lower
                 atom_level: int = (item - 1) * \
@@ -62,9 +66,21 @@ class PrepareAmino:
                                                atom_level,
                                                mol_level)
                 amino.Atoms_df = i_amino
-                UpdateBoAnDiMa(amino)
+                Atoms_list.append(i_amino)
+                boandi = UpdateBoAnDi(amino)  # Update bonds, angles, dihedrals
+                Bonds_list.append(boandi.Bonds_df)
+                Angles_list.append(boandi.Angles_df)
+                Dihedrals_list.append(boandi.Dihedrals_df)
             else:
                 break
+        self.All_amino_atoms = pd.concat(Atoms_list, ignore_index=True)
+        self.All_amino_atoms.index += 1
+        self.All_amino_bonds = pd.concat(Bonds_list, ignore_index=True)
+        self.All_amino_bonds.index += 1
+        self.All_amino_angles = pd.concat(Angles_list, ignore_index=True)
+        self.All_amino_angles.index += 1
+        self.All_amino_dihedrals = pd.concat(Dihedrals_list, ignore_index=True)
+        self.All_amino_dihedrals.index += 1
 
     def __upgrade_amino(self,
                         amino_atoms: pd.DataFrame,  # Amino Atoms information,
@@ -187,7 +203,7 @@ class PrepareAmino:
         return df
 
 
-class UpdateBoAnDiMa:
+class UpdateBoAnDi:
     """update all the bonds, angles, dihedrals, masses"""
     def __init__(self,
                  rot_amino: PrepareAmino  # Amino data with rotated positions
@@ -201,47 +217,48 @@ class UpdateBoAnDiMa:
         dict_atom_id: dict[int, int]  # to update the indeces
         dict_atom_id = {k: v for k, v in zip(rot_amino.Atoms_df['old_id'],
                                              rot_amino.Atoms_df['atom_id'])}
-        print(dict_atom_id)
-        rot_amino.Bonds_df = self.__update_bonds(
-                             rot_amino.Bonds_df, dict_atom_id)
-        rot_amino.Angles_df = self.__update_angles(
-                             rot_amino.Angles_df, dict_atom_id)
-        rot_amino.Dihedrals_df = self.__update_dihedrals(
-                             rot_amino.Dihedrals_df, dict_atom_id)
-        print(rot_amino.Dihedrals_df)
+        self.Bonds_df = self.__update_bonds(
+                        rot_amino.Bonds_df, dict_atom_id)
+        self.Angles_df = self.__update_angles(
+                         rot_amino.Angles_df, dict_atom_id)
+        self.Dihedrals_df = self.__update_dihedrals(
+                            rot_amino.Dihedrals_df, dict_atom_id)
 
     def __update_bonds(self,
                        Bonds_df: pd.DataFrame,  # Bonds data frame
                        dict_id: dict[int, int]  # Atoms ids
                        ) -> pd.DataFrame:
         """update atom indexs in the bonds"""
+        df = Bonds_df.copy()
         for item, row in Bonds_df.iterrows():
-            Bonds_df.at[item, 'ai'] = dict_id[row['ai']]
-            Bonds_df.at[item, 'aj'] = dict_id[row['aj']]
-        return Bonds_df
+            df.at[item, 'ai'] = dict_id[row['ai']]
+            df.at[item, 'aj'] = dict_id[row['aj']]
+        return df
 
     def __update_angles(self,
                         Angles_df: pd.DataFrame,  # Bonds data frame
                         dict_id: dict[int, int]  # Atoms ids
                         ) -> pd.DataFrame:
         """update atom indexs in the angles"""
+        df = Angles_df.copy()
         for item, row in Angles_df.iterrows():
-            Angles_df.at[item, 'ai'] = dict_id[row['ai']]
-            Angles_df.at[item, 'aj'] = dict_id[row['aj']]
-            Angles_df.at[item, 'ak'] = dict_id[row['ak']]
-        return Angles_df
+            df.at[item, 'ai'] = dict_id[row['ai']]
+            df.at[item, 'aj'] = dict_id[row['aj']]
+            df.at[item, 'ak'] = dict_id[row['ak']]
+        return df
 
     def __update_dihedrals(self,
                            Dihedrlas_df: pd.DataFrame,  # Bonds data frame
                            dict_id: dict[int, int]  # Atoms ids
                            ) -> pd.DataFrame:
         """update atom indexs in the dihedrals"""
+        df = Dihedrlas_df.copy()
         for item, row in Dihedrlas_df.iterrows():
-            Dihedrlas_df.at[item, 'ai'] = dict_id[row['ai']]
-            Dihedrlas_df.at[item, 'aj'] = dict_id[row['aj']]
-            Dihedrlas_df.at[item, 'ak'] = dict_id[row['ak']]
-            Dihedrlas_df.at[item, 'ah'] = dict_id[row['ah']]
-        return Dihedrlas_df
+            df.at[item, 'ai'] = dict_id[row['ai']]
+            df.at[item, 'aj'] = dict_id[row['aj']]
+            df.at[item, 'ak'] = dict_id[row['ak']]
+            df.at[item, 'ah'] = dict_id[row['ah']]
+        return df
 
 
 if __name__ == '__main__':
