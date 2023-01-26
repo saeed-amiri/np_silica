@@ -317,6 +317,14 @@ class UpdateCoords:
         self.Si_df = update.USi_df
         self.NAtoms = len(update.UAtoms_df)
         self.Nmols = np.max(update.UAtoms_df['mol'])
+        self.Dihedrals_df = self.__set_dihedrlas()
+
+    def __set_dihedrlas(self) -> pd.DataFrame:
+        """make empty df"""
+        columns: list[str]  # Name of the columns
+        columns = ['typ', 'ai', 'aj', 'ak', 'ah']
+        df = pd.DataFrame(columns=columns)
+        return df
 
 
 if __name__ == '__main__':
