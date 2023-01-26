@@ -57,6 +57,7 @@ class PrepareAmino:
         amino_masses: pd.DataFrame  # To update the atom index in masses
         amino_masses = self.__update_mass_index(update.Masses_df,
                                                 amino.Masses_df)
+        Atoms_df = self.__update_atom_types(Atoms_df, amino_masses)
         for item, row in si_df.iterrows():
             # Si from amino will be deleted later, so the rest of
             # atoms must start on lower
@@ -82,7 +83,7 @@ class PrepareAmino:
         self.All_amino_dihedrals = pd.concat(Dihedrals_list, ignore_index=True)
         self.All_amino_dihedrals.index += 1
         self.Masses_df = self.__drop_si_mass(amino_masses)
-    
+
         print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}:\n'
               f'\t {len(self.All_amino_atoms)} atoms'
               f', {len(self.All_amino_bonds)} bonds'
@@ -124,7 +125,7 @@ class PrepareAmino:
         df.drop(columns=['index', 'old_id'], inplace=True, axis=1)
         df.index += 1
         return df
-    
+
     def __drop_si_mass(self,
                        amino_masses: pd.DataFrame  # Amino masses
                        ) -> pd.DataFrame:
@@ -135,7 +136,7 @@ class PrepareAmino:
         df.drop(columns=['index'], inplace=True, axis=1)
         df.index += 1
         return df
-    
+
     def __update_mass_index(self,
                             silica_masses: pd.DataFrame,  # DF of masses
                             amino_masses: pd.DataFrame  # DF of masses
@@ -146,6 +147,19 @@ class PrepareAmino:
         df['old_typ'] = df['typ']
         for item, _ in amino_masses.iterrows():
             df.at[item, 'typ'] += silica_ind
+        return df
+
+    def __update_atom_types(self,
+                            Atoms_df: pd.DataFrame,  # Atoms of amino
+                            amino_masses: pd.DataFrame  # Updated masses
+                            ) -> pd.DataFrame:
+        """update type of atoms before rotation and indexing"""
+        old_new_dict: dict[int, int]  # To change the types
+        old_new_dict = {k: v for k, v in zip(amino_masses['old_typ'],
+                                             amino_masses['typ'])}
+        df: pd.DataFrame = Atoms_df.copy()
+        for item, row in Atoms_df.iterrows():
+            df.at[item, 'typ'] = old_new_dict[row['typ']]
         return df
 
     def __rotate_amino(self,
@@ -406,9 +420,9 @@ class ConcatAll:
         return df
 
     def __concate_masses(self,
-                    silica_masses: pd.DataFrame,  # Silica masses
-                    aminos_masses: pd.DataFrame  # Aminos masses
-                    ) -> pd.DataFrame:
+                         silica_masses: pd.DataFrame,  # Silica masses
+                         aminos_masses: pd.DataFrame  # Aminos masses
+                         ) -> pd.DataFrame:
         """update and make total masses df"""
         print(silica_masses)
         print(aminos_masses)
