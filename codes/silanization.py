@@ -81,6 +81,8 @@ class PrepareAmino:
         self.All_amino_angles.index += 1
         self.All_amino_dihedrals = pd.concat(Dihedrals_list, ignore_index=True)
         self.All_amino_dihedrals.index += 1
+        self.Masses_df = self.__drop_si_mass(amino.Masses_df)
+    
         print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}:\n'
               f'\t {len(self.All_amino_atoms)} atoms'
               f', {len(self.All_amino_bonds)} bonds'
@@ -122,6 +124,18 @@ class PrepareAmino:
         df.drop(columns=['index', 'old_id'], inplace=True, axis=1)
         df.index += 1
         return df
+    
+    def __drop_si_mass(self,
+                       amino_masses: pd.DataFrame  # Amino masses
+                       ) -> pd.DataFrame:
+        """Drop Si from amino masses, it is only one Si in atoms"""
+        df: pd.DataFrame = amino_masses.copy()
+        df.drop(amino_masses[amino_masses['name'] == 'Si'].index, inplace=True)
+        df.reset_index(inplace=True)
+        df.drop(columns=['index'], inplace=True, axis=1)
+        df.index += 1
+        return df
+
 
     def __rotate_amino(self,
                        amino_atoms: pd.DataFrame  # Updated amino
@@ -300,6 +314,7 @@ class ConcatAll:
         self.Dihedrals_df = self.__concate_dihedrals(silica.Dihedrals_df,
                                                      aminos.All_amino_dihedrals
                                                      )
+        self.__concate_masses(silica.Masses_df, aminos.Masses_df)
         self.__set_attrs()
 
     def __concate_atoms(self,
@@ -378,6 +393,14 @@ class ConcatAll:
         del si_df
         del amino_df
         return df
+
+    def __concate_masses(self,
+                    silica_masses: pd.DataFrame,  # Silica masses
+                    aminos_masses: pd.DataFrame  # Aminos masses
+                    ) -> pd.DataFrame:
+        """update and make total masses df"""
+        print(silica_masses)
+        print(aminos_masses)
 
     def __set_attrs(self) -> None:
         """set attributes to object(self)"""
