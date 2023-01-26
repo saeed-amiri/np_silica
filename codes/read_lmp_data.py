@@ -34,8 +34,8 @@ class Header:
 
     def __init__(self, infile) -> None:
         self.infile: str = infile
-        print(f'{bcolors.OKCYAN}{self.__class__.__name__}:\n'
-              f'\tReading: `{self.infile}`{bcolors.ENDC}\n')
+        print(f'\n{bcolors.OKCYAN}{self.__class__.__name__}:\n'
+              f'\tReading: `{self.infile}`{bcolors.ENDC}')
         self.atomsLine: int
         self.file_exist(infile)
         self.atomsLine = self.check_file()
@@ -219,8 +219,7 @@ class Header:
                     bond_name = all_name[1]
                     print(f'{bcolors.WARNING}read_data:\n'
                           f'\t Unclear style in the Masses section:'
-                          f'\t{all_name}\n'
-                          f'{bcolors.ENDC}')
+                          f'\t{all_name} {bcolors.ENDC}')
                 elif atoms_info_len == 5:  # Get data for GROMACS
                     atom_name = all_name
                     self.GROMACS_flag = True
@@ -412,7 +411,7 @@ class Body(Header):
                     Atoms: pd.DataFrame  # Atoms dataframe from read from data
                     ) -> pd.DataFrame:
         """set the center of mass to zero"""
-        print(f'{bcolors.OKCYAN}\tMove the center of mass to zero\n'
+        print(f'{bcolors.OKCYAN}\tMove the center of mass to zero'
               f'{bcolors.ENDC}')
         x_cm: float = np.average(Atoms['x'])
         y_cm: float = np.average(Atoms['y'])
