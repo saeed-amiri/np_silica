@@ -151,7 +151,7 @@ class PrepareAmino:
                      x: float,  # X position
                      y: float,  # Y position
                      z: float  # Z position
-                     ) -> tuple[float]:
+                     ) -> tuple[float, float, float]:
         """calculate the rotated coordes"""
         cos_g: float = np.cos(gamma)
         cos_b: float = np.cos(beta)
@@ -217,12 +217,12 @@ class PrepareAmino:
 class UpdateBoAnDi:
     """update all the bonds, angles, dihedrals, masses"""
     def __init__(self,
-                 rot_amino: PrepareAmino  # Amino data with rotated positions
+                 rot_amino: GetAmino  # Amino data with rotated positions
                  ) -> None:
         self.__update_all(rot_amino)
 
     def __update_all(self,
-                     rot_amino: PrepareAmino  # Amino data with rotated pos
+                     rot_amino: GetAmino  # Amino data with rotated pos
                      ) -> None:
         """call all the functions"""
         dict_atom_id: dict[int, int]  # to update the indeces
@@ -274,8 +274,38 @@ class UpdateBoAnDi:
 
 class ConcatAll:
     """append all the aminopropyle to the silicon data file"""
-    def __init__(self) -> None:
-        pass
+    def __init__(self,
+                 silica: upcord.UpdateCoords,  # Silica updated
+                 aminos: PrepareAmino  # Update aminos
+                 ) -> None:
+        self.__concate_all(silica, aminos)
+
+    def __concate_all(self,
+                      silica: upcord.UpdateCoords,  # Silica updated
+                      aminos: PrepareAmino  # Update aminos
+                      ) -> None:
+        """concate the all atoms, bonds, angles, diedrlas"""
+        self.Atoms_df: pd.DataFrame  # DF in write_lmp format
+        self.Atoms_df = self.__concate_atoms(silica.Atoms_df,
+                                             aminos.All_amino_atoms)
+
+    def __concate_atoms(self,
+                        silica_atoms: pd.DataFrame,  # Silica atoms
+                        aminos_atoms: pd.DataFrame  # Silica
+                        ) -> pd.DataFrame:
+        """concate all the atoms, make sure they all have same columns"""
+        columns: list[str]  # Name of the wanted columns
+        columns = ['atom_id', 'mol', 'typ', 'charge', 'x', 'y', 'z',
+                   'nx', 'ny', 'nz', 'cmt', 'name']
+        si_df = pd.DataFrame(columns=columns)
+        amino_df = pd.DataFrame(columns=columns)
+        for col in columns:
+            si_df[col] = silica_atoms[col]
+            amino_df[col] = aminos_atoms[col]
+        df: pd.DataFrame  # All atoms dataframe
+        df = pd.concat([si_df, amino_df], ignore_index=True)
+        df.index += 1
+        return df
 
 
 if __name__ == '__main__':
@@ -283,3 +313,4 @@ if __name__ == '__main__':
     update = upcord.UpdateCoords(fname)  # Updated data for silica
     amino = GetAmino()
     up_aminos = PrepareAmino(update, amino)
+    ConcatAll(update, up_aminos)
