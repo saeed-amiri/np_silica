@@ -243,9 +243,13 @@ class WriteLmp(GetData):
         if not df.empty:
             f.write(f'Dihedrals\n')
             f.write(f'\n')
-            columns = ['typ', 'ai', 'aj', 'ak', 'ah', 'cmt', 'name',
-                       'type_name']
-            df.to_csv(f, sep=' ', index=True, columns=columns, header=None)
+            try:
+                columns = ['typ', 'ai', 'aj', 'ak', 'ah', 'cmt', 'name',
+                           'type_name']
+                df.to_csv(f, sep=' ', index=True, columns=columns, header=None)
+            except KeyError:
+                columns = ['typ', 'ai', 'aj', 'ak', 'ah']
+                df.to_csv(f, sep=' ', index=True, columns=columns, header=None)
             f.write(f'\n')
             # self.write_BoAnDi_infos(df, 'dihedrals')
         else:
