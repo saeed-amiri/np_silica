@@ -292,9 +292,10 @@ class ConcatAll:
                                              aminos.All_amino_bonds)
         self.Angles_df = self.__concate_angles(silica.Angles_df,
                                                aminos.All_amino_angles)
-        self.Dihedrlas_df = self.__concate_dihedrals(silica.Dihedrals_df,
+        self.Dihedrals_df = self.__concate_dihedrals(silica.Dihedrals_df,
                                                      aminos.All_amino_dihedrals
                                                      )
+        self.__set_attrs()
 
     def __concate_atoms(self,
                         silica_atoms: pd.DataFrame,  # Silica atoms
@@ -372,6 +373,14 @@ class ConcatAll:
         del si_df
         del amino_df
         return df
+
+    def __set_attrs(self) -> None:
+        """set attributes to object(self)"""
+        self.Nmols: int = np.max(self.Atoms_df['mol'])
+        self.NAtoms: int = len(self.Atoms_df)
+        self.NBonds: int = len(self.Bonds_df)
+        self.NAngles: int = len(self.Angles_df)
+        self.NDihedrals: int = len(self.Dihedrals_df)
 
 
 if __name__ == '__main__':
