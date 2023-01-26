@@ -292,7 +292,9 @@ class ConcatAll:
                                              aminos.All_amino_bonds)
         self.Angles_df = self.__concate_angles(silica.Angles_df,
                                                aminos.All_amino_angles)
-        print(self.Angles_df)
+        self.Dihedrlas_df = self.__concate_dihedrals(silica.Dihedrals_df,
+                                                     aminos.All_amino_dihedrals
+                                                     )
 
     def __concate_atoms(self,
                         silica_atoms: pd.DataFrame,  # Silica atoms
@@ -345,6 +347,25 @@ class ConcatAll:
         for col in columns:
             si_df[col] = silica_angles[col]
             amino_df[col] = aminos_angles[col]
+        df: pd.DataFrame  # All atoms dataframe
+        df = pd.concat([si_df, amino_df], ignore_index=True)
+        df.index += 1
+        del si_df
+        del amino_df
+        return df
+    
+    def __concate_dihedrals(self,
+                            silica_dihedrals: pd.DataFrame,  # Silica bonds
+                            aminos_dihedrals: pd.DataFrame  # Aminos bonds
+                            ) -> pd.DataFrame:
+        """concate all the angles in the write_lmp format"""
+        columns: list[str]  # Name of the columns
+        columns = ['typ', 'ai', 'aj', 'ak', 'ah']
+        si_df = pd.DataFrame(columns=columns)
+        amino_df = pd.DataFrame(columns=columns)
+        for col in columns:
+            si_df[col] = silica_dihedrals[col]
+            amino_df[col] = aminos_dihedrals[col]
         df: pd.DataFrame  # All atoms dataframe
         df = pd.concat([si_df, amino_df], ignore_index=True)
         df.index += 1
