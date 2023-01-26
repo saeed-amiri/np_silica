@@ -64,6 +64,7 @@ class PrepareAmino:
                                                      amino.Angles_df)
         amino.Dihedrals_df = self.__update_boandi_types(update.Dihedrals_df,
                                                         amino.Dihedrals_df)
+
         for item, row in si_df.iterrows():
             # Si from amino will be deleted later, so the rest of
             # atoms must start on lower
@@ -175,8 +176,9 @@ class PrepareAmino:
         """update bonds type in aminos"""
         silica_ind: int = np.max(silica['typ'])
         df: pd.DataFrame = amino.copy()
-        for item, _ in amino.iterrows():
-            df.at[item, 'typ'] += silica_ind
+        if not np.isnan(silica_ind):
+            for item, _ in amino.iterrows():
+                df.at[item, 'typ'] += silica_ind
         return df
 
     def __rotate_amino(self,
@@ -356,7 +358,8 @@ class ConcatAll:
         self.Dihedrals_df = self.__concate_dihedrals(silica.Dihedrals_df,
                                                      aminos.All_amino_dihedrals
                                                      )
-        self.__concate_masses(silica.Masses_df, aminos.Masses_df)
+        self.Masses_df = self.__concate_masses(silica.Masses_df,
+                                               aminos.Masses_df)
         self.__set_attrs()
 
     def __concate_atoms(self,
@@ -438,11 +441,19 @@ class ConcatAll:
 
     def __concate_masses(self,
                          silica_masses: pd.DataFrame,  # Silica masses
-                         aminos_masses: pd.DataFrame  # Aminos masses
+                         amino_masses: pd.DataFrame  # Aminos masses
                          ) -> pd.DataFrame:
         """update and make total masses df"""
-        print(silica_masses)
-        print(aminos_masses)
+        columns: list[str] = ['typ', 'mass', 'cmt', 'name']
+        df_silica = pd.DataFrame(columns=columns)
+        df_amino = pd.DataFrame(columns=columns)
+        for col in columns:
+            df_silica[col] = silica_masses[col]
+            df_amino[col] = amino_masses[col]
+
+        df = pd.DataFrame(columns=columns)
+        df = pd.concat([df_silica, df_amino])
+        return df
 
     def __set_attrs(self) -> None:
         """set attributes to object(self)"""
@@ -451,6 +462,10 @@ class ConcatAll:
         self.NBonds: int = len(self.Bonds_df)
         self.NAngles: int = len(self.Angles_df)
         self.NDihedrals: int = len(self.Dihedrals_df)
+        self.Natom_types: int = np.max(self.Masses_df['typ'])
+        self.Nbond_types: int = np.max(self.Bonds_df['typ'])
+        self.Nangle_types: int = np.max(self.Angles_df['typ'])
+        self.Ndihedral_types: int = np.max(self.Dihedrals_df['typ'])
 
 
 if __name__ == '__main__':
