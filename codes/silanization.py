@@ -288,10 +288,12 @@ class ConcatAll:
         self.Atoms_df: pd.DataFrame  # DF in write_lmp format
         self.Atoms_df = self.__concate_atoms(silica.Atoms_df,
                                              aminos.All_amino_atoms)
+        self.Bonds_df = self.__concate_bonds(silica.Bonds_df,
+                                             aminos.All_amino_bonds)
 
     def __concate_atoms(self,
                         silica_atoms: pd.DataFrame,  # Silica atoms
-                        aminos_atoms: pd.DataFrame  # Silica
+                        aminos_atoms: pd.DataFrame  # Aminos atoms
                         ) -> pd.DataFrame:
         """concate all the atoms, make sure they all have same columns"""
         columns: list[str]  # Name of the wanted columns
@@ -305,7 +307,29 @@ class ConcatAll:
         df: pd.DataFrame  # All atoms dataframe
         df = pd.concat([si_df, amino_df], ignore_index=True)
         df.index += 1
+        del si_df
+        del amino_df
         return df
+
+    def __concate_bonds(self,
+                        silica_bonds: pd.DataFrame,  # Silica bonds
+                        aminos_bonds: pd.DataFrame  # Aminos bonds
+                        ) -> pd.DataFrame:
+        """concate all the bonds in the write_lmp format"""
+        columns: list[str]  # Name of the columns
+        columns = ['typ', 'ai', 'aj', 'cmt', 'name']
+        si_df = pd.DataFrame(columns=columns)
+        amino_df = pd.DataFrame(columns=columns)
+        for col in columns:
+            si_df[col] = silica_bonds[col]
+            amino_df[col] = aminos_bonds[col]
+        df: pd.DataFrame  # All atoms dataframe
+        df = pd.concat([si_df, amino_df], ignore_index=True)
+        df.index += 1
+        del si_df
+        del amino_df
+        return df
+
 
 
 if __name__ == '__main__':
