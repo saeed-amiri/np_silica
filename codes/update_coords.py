@@ -41,7 +41,7 @@ class GetSiGroups:
         # Drop some columns
         df.drop(axis=1, columns=['nx', 'ny', 'nz', 'cmt', 'b_name'],
                 inplace=True)
-        print(f'{bcolors.OKBLUE}{self.__class__.__name__}:\n'
+        print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}:\n'
               f'\tThere are: {len(df)} atoms with selected '
               f'atoms name [Si] in the file{bcolors.ENDC}')
         max_radius: float = self.__get_max_radius(Atoms)
