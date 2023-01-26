@@ -41,15 +41,15 @@ class GetSiGroups:
         # Drop some columns
         df.drop(axis=1, columns=['nx', 'ny', 'nz', 'cmt', 'b_name'],
                 inplace=True)
-        print(f'{bcolors.OKGREEN}{self.__class__.__name__}:\n'
+        print(f'{bcolors.OKBLUE}{self.__class__.__name__}:\n'
               f'\tThere are: {len(df)} atoms with selected '
-              f'atoms name [Si] in the file\n{bcolors.ENDC}')
+              f'atoms name [Si] in the file{bcolors.ENDC}')
         max_radius: float = self.__get_max_radius(Atoms)
         df = self.__get_angles(df)
         df = df[(df['rho'] >= max_radius - 5)]
-        print(f'{bcolors.OKGREEN}\tThere are: {len(df)} Si atoms in the '
+        print(f'{bcolors.OKBLUE}\tThere are: {len(df)} Si atoms in the '
               f'choosen area of the system, Max_radius = {max_radius:.5f}'
-              f'\n{bcolors.ENDC}')
+              f'{bcolors.ENDC}')
         return df
 
     def __get_max_radius(self,
@@ -128,9 +128,9 @@ class GetOGroups:
                     delete_list.append(row['ai'])
                 if row['aj'] in all_o and row['aj'] not in delete_list:
                     delete_list.append(row['aj'])
-        print(f'{bcolors.OKBLUE}{self.__class__.__name__}:\n'
+        print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}:\n'
               f'\tThere are {len(delete_list)} O atoms bonded to the '
-              f'slected Si\n{bcolors.ENDC}')
+              f'slected Si{bcolors.ENDC}')
         return delete_list
 
 
@@ -205,8 +205,8 @@ class Delete:
         for item, row in df.iterrows():
             if row['atom_id'] in delete_group:
                 Atoms_df.drop(index=[item], axis=0, inplace=True)
-        print(f'{bcolors.OKBLUE}{self.__class__.__name__}:\n'
-              f'\t {len(delete_group)} atoms is deleted from data file\n'
+        print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}:\n'
+              f'\t {len(delete_group)} atoms is deleted from data file'
               f'{bcolors.ENDC}')
         del df
         Atoms_df.reset_index(inplace=True)
@@ -227,8 +227,8 @@ class Delete:
             if item in delete_group:
                 Velocities_df.drop(index=[item], axis=0, inplace=True)
                 del_counter += 1
-        print(f'{bcolors.OKGREEN}\t {del_counter} velocities are deleted '
-              f'from the data file\n{bcolors.ENDC}')
+        print(f'{bcolors.OKBLUE}\t {del_counter} velocities are deleted '
+              f'from the data file{bcolors.ENDC}')
         new_ai = []  # New index for ai
         for item, row in Velocities_df.iterrows():
             new_ai.append(old_new_dict[item])
@@ -248,8 +248,8 @@ class Delete:
             if row['ai'] in delete_group or row['aj'] in delete_group:
                 Bonds_df.drop(index=[item], axis=0, inplace=True)
                 del_counter += 1
-        print(f'{bcolors.OKGREEN}\t {del_counter} bonds are deleted '
-              f'from the data file\n{bcolors.ENDC}')
+        print(f'{bcolors.OKBLUE}\t {del_counter} bonds are deleted '
+              f'from the data file{bcolors.ENDC}')
         new_ai = []  # New index for ai
         new_aj = []  # New index for aj
         for item, row in Bonds_df.iterrows():
@@ -276,8 +276,8 @@ class Delete:
                or row['ak'] in delete_group:
                 Angels_df.drop(index=[item], axis=0, inplace=True)
                 del_counter += 1
-        print(f'{bcolors.OKGREEN}\t {del_counter} angles are deleted '
-              f'from the data file\n{bcolors.ENDC}')
+        print(f'{bcolors.OKBLUE}\t {del_counter} angles are deleted '
+              f'from the data file{bcolors.ENDC}')
         new_ai = []  # New index for ai
         new_aj = []  # New index for aj
         new_ak = []  # New index for ak
