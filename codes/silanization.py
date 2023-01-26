@@ -58,6 +58,12 @@ class PrepareAmino:
         amino_masses = self.__update_mass_index(update.Masses_df,
                                                 amino.Masses_df)
         Atoms_df = self.__update_atom_types(Atoms_df, amino_masses)
+        amino.Bonds_df = self.__update_boandi_types(update.Bonds_df,
+                                                    amino.Bonds_df)
+        amino.Angles_df = self.__update_boandi_types(update.Angles_df,
+                                                     amino.Angles_df)
+        amino.Dihedrals_df = self.__update_boandi_types(update.Dihedrals_df,
+                                                        amino.Dihedrals_df)
         for item, row in si_df.iterrows():
             # Si from amino will be deleted later, so the rest of
             # atoms must start on lower
@@ -160,6 +166,17 @@ class PrepareAmino:
         df: pd.DataFrame = Atoms_df.copy()
         for item, row in Atoms_df.iterrows():
             df.at[item, 'typ'] = old_new_dict[row['typ']]
+        return df
+
+    def __update_boandi_types(self,
+                              silica: pd.DataFrame,  # Silica bonds/angles/dihe
+                              amino: pd.DataFrame  # Amino bonds/angles/dihedra
+                              ) -> pd.DataFrame:
+        """update bonds type in aminos"""
+        silica_ind: int = np.max(silica['typ'])
+        df: pd.DataFrame = amino.copy()
+        for item, _ in amino.iterrows():
+            df.at[item, 'typ'] += silica_ind
         return df
 
     def __rotate_amino(self,
