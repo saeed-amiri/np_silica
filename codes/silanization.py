@@ -65,17 +65,16 @@ class PrepareAmino:
                                                      amino.Angles_df)
         amino.Dihedrals_df = self.__update_boandi_types(update.Dihedrals_df,
                                                         amino.Dihedrals_df)
-
         for item, row in si_df.iterrows():
             # Si from amino will be deleted later, so the rest of
             # atoms must start on lower
             atom_level: int = (item - 1) * \
-                              (amino.NAtoms - 1) + update.NAtoms - 1
+                                (amino.NAtoms - 1) + update.NAtoms - 1
             mol_level: int = item + update.Nmols
             i_amino = self.__upgrade_amino(Atoms_df.copy(),
-                                           row,
-                                           atom_level,
-                                           mol_level)
+                                            row,
+                                            atom_level,
+                                            mol_level)
             amino.Atoms_df = i_amino
             Atoms_list.append(self.__drop_si(i_amino))
             boandi = UpdateBoAnDi(amino)  # Update bonds, angles, dihedrals
@@ -192,18 +191,21 @@ class PrepareAmino:
         new_x: list[float] = []  # After rotations
         new_y: list[float] = []  # After rotations
         new_z: list[float] = []  # After rotations
-        beta: float = amino_atoms['azimuth'][1]
-        gamma: float = amino_atoms['polar'][1]
+        beta: float = amino_atoms['azimuth'][1]  # Si where chain will attach
+        gamma: float = amino_atoms['polar'][1]  # Si where chain will attach to
         new_x.append(amino_atoms['x'][1])
         new_y.append(amino_atoms['y'][1])
         new_z.append(amino_atoms['z'][1])
         for item, row in amino_atoms.iterrows():
             if item > 1:
-                x, y, z = self.__rot_matrix(beta, gamma,
-                                            row['x'], row['y'], row['z'])
-                new_x.append(x + ref_x)
-                new_y.append(y + ref_y)
-                new_z.append(z + ref_z)
+                x_i, y_i, z_i = self.__rot_matrix(beta,
+                                                  gamma,
+                                                  row['x'],
+                                                  row['y'],
+                                                  row['z'])
+                new_x.append(x_i + ref_x)
+                new_y.append(y_i + ref_y)
+                new_z.append(z_i + ref_z)
         amino_atoms['x'] = new_x
         amino_atoms['y'] = new_y
         amino_atoms['z'] = new_z
@@ -217,14 +219,24 @@ class PrepareAmino:
                      z: float  # Z position
                      ) -> tuple[float, float, float]:
         """calculate the rotated coordes"""
-        cos_g: float = np.cos(gamma)
-        cos_b: float = np.cos(beta)
-        sin_g: float = np.sin(gamma)
-        sin_b: float = np.sin(beta)
-
-        x_new: float = x*cos_g*cos_b - y*sin_g + z*sin_b*cos_g
-        y_new: float = x*sin_g*cos_b + y*cos_g + z*sin_b*sin_g
-        z_new: float = -x**sin_b + z*cos_b
+        h_pi: float = 0.5*np.pi
+        if beta > 0:
+            cos_g: float = np.cos(gamma - h_pi)
+            sin_g: float = np.sin(gamma - h_pi)
+        else:
+            cos_g: float = np.cos(h_pi - gamma)
+            sin_g: float = np.sin(h_pi - gamma)
+        cos_b: float = np.cos(h_pi-beta)
+        sin_b: float = np.sin(h_pi-beta)
+        x_n = x*cos_b-y*sin_b
+        y_n = x*sin_b+y*cos_b
+        z_n = z
+        x_new = x_n*cos_g+z_n*sin_g
+        y_new = y_n
+        z_new = -x_n*sin_g+z_n*cos_g
+        # x_new: float = x*cos_g*cos_b - y*sin_g + z*sin_b*cos_g
+        # y_new: float = x*sin_g*cos_b + y*cos_g + z*sin_b*sin_g
+        # z_new: float = -x*sin_b + z*cos_b
         return x_new, y_new, z_new
 
     def __order_si_df(self,
@@ -474,6 +486,6 @@ if __name__ == '__main__':
     update = upcord.UpdateCoords(fname)  # Updated data for silica
     amino = GetAmino()
     up_aminos = PrepareAmino(update, amino)
-    final = ConcatAll(update, up_aminos)
-    wrt = wrlmp.WriteLmp(obj=final, output='silanized.data')
+    silanized_data = ConcatAll(update, up_aminos)
+    wrt = wrlmp.WriteLmp(obj=silanized_data, output='silanized.data')
     wrt.write_lmp()
