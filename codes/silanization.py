@@ -81,6 +81,12 @@ class PrepareAmino:
         self.All_amino_angles.index += 1
         self.All_amino_dihedrals = pd.concat(Dihedrals_list, ignore_index=True)
         self.All_amino_dihedrals.index += 1
+        print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}:\n'
+              f'\t {len(self.All_amino_atoms)} atoms'
+              f', {len(self.All_amino_bonds)} bonds'
+              f', {len(self.All_amino_angles)} angles'
+              f', {len(self.All_amino_dihedrals)} dihedrals'
+              f' is updated')
 
     def __upgrade_amino(self,
                         amino_atoms: pd.DataFrame,  # Amino Atoms information,
@@ -121,7 +127,6 @@ class PrepareAmino:
                        amino_atoms: pd.DataFrame  # Updated amino
                        ) -> pd.DataFrame:
         """rotate amino based on the azimuth and polar of the Si"""
-        # print(amino_atoms)
         ref_x: float = amino_atoms['x'][1]
         ref_y: float = amino_atoms['y'][1]
         ref_z: float = amino_atoms['z'][1]
@@ -203,7 +208,7 @@ class PrepareAmino:
                     ) -> pd.DataFrame:
         """put the coordinate of Si in Aminopropyle to zero"""
         df: pd.DataFrame = amino_atoms.copy()
-        print(f'{bcolors.OKCYAN}\tMove Aminopropyle [Si] to origin\n'
+        print(f'{bcolors.OKCYAN}\tMove Aminopropyle [Si] to origin'
               f'{bcolors.ENDC}')
         x_si: float = amino_atoms[amino_atoms['name'] == self.Si]['x'][1]
         y_si: float = amino_atoms[amino_atoms['name'] == self.Si]['y'][1]
@@ -335,11 +340,11 @@ class ConcatAll:
         del si_df
         del amino_df
         return df
-    
+
     def __concate_angles(self,
-                        silica_angles: pd.DataFrame,  # Silica bonds
-                        aminos_angles: pd.DataFrame  # Aminos bonds
-                        ) -> pd.DataFrame:
+                         silica_angles: pd.DataFrame,  # Silica bonds
+                         aminos_angles: pd.DataFrame  # Aminos bonds
+                         ) -> pd.DataFrame:
         """concate all the angles in the write_lmp format"""
         columns: list[str]  # Name of the columns
         columns = ['typ', 'ai', 'aj', 'ak']
@@ -354,7 +359,7 @@ class ConcatAll:
         del si_df
         del amino_df
         return df
-    
+
     def __concate_dihedrals(self,
                             silica_dihedrals: pd.DataFrame,  # Silica bonds
                             aminos_dihedrals: pd.DataFrame  # Aminos bonds
