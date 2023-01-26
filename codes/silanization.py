@@ -54,25 +54,25 @@ class PrepareAmino:
         Bonds_list: list[pd.DataFrame] = []  # Keep all the aminos to concate
         Angles_list: list[pd.DataFrame] = []  # Keep all the aminos to concate
         Dihedrals_list: list[pd.DataFrame] = []  # Keep all the aminos> concate
+        amino_masses: pd.DataFrame  # To update the atom index in masses
+        amino_masses = self.__update_mass_index(update.Masses_df,
+                                                amino.Masses_df)
         for item, row in si_df.iterrows():
-            if item < 15:
-                # Si from amino will be deleted later, so the rest of
-                # atoms must start on lower
-                atom_level: int = (item - 1) * \
-                                  (amino.NAtoms - 1) + update.NAtoms - 1
-                mol_level: int = item + update.Nmols
-                i_amino = self.__upgrade_amino(Atoms_df.copy(),
-                                               row,
-                                               atom_level,
-                                               mol_level)
-                amino.Atoms_df = i_amino
-                Atoms_list.append(self.__drop_si(i_amino))
-                boandi = UpdateBoAnDi(amino)  # Update bonds, angles, dihedrals
-                Bonds_list.append(boandi.Bonds_df)
-                Angles_list.append(boandi.Angles_df)
-                Dihedrals_list.append(boandi.Dihedrals_df)
-            else:
-                break
+            # Si from amino will be deleted later, so the rest of
+            # atoms must start on lower
+            atom_level: int = (item - 1) * \
+                              (amino.NAtoms - 1) + update.NAtoms - 1
+            mol_level: int = item + update.Nmols
+            i_amino = self.__upgrade_amino(Atoms_df.copy(),
+                                           row,
+                                           atom_level,
+                                           mol_level)
+            amino.Atoms_df = i_amino
+            Atoms_list.append(self.__drop_si(i_amino))
+            boandi = UpdateBoAnDi(amino)  # Update bonds, angles, dihedrals
+            Bonds_list.append(boandi.Bonds_df)
+            Angles_list.append(boandi.Angles_df)
+            Dihedrals_list.append(boandi.Dihedrals_df)
         self.All_amino_atoms = pd.concat(Atoms_list, ignore_index=True)
         self.All_amino_atoms.index += 1
         self.All_amino_bonds = pd.concat(Bonds_list, ignore_index=True)
@@ -81,14 +81,14 @@ class PrepareAmino:
         self.All_amino_angles.index += 1
         self.All_amino_dihedrals = pd.concat(Dihedrals_list, ignore_index=True)
         self.All_amino_dihedrals.index += 1
-        self.Masses_df = self.__drop_si_mass(amino.Masses_df)
+        self.Masses_df = self.__drop_si_mass(amino_masses)
     
         print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}:\n'
               f'\t {len(self.All_amino_atoms)} atoms'
               f', {len(self.All_amino_bonds)} bonds'
               f', {len(self.All_amino_angles)} angles'
               f', {len(self.All_amino_dihedrals)} dihedrals'
-              f' is updated')
+              f' is updated{bcolors.ENDC}')
 
     def __upgrade_amino(self,
                         amino_atoms: pd.DataFrame,  # Amino Atoms information,
@@ -135,7 +135,18 @@ class PrepareAmino:
         df.drop(columns=['index'], inplace=True, axis=1)
         df.index += 1
         return df
-
+    
+    def __update_mass_index(self,
+                            silica_masses: pd.DataFrame,  # DF of masses
+                            amino_masses: pd.DataFrame  # DF of masses
+                            ) -> pd.DataFrame:
+        """update atoms masses index in Masses for Amino"""
+        silica_ind: int = np.max(silica_masses['typ'])
+        df: pd.DataFrame = amino_masses.copy()
+        df['old_typ'] = df['typ']
+        for item, _ in amino_masses.iterrows():
+            df.at[item, 'typ'] += silica_ind
+        return df
 
     def __rotate_amino(self,
                        amino_atoms: pd.DataFrame  # Updated amino
