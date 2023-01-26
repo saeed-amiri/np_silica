@@ -4,6 +4,7 @@ import pandas as pd
 import read_lmp_data as rdlmp
 import update_coords as upcord
 from colors_text import TextColor as bcolors
+import write_lmp as wrlmp
 
 
 class Doc:
@@ -473,4 +474,6 @@ if __name__ == '__main__':
     update = upcord.UpdateCoords(fname)  # Updated data for silica
     amino = GetAmino()
     up_aminos = PrepareAmino(update, amino)
-    ConcatAll(update, up_aminos)
+    final = ConcatAll(update, up_aminos)
+    wrt = wrlmp.WriteLmp(obj=final, output='silanized.data')
+    wrt.write_lmp()
