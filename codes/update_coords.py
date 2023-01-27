@@ -41,7 +41,8 @@ class GetSiGroups:
         # Drop some columns
         df.drop(axis=1, columns=['nx', 'ny', 'nz', 'cmt', 'b_name'],
                 inplace=True)
-        print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}:\n'
+        print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}: '
+              f'({self.__module__})\n'
               f'\tThere are: {len(df)} atoms with selected '
               f'atoms name [Si] in the file{bcolors.ENDC}')
         max_radius: float = self.__get_max_radius(Atoms)
@@ -128,7 +129,8 @@ class GetOGroups:
                     delete_list.append(row['ai'])
                 if row['aj'] in all_o and row['aj'] not in delete_list:
                     delete_list.append(row['aj'])
-        print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}:\n'
+        print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}: '
+              f'({self.__module__})\n'
               f'\tThere are {len(delete_list)} O atoms bonded to the '
               f'slected Si{bcolors.ENDC}')
         return delete_list
@@ -205,7 +207,8 @@ class Delete:
         for item, row in df.iterrows():
             if row['atom_id'] in delete_group:
                 Atoms_df.drop(index=[item], axis=0, inplace=True)
-        print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}:\n'
+        print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}: '
+              f'({self.__module__})\n'
               f'\t {len(delete_group)} atoms is deleted from data file'
               f'{bcolors.ENDC}')
         del df
