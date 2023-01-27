@@ -117,20 +117,21 @@ class GetSiGroups:
         return df
 
 
-class GetOGroups:
+class GetOxGroups:
     """get Oxygen and/or Hydrogen groups to delete them and update
     data file.
-    Oxygen is bonded to the silica and Hydrogen if asked for is bonded
-    to the Oxygen.
+    Oxygen is bonded to the silica and Hydrogen, if any, bonded to the Oxygens.
     """
     def __init__(self,
                  silica: rdlmp.ReadData,  # Atoms df in form of lammps fullatom
                  Si_delete: list[int],  # With selected group[Si]
-                 Ogroup:  list[typing.Any],  # Name | index groups[O] to delete
+                 Ogroup: list[typing.Any],  # Name | index groups[O] to delete
+                 Hgroup: list[str],  # name of the H atoms to check for bonds
                  fraction: float = 1  # Fraction of to select from, 0<fr<=1
                  ) -> None:
         self.O_delete: list[int]  # All the O atoms to delete
         self.O_delete = self.__get_oxgygen(silica, Si_delete, Ogroup)
+        GetHyGroups(silica, self.O_delete, Hgroup)
 
     def __get_oxgygen(self,
                       silica: rdlmp.ReadData,  # Atoms df in lammps full atom
@@ -162,8 +163,59 @@ class GetOGroups:
                     delete_list.append(row['aj'])
         print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}: '
               f'({self.__module__})\n'
-              f'\tThere are {len(delete_list)} O atoms bonded to the '
+              f'\tThere are {len(delete_list)} `O` atoms bonded to the '
               f'slected Si{bcolors.ENDC}')
+        return delete_list
+
+
+class GetHyGroups:
+    """Find Hydrogen groups bonded to the Oxygen atoms"""
+    def __init__(self,
+                 silica: rdlmp.ReadData,  # All silica atoms
+                 O_delete: list[int],  # Index of O atoms to delete
+                 Hgroup: list[str]  # name of the H atoms to check for bonds
+                 ) -> None:
+        self.H_delete: list[int]  # List of all the H atoms to delete
+        self.H_delete = self.__do_hydrogens(silica, O_delete, Hgroup)
+
+    def __do_hydrogens(self,
+                       silica: rdlmp.ReadData,  # All silica atoms
+                       O_delete: list[int],  # Index of O atoms to delete
+                       Hgroup: list[str]  # name of the H atoms to check
+                       ) -> list[int]:
+        df_H: pd.DataFrame   # All the hydrogens with the selcted type
+        df_H = self.__get_hydrogens(silica.Atoms_df, O_delete, Hgroup)
+        H_delete: list[int] = self.__H_delete(silica.Bonds_df, O_delete, df_H)
+        return H_delete
+
+    def __get_hydrogens(self,
+                        silica_atoms: pd.DataFrame,  # All silica atoms
+                        O_delete: list[int],  # Index of O atoms to delete
+                        Hgroup: list[str]  # name of the H atoms to check for
+                        ) -> pd.DataFrame:
+        # Get Hydrogen atoms
+        H_list: list[pd.DataFrame] = []  # df of all Hydrogens
+        for item in Hgroup:
+            H_list.append(silica_atoms[silica_atoms['name'] == item])
+        return pd.concat(H_list)
+
+    def __H_delete(self,
+                   bonds_df: pd.DataFrame,  # All the bonds in silica
+                   O_delete: list[int],  # Index of the O atoms
+                   df_H: pd.DataFrame  # Df of all the Hydrogens
+                   ) -> None:
+        all_h = [item for item in df_H['atom_id']]
+        delete_list: list[int] = []  # index of H atoms to delete
+        for _, row in bonds_df.iterrows():
+            if row['ai'] in O_delete or row['aj'] in O_delete:
+                if row['ai'] in all_h and row['ai'] not in delete_list:
+                    delete_list.append(row['ai'])
+                if row['aj'] in all_h and row['aj'] not in delete_list:
+                    delete_list.append(row['aj'])
+        print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}: '
+              f'({self.__module__})\n'
+              f'\tThere are {len(delete_list)} `H` atoms bonded to the '
+              f'slected O{bcolors.ENDC}')
         return delete_list
 
 
@@ -172,13 +224,20 @@ class Delete:
     def __init__(self,
                  silica: rdlmp.ReadData  # Data from LAMMPS
                  ) -> None:
+        """find silicon atoms on the shell, then find the Oxygen which
+        is attached to the silicons and delete them; also, it should
+        check if there is any hydrogen attached to the selected O and
+        drop them too"""
+        # Find Si on the shell
         silicons = GetSiGroups(silica.Atoms_df,
-                               Sigroup=['SD'],
+                               Sigroup=['SD', 'SI'],
                                fraction=1)
-        oxygens = GetOGroups(silica,
-                             silicons.Si_delete,
-                             Ogroup=['OD'],
-                             fraction=1)
+        # Drop selected O atached to the Si and if there is H atom bond to them
+        oxygens = GetOxGroups(silica,
+                              silicons.Si_delete,
+                              Ogroup=['OD', 'OH'],
+                              Hgroup=['HO'],
+                              fraction=1)
         self.Si_df = silicons.df_Si
         self.__delete_all(silica, oxygens.O_delete)
 
@@ -257,14 +316,14 @@ class Delete:
         """delete velocities for deleted atoms"""
         df = Velocities_df.copy()
         del_counter: int = 0  # count the numbers of deleted velocities
-        for item, row in df.iterrows():
+        for item, _ in df.iterrows():
             if item in delete_group:
                 Velocities_df.drop(index=[item], axis=0, inplace=True)
                 del_counter += 1
         print(f'{bcolors.OKBLUE}\t{del_counter} velocities are deleted '
               f'from the data file{bcolors.ENDC}')
         new_ai = []  # New index for ai
-        for item, row in Velocities_df.iterrows():
+        for item, _ in Velocities_df.iterrows():
             new_ai.append(old_new_dict[item])
         del df
         Velocities_df.index = new_ai
