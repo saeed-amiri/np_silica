@@ -306,6 +306,7 @@ class UpdateCoords:
         silica = GetData(fname)
         update = Delete(silica)
         self.__set_attrs(silica, update)
+        self.__write_infos()
 
     def __set_attrs(self,
                     silica: GetData,  # Tha main data
@@ -321,6 +322,13 @@ class UpdateCoords:
         self.NAtoms = len(update.UAtoms_df)
         self.Nmols = np.max(update.UAtoms_df['mol'])
         self.Dihedrals_df = self.__set_dihedrlas()
+        self.NAtomTyp: int = np.max(self.Masses_df['typ'])
+        self.NBonds: int = len(self.Bonds_df)
+        self.NBondTyp: int = np.max(self.Bonds_df['typ'])
+        self.NAngles: int = len(self.Angles_df)
+        self.NAngleTyp: int = np.max(self.Angles_df['typ'])
+        self.NDihedrals: int = len(self.Dihedrals_df)
+        self.NDihedralTyp: int = np.max(self.Dihedrals_df['typ'])
 
     def __set_dihedrlas(self) -> pd.DataFrame:
         """make empty df"""
@@ -328,6 +336,19 @@ class UpdateCoords:
         columns = ['typ', 'ai', 'aj', 'ak', 'ah']
         df = pd.DataFrame(columns=columns)
         return df
+
+    def __write_infos(self) -> None:
+        print(f'{bcolors.OKGREEN}\tData Summary after deleting atoms:\n'
+              f'\t\t# Atoms: {self.NAtoms}, # Atom`s types: {self.NAtomTyp}\n'
+              f'\t\t# Bonds: {self.NBonds}, # Bond`s types: {self.NBondTyp}\n'
+              f'\t\t# Angles: {self.NAngles}, '
+              f'# Angle`s types: {self.NAngleTyp}\n'
+              f'\t\t# Dihedrals: {self.NDihedrals}, '
+              f'# Dihedral`s types: {self.NDihedralTyp}\n'
+              f'\t\tTotal charge: {self.Atoms_df["charge"].sum()}\n'
+              f'\t\tMin charge: {self.Atoms_df["charge"].min()}\n'
+              f'\t\tMax charge: {self.Atoms_df["charge"].max()}'
+              )
 
 
 if __name__ == '__main__':
