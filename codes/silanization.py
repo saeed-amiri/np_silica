@@ -379,6 +379,7 @@ class ConcatAll:
         self.Masses_df = self.__concate_masses(silica.Masses_df,
                                                aminos.Masses_df)
         self.__set_attrs()
+        self.__write_infos()
 
     def __concate_atoms(self,
                         silica_atoms: pd.DataFrame,  # Silica atoms
@@ -480,10 +481,23 @@ class ConcatAll:
         self.NBonds: int = len(self.Bonds_df)
         self.NAngles: int = len(self.Angles_df)
         self.NDihedrals: int = len(self.Dihedrals_df)
-        self.Natom_types: int = np.max(self.Masses_df['typ'])
-        self.Nbond_types: int = np.max(self.Bonds_df['typ'])
-        self.Nangle_types: int = np.max(self.Angles_df['typ'])
-        self.Ndihedral_types: int = np.max(self.Dihedrals_df['typ'])
+        self.NAtomTyp: int = np.max(self.Masses_df['typ'])
+        self.NBondTyp: int = np.max(self.Bonds_df['typ'])
+        self.NAngleTyp: int = np.max(self.Angles_df['typ'])
+        self.NDihedralTyp: int = np.max(self.Dihedrals_df['typ'])
+
+    def __write_infos(self) -> None:
+        print(f'{bcolors.OKGREEN}\tData Summary after silanization:\n'
+              f'\t\t# Atoms: {self.NAtoms}, # Atom`s types: {self.NAtomTyp}\n'
+              f'\t\t# Bonds: {self.NBonds}, # Bond`s types: {self.NBondTyp}\n'
+              f'\t\t# Angles: {self.NAngles}, '
+              f'# Angle`s types: {self.NAngleTyp}\n'
+              f'\t\t# Dihedrals: {self.NDihedrals}, '
+              f'# Dihedral`s types: {self.NDihedralTyp}\n'
+              f'\t\tTotal charge: {self.Atoms_df["charge"].sum()}\n'
+              f'\t\tMin charge: {self.Atoms_df["charge"].min()}\n'
+              f'\t\tMax charge: {self.Atoms_df["charge"].max()}'
+              )
 
 
 if __name__ == '__main__':
