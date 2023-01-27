@@ -126,12 +126,10 @@ class GetOxGroups:
                  silica: rdlmp.ReadData,  # Atoms df in form of lammps fullatom
                  Si_delete: list[int],  # With selected group[Si]
                  Ogroup: list[typing.Any],  # Name | index groups[O] to delete
-                 Hgroup: list[str],  # name of the H atoms to check for bonds
                  fraction: float = 1  # Fraction of to select from, 0<fr<=1
                  ) -> None:
         self.O_delete: list[int]  # All the O atoms to delete
         self.O_delete = self.__get_oxgygen(silica, Si_delete, Ogroup)
-        GetHyGroups(silica, self.O_delete, Hgroup)
 
     def __get_oxgygen(self,
                       silica: rdlmp.ReadData,  # Atoms df in lammps full atom
@@ -236,14 +234,17 @@ class Delete:
         oxygens = GetOxGroups(silica,
                               silicons.Si_delete,
                               Ogroup=['OD', 'OH'],
-                              Hgroup=['HO'],
                               fraction=1)
+        hydrogens = GetHyGroups(silica,
+                                oxygens.O_delete,
+                                Hgroup=['HO'])
         self.Si_df = silicons.df_Si
-        self.__delete_all(silica, oxygens.O_delete)
+        self.__delete_all(silica, oxygens.O_delete, hydrogens.H_delete)
 
     def __delete_all(self,
                      silica: rdlmp.ReadData,  # Data from LAMMPS
                      O_delete: list[int],  # Index of O atoms to delete
+                     H_delete: list[int]  # Index of H atoms to delete
                      ) -> None:
         old_new_dict: dict[int, int]  # new and old index of updated atoms df
         self.UAtoms_df: pd.DataFrame  # Atoms  with updated atoms' index
@@ -252,6 +253,7 @@ class Delete:
         self.UAngles_df: pd.DataFrame  # Angles with updated atoms' index
         delete_group: list[int] = []  # To extend all selected atoms
         delete_group.extend(O_delete)
+        delete_group.extend(H_delete)
         old_new_dict, self.UAtoms_df = self.__update_atoms(silica,
                                                            delete_group)
         self.UVelocities = self.__update_velocities(silica.Velocities_df,
