@@ -1,3 +1,4 @@
+import re
 import sys
 import numpy as np
 import pandas as pd
@@ -72,9 +73,9 @@ class PrepareAmino:
                                 (amino.NAtoms - 1) + update.NAtoms - 1
             mol_level: int = item + update.Nmols
             i_amino = self.__upgrade_amino(Atoms_df.copy(),
-                                            row,
-                                            atom_level,
-                                            mol_level)
+                                           row,
+                                           atom_level,
+                                           mol_level)
             amino.Atoms_df = i_amino
             Atoms_list.append(self.__drop_si(i_amino))
             boandi = UpdateBoAnDi(amino)  # Update bonds, angles, dihedrals
@@ -91,7 +92,8 @@ class PrepareAmino:
         self.All_amino_dihedrals.index += 1
         self.Masses_df = self.__drop_si_mass(amino_masses)
 
-        print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}:\n'
+        print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}: '
+              f'({self.__module__})\n'
               f'\t {len(self.All_amino_atoms)} atoms'
               f', {len(self.All_amino_bonds)} bonds'
               f', {len(self.All_amino_angles)} angles'
@@ -224,8 +226,8 @@ class PrepareAmino:
             cos_g: float = np.cos(gamma - h_pi)
             sin_g: float = np.sin(gamma - h_pi)
         else:
-            cos_g: float = np.cos(h_pi - gamma)
-            sin_g: float = np.sin(h_pi - gamma)
+            cos_g = np.cos(h_pi - gamma)
+            sin_g = np.sin(h_pi - gamma)
         cos_b: float = np.cos(h_pi-beta)
         sin_b: float = np.sin(h_pi-beta)
         x_n = x*cos_b-y*sin_b
@@ -234,6 +236,9 @@ class PrepareAmino:
         x_new = x_n*cos_g+z_n*sin_g
         y_new = y_n
         z_new = -x_n*sin_g+z_n*cos_g
+        # x_new = x_n*cos_g-z_n*sin_g
+        # y_new = x_n*sin_g*sin_g+y_n*cos_g+z_n*sin_g*cos_g
+        # z_new = x_n*cos_g*sin_g-y*sin_g+z_n*cos_g*cos_g
         # x_new: float = x*cos_g*cos_b - y*sin_g + z*sin_b*cos_g
         # y_new: float = x*sin_g*cos_b + y*cos_g + z*sin_b*sin_g
         # z_new: float = -x*sin_b + z*cos_b
@@ -487,5 +492,7 @@ if __name__ == '__main__':
     amino = GetAmino()
     up_aminos = PrepareAmino(update, amino)
     silanized_data = ConcatAll(update, up_aminos)
-    wrt = wrlmp.WriteLmp(obj=silanized_data, output='silanized.data')
+    np_size: int = int(re.findall(r'\d+', fname)[0])
+    fout: str = f'silanized_{np_size}nm.data'
+    wrt = wrlmp.WriteLmp(obj=silanized_data, output=fout)
     wrt.write_lmp()
