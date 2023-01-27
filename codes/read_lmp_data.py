@@ -34,7 +34,8 @@ class Header:
 
     def __init__(self, infile) -> None:
         self.infile: str = infile
-        print(f'\n{bcolors.OKCYAN}{self.__class__.__name__}:\n'
+        print(f'\n{bcolors.OKCYAN}{self.__class__.__name__}: '
+              f'({self.__module__})\n'
               f'\tReading: `{self.infile}`{bcolors.ENDC}')
         self.atomsLine: int
         self.file_exist(infile)
