@@ -37,11 +37,17 @@ class GetSiGroups:
         Si_list: list[pd.DataFrame] = []  # df with asked Si groups
         for item in Sigroup:
             Si_list.append(Atoms[Atoms['name'] == item])
-        df: pd.DataFrame = pd.concat(Si_list)  # Df of all the Si to replace
+        # Df of all the Si to replace:
+        df: pd.DataFrame = pd.concat(Si_list)
+        # Drop unwanted columns:
         df = self.__drop_cols(df)
+        # Check if contain atoms:
         df = self.__check_si_df(df, Sigroup)
+        # Get the NP radius:
         max_radius: float = self.__get_max_radius(Atoms)
-        df = self.__get_angles(df)
+        # Get spherical coords for Si atoms:
+        df = self.__get_sphere_coord(df)
+        # Drop atom outside the shell:
         df = self.__apply_radius(df, max_radius)
         return df
 
@@ -88,9 +94,9 @@ class GetSiGroups:
         z_max: float = Atoms['z'].abs().max()
         return np.max([x_max, y_max, z_max])
 
-    def __get_angles(self,
-                     df: pd.DataFrame  # The selected Si group
-                     ) -> pd.DataFrame:
+    def __get_sphere_coord(self,
+                           df: pd.DataFrame  # The selected Si group
+                           ) -> pd.DataFrame:
         """find and set the azimuth and polar angle of the atoms"""
         rho: list[float] = []  # To add to dataframe
         azimuth: list[float] = []  # To add to dataframe
