@@ -38,18 +38,44 @@ class GetSiGroups:
         for item in Sigroup:
             Si_list.append(Atoms[Atoms['name'] == item])
         df: pd.DataFrame = pd.concat(Si_list)  # Df of all the Si to replace
-        # Drop some columns
-        df.drop(axis=1, columns=['nx', 'ny', 'nz', 'cmt', 'b_name'],
-                inplace=True)
-        print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}: '
-              f'({self.__module__})\n'
-              f'\tThere are: {len(df)} atoms with selected '
-              f'atoms name [Si] in the file{bcolors.ENDC}')
+        df = self.__drop_cols(df)
+        df = self.__check_si_df(df, Sigroup)
         max_radius: float = self.__get_max_radius(Atoms)
         df = self.__get_angles(df)
-        df = df[(df['rho'] >= max_radius - 5)]
+        df = self.__apply_radius(df, max_radius)
+        return df
+
+    def __drop_cols(self,
+                    df: pd.DataFrame,  # Dataframe from selected Si atoms
+                    ) -> pd.DataFrame:
+        """drop some columns"""
+        df.drop(axis=1, columns=['nx', 'ny', 'nz', 'cmt', 'b_name'],
+                inplace=True)
+        return df
+
+    def __check_si_df(self,
+                      df: pd.DataFrame,  # Dataframe from selected Si atoms
+                      Sigroup: list[typing.Any],  # Name | index of groups[Si]
+                      ) -> pd.DataFrame:
+        """check the data frame"""
+        if len(df) > 0:
+            print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}: '
+                  f'({self.__module__})\n'
+                  f'\tThere are: {len(df)} atoms with selected '
+                  f'atoms name [Si] in the file{bcolors.ENDC}')
+        else:
+            exit(f'{bcolors.FAIL}Error! The selcted atom group `{Sigroup}`'
+                 f'does not exist!\n{bcolors.ENDC}')
+        return df
+
+    def __apply_radius(self,
+                       df: pd.DataFrame,  # Checked df of selected Si
+                       radius: float  # Max radius to check the shell
+                       ) -> pd.DataFrame:
+        """keep the Si on the shell"""
+        df = df[(df['rho'] >= radius - 5)]
         print(f'{bcolors.OKBLUE}\tThere are: {len(df)} Si atoms in the '
-              f'choosen area of the system, Max_radius = {max_radius:.5f}'
+              f'choosen area of the system, Max_radius = {radius:.3f}'
               f'{bcolors.ENDC}')
         return df
 
@@ -348,6 +374,7 @@ class UpdateCoords:
               f'\t\tTotal charge: {self.Atoms_df["charge"].sum()}\n'
               f'\t\tMin charge: {self.Atoms_df["charge"].min()}\n'
               f'\t\tMax charge: {self.Atoms_df["charge"].max()}'
+              f'{bcolors.ENDC}'
               )
 
 
