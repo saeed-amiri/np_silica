@@ -94,7 +94,7 @@ class PrepareAmino:
 
         print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}: '
               f'({self.__module__})\n'
-              f'\t {len(self.All_amino_atoms)} atoms'
+              f'\t{len(self.All_amino_atoms)} atoms'
               f', {len(self.All_amino_bonds)} bonds'
               f', {len(self.All_amino_angles)} angles'
               f', {len(self.All_amino_dihedrals)} dihedrals'
