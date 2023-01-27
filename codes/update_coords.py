@@ -43,8 +43,8 @@ class GetSiGroups:
         df = self.__drop_cols(df)
         # Check if contain atoms:
         df = self.__check_si_df(df, Sigroup)
-        # Get the NP radius:
-        max_radius: float = self.__get_max_radius(Atoms)
+        # Get the nano particle radius:
+        max_radius: float = self.__get_sys_radius(Atoms)
         # Get spherical coords for Si atoms:
         df = self.__get_sphere_coord(df)
         # Drop atom outside the shell:
@@ -54,7 +54,7 @@ class GetSiGroups:
     def __drop_cols(self,
                     df: pd.DataFrame,  # Dataframe from selected Si atoms
                     ) -> pd.DataFrame:
-        """drop some columns"""
+        """drop some unwanted columns"""
         df.drop(axis=1, columns=['nx', 'ny', 'nz', 'cmt', 'b_name'],
                 inplace=True)
         return df
@@ -85,7 +85,7 @@ class GetSiGroups:
               f'{bcolors.ENDC}')
         return df
 
-    def __get_max_radius(self,
+    def __get_sys_radius(self,
                          Atoms: pd.DataFrame,  # Atoms in lammps full atom
                          ) -> float:
         """return the radius of the nano-particles"""
@@ -111,7 +111,6 @@ class GetSiGroups:
             rho.append(i_rho)
             azimuth.append(i_azimuth)
             polar.append(i_polar)
-
         df['rho'] = rho
         df['azimuth'] = azimuth
         df['polar'] = polar
