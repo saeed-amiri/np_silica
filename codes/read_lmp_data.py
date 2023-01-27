@@ -567,6 +567,20 @@ class ReadData(Body):
     """
     def __init__(self, infile) -> None:
         super().__init__(infile)
+        self.__write_infos()
+
+    def __write_infos(self) -> None:
+        print(f'{bcolors.OKGREEN}\tRead Data Summary:\n'
+              f'\t\t# Atoms: {self.NAtoms}, # Atom`s types: {self.NAtomTyp}\n'
+              f'\t\t# Bonds: {self.NBonds}, # Bond`s types: {self.NBondTyp}\n'
+              f'\t\t# Angles: {self.NAngles}, '
+              f'# Angle`s types: {self.NAngleTyp}\n'
+              f'\t\t# Dihedrals: {self.NDihedrals}, '
+              f'# Dihedral`s types: {self.NDihedralTyp}\n'
+              f'\t\tTotal charge: {self.Atoms_df["charge"].sum()}\n'
+              f'\t\tMin charge: {self.Atoms_df["charge"].min()}\n'
+              f'\t\tMax charge: {self.Atoms_df["charge"].max()}'
+              )
 
 
 if __name__ == '__main__':
