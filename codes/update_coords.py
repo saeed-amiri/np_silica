@@ -209,7 +209,7 @@ class Delete:
                 Atoms_df.drop(index=[item], axis=0, inplace=True)
         print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}: '
               f'({self.__module__})\n'
-              f'\t {len(delete_group)} atoms is deleted from data file'
+              f'\t{len(delete_group)} atoms is deleted from data file'
               f'{bcolors.ENDC}')
         del df
         Atoms_df.reset_index(inplace=True)
@@ -230,7 +230,7 @@ class Delete:
             if item in delete_group:
                 Velocities_df.drop(index=[item], axis=0, inplace=True)
                 del_counter += 1
-        print(f'{bcolors.OKBLUE}\t {del_counter} velocities are deleted '
+        print(f'{bcolors.OKBLUE}\t{del_counter} velocities are deleted '
               f'from the data file{bcolors.ENDC}')
         new_ai = []  # New index for ai
         for item, row in Velocities_df.iterrows():
@@ -251,7 +251,7 @@ class Delete:
             if row['ai'] in delete_group or row['aj'] in delete_group:
                 Bonds_df.drop(index=[item], axis=0, inplace=True)
                 del_counter += 1
-        print(f'{bcolors.OKBLUE}\t {del_counter} bonds are deleted '
+        print(f'{bcolors.OKBLUE}\t{del_counter} bonds are deleted '
               f'from the data file{bcolors.ENDC}')
         new_ai = []  # New index for ai
         new_aj = []  # New index for aj
@@ -279,7 +279,7 @@ class Delete:
                or row['ak'] in delete_group:
                 Angels_df.drop(index=[item], axis=0, inplace=True)
                 del_counter += 1
-        print(f'{bcolors.OKBLUE}\t {del_counter} angles are deleted '
+        print(f'{bcolors.OKBLUE}\t{del_counter} angles are deleted '
               f'from the data file{bcolors.ENDC}')
         new_ai = []  # New index for ai
         new_aj = []  # New index for aj
