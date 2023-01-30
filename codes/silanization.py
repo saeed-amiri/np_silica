@@ -40,6 +40,7 @@ class PrepareAmino:
                  ) -> None:
         """apply the position update to the aminos"""
         self.__update_aminos(update, amino)
+        self.__write_infos()
 
     def __update_aminos(self,
                         update: upcord.UpdateCoords,  # Information of silica
@@ -294,6 +295,20 @@ class PrepareAmino:
         df['z'] -= z_si
         return df
 
+    def __write_infos(self) -> None:
+        print(f'{bcolors.OKGREEN}\tData Summary of all aminopropyl:\n'
+              f'\t\t# Atoms in aminos` group: {len(self.All_amino_atoms)}\n'
+              f'\t\t# Bonds in aminos` group: {len(self.All_amino_bonds)}\n'
+              f'\t\t# Angles in aminos` group: {len(self.All_amino_angles)}\n'
+              f'\t\t# Dihedrals in aminos` group: '
+              f'{len(self.All_amino_dihedrals)}\n'
+              f'\t\tTotal charge: {self.All_amino_atoms["charge"].sum()}\n'
+              f'\t\tMin charge: {self.All_amino_atoms["charge"].min()}\n'
+              f'\t\tMax charge: {self.All_amino_atoms["charge"].max()}'
+              f'{bcolors.ENDC}'
+              )
+
+
 
 class UpdateBoAnDi:
     """update all the bonds, angles, dihedrals, masses"""
@@ -360,6 +375,7 @@ class ConcatAll:
                  aminos: PrepareAmino  # Update aminos
                  ) -> None:
         self.__concate_all(silica, aminos)
+        self.__write_infos()
 
     def __concate_all(self,
                       silica: upcord.UpdateCoords,  # Silica updated
@@ -378,8 +394,10 @@ class ConcatAll:
                                                      )
         self.Masses_df = self.__concate_masses(silica.Masses_df,
                                                aminos.Masses_df)
+        print(f'{bcolors.OKBLUE}{self.__class__.__name__}: '
+              f'({self.__module__})\n'
+              f'Concanating all the atoms\n{bcolors.ENDC}')
         self.__set_attrs()
-        self.__write_infos()
 
     def __concate_atoms(self,
                         silica_atoms: pd.DataFrame,  # Silica atoms
@@ -497,6 +515,7 @@ class ConcatAll:
               f'\t\tTotal charge: {self.Atoms_df["charge"].sum()}\n'
               f'\t\tMin charge: {self.Atoms_df["charge"].min()}\n'
               f'\t\tMax charge: {self.Atoms_df["charge"].max()}'
+              f'{bcolors.ENDC}'
               )
 
 
