@@ -22,7 +22,6 @@ class GetSiGroups:
                  ) -> None:
         self.df_Si = self.__get_silica(Atoms, Sigroup)
         self.Si_delete: list[int] = [item for item in self.df_Si['atom_id']]
-        # print(self.Si_delete)
 
     def __get_silica(self,
                      Atoms: pd.DataFrame,  # Atoms df in the lammps fullatom
@@ -32,7 +31,7 @@ class GetSiGroups:
         Si_list: list[pd.DataFrame] = []  # df with asked Si groups
         for item in Sigroup:
             Si_list.append(Atoms[Atoms['name'] == item])
-        # Df of all the Si to replace:
+        # DF of all the Si to replace:
         df: pd.DataFrame = pd.concat(Si_list)
         # Drop unwanted columns:
         df = self.__drop_cols(df)
