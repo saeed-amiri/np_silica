@@ -408,6 +408,7 @@ class Body(Header):
                                            name=i_name,
                                            b_name=i_bond_name
                                           )
+
     def com_to_zero(self,
                     Atoms: pd.DataFrame  # Atoms dataframe from read from data
                     ) -> pd.DataFrame:
@@ -581,6 +582,7 @@ class ReadData(Body):
               f'\t\tTotal charge: {self.Atoms_df["charge"].sum()}\n'
               f'\t\tMin charge: {self.Atoms_df["charge"].min()}\n'
               f'\t\tMax charge: {self.Atoms_df["charge"].max()}'
+              f'{bcolors.ENDC}'
               )
 
 
