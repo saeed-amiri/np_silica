@@ -118,6 +118,7 @@ class GetOmGroups:
                  silica: rdlmp.ReadData,  # Atoms in form of lammps
                  Si_delete: list[int],  # Index of the selected Si
                  O_delete: list[int],  # Index of the deleted ones, sanity chek
+                 Si_df: pd.DataFrame,  # Silicon in the shell
                  OMgroup: list[str]  # Name of the OM oxygen to get
                  ) -> None:
         self.replace_oxy: dict[int, list[int]]  # Si with bonded O to replace
@@ -125,6 +126,8 @@ class GetOmGroups:
                                                Si_delete,
                                                O_delete,
                                                OMgroup)
+        self.Si_df: pd.DataFrame  # Si df with droped unbonded Si
+        self.Si_df = self.__update_si_df(Si_df)
 
     def __get_OMgroups(self,
                        silica: rdlmp.ReadData,  # All df in form of lammps
@@ -174,6 +177,16 @@ class GetOmGroups:
               f'\tThere are {len(replace_o_dict)} `O` atoms bonded to the '
               f'slected Si{bcolors.ENDC}\n')
         return replace_o_dict
+
+    def __update_si_df(self,
+                       Si_df: pd.DataFrame  # DF of selected Si
+                       ) -> pd.DataFrame:
+        """drop the silicons which are not bonded from Si"""
+        df: pd.DataFrame = Si_df.copy()
+        for item, row in Si_df.iterrows():
+            if item not in self.replace_oxy.keys():
+                df.drop(index=[item], axis=0, inplace=True)
+        return df
 
     def __drop_cols(self,
                     df: pd.DataFrame,  # Dataframe from selected Si atoms
