@@ -68,8 +68,10 @@ class Delete:
         self.UAngles_df = self.__update_angles(silica.Angles_df,
                                                old_new_dict,
                                                delete_group)
-        self.USi_df = self.__update_selected_Si(old_new_dict)
-        self.__append_om(self.USi_df, old_new_dict, om_groups.replace_oxy)
+        USi_df = self.__update_selected_Si(old_new_dict)
+        self.USi_df = self.__append_om(USi_df,
+                                       old_new_dict,
+                                       om_groups.replace_oxy)
 
     def __update_selected_Si(self,
                              old_new_dict: dict[int, int]  # old:new atom id
@@ -123,9 +125,10 @@ class Delete:
         om: dict[int, list[int]] = self.__update_om_id(old_new_dict,
                                                        replace_oxy)
         df: pd.DataFrame = Si_df.copy()
-        print(len(om))
-        print(len(df))
-
+        df['OM_list'] = [None for _ in df.index]
+        for item, row in Si_df.iterrows():
+            df.at[item, 'OM_list'] = om[row['atom_id']]
+        return df
 
     def __update_om_id(self,
                        old_new_dict: dict[int, int],  # old: new atom id
