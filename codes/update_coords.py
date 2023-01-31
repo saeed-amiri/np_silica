@@ -22,19 +22,23 @@ class Delete:
         drop them too"""
         # Find Si on the shell
         silicons = gtatom.GetSiGroups(silica.Atoms_df,
-                                      Sigroup=['SD', 'SI'],
+                                      Sigroup=['SD', 'SI', 'SB'],
                                       fraction=1)
         # Drop selected O atached to the Si and if there is H atom bond to them
         oxygens = gtatom.GetOxGroups(silica,
                                      silicons.Si_delete,
-                                     Ogroup=['OD'],
+                                     Ogroup=['OD', 'OH'],
                                      fraction=1)
+        # Get hydrogen bonded to the selected oxygen, to drop
         hydrogens = gtatom.GetHyGroups(silica,
                                        oxygens.O_delete,
                                        Hgroup=['HO'])
+        # Get the O which bonded to the selected Si, to make angles and torsion
         om_groups = gtatom.GetOmGroups(silica,
-                                       silicons.Si_delete,
-                                       OMgroup=['OM', 'OH', 'OMH', 'OB'])
+                                       oxygens.bonded_si,
+                                       oxygens.O_delete,
+                                       OMgroup=['OM', 'OMH', 'OB']
+                                       )
         self.Si_df = silicons.df_Si
         self.__delete_all(silica, oxygens.O_delete, hydrogens.H_delete)
 
