@@ -37,23 +37,25 @@ class Delete:
         om_groups = gtatom.GetOmGroups(silica,
                                        oxygens.bonded_si,
                                        oxygens.O_delete,
+                                       silicons.df_Si,
                                        OMgroup=['OM', 'OMH', 'OB']
                                        )
-        self.Si_df = silicons.df_Si
-        self.__delete_all(silica, oxygens.O_delete, hydrogens.H_delete)
+        self.Si_df = om_groups.Si_df
+        self.__delete_all(silica, oxygens, hydrogens.H_delete, om_groups)
 
     def __delete_all(self,
                      silica: rdlmp.ReadData,  # Data from LAMMPS
-                     O_delete: list[int],  # Index of O atoms to delete
-                     H_delete: list[int]  # Index of H atoms to delete
+                     oxygens: gtatom.GetOxGroups,  # Index of O atoms to delete
+                     H_delete: list[int],  # Index of H atoms to delete
+                     om_groups: gtatom.GetOmGroups  # O atoms to replace
                      ) -> None:
         old_new_dict: dict[int, int]  # new and old index of updated atoms df
-        self.UAtoms_df: pd.DataFrame  # Atoms  with updated atoms' index
+        self.UAtoms_df: pd.DataFrame  # Atoms with updated atoms' index
         self.UVelocities: pd.DataFrame  # Velocities with updated atoms' index
         self.UBonds_df: pd.DataFrame  # Bonds with updated atoms' index
         self.UAngles_df: pd.DataFrame  # Angles with updated atoms' index
         delete_group: list[int] = []  # To extend all selected atoms
-        delete_group.extend(O_delete)
+        delete_group.extend(oxygens.O_delete)
         delete_group.extend(H_delete)
         old_new_dict, self.UAtoms_df = self.__update_atoms(silica,
                                                            delete_group)
@@ -67,6 +69,7 @@ class Delete:
                                                old_new_dict,
                                                delete_group)
         self.USi_df = self.__update_selected_Si(old_new_dict)
+        self.__append_om(self.USi_df, old_new_dict, om_groups.replace_oxy)
 
     def __update_selected_Si(self,
                              old_new_dict: dict[int, int]  # old:new atom id
@@ -81,7 +84,7 @@ class Delete:
 
     def __update_atoms(self,
                        silica: rdlmp.ReadData,  # Atoms df in lammps full atom
-                       delete_group: list[int]  # Index of the atom to delete
+                       delete_group: list[int],  # Index of the atom to delete
                        ) -> tuple[dict[int, int], pd.DataFrame]:
         """delete atoms and return update version in LAMMPS format"""
         Atoms_df: pd.DataFrame  # DF with removed atoms
@@ -110,6 +113,32 @@ class Delete:
         Atoms_df['atom_id'] = Atoms_df.index
         Atoms_df.drop(columns=['index'], inplace=True)
         return Atoms_df
+
+    def __append_om(self,
+                    Si_df: pd.DataFrame,  # Updated Si df
+                    old_new_dict: dict[int, int],  # old: new atom id
+                    replace_oxy: dict[int, list[int]]  # Si atoms with O atoms
+                    ) -> pd.DataFrame:
+        """append indices of OM atoms which are bonded to the Si"""
+        om: dict[int, list[int]] = self.__update_om_id(old_new_dict,
+                                                       replace_oxy)
+        df: pd.DataFrame = Si_df.copy()
+        print(len(om))
+        print(len(df))
+
+
+    def __update_om_id(self,
+                       old_new_dict: dict[int, int],  # old: new atom id
+                       replace_oxy: dict[int, list[int]]  # Si atom with O atom
+                       ) -> dict[int, list[int]]:
+        """update the atom_id of the OM atoms bonded to the Si"""
+        om: dict[int, list[int]] = {}
+        for k, v in replace_oxy.items():
+            new_k: int = old_new_dict[k]
+            om[new_k] = []
+            for item in v:
+                om[new_k].append(old_new_dict[item])
+        return om
 
     def __update_velocities(self,
                             Velocities_df: pd.DataFrame,  # In LAMMPS format
