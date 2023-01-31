@@ -1,9 +1,7 @@
-import sys
 import typing
 import numpy as np
 import pandas as pd
 import read_lmp_data as rdlmp
-import write_lmp as wrlmp
 from colors_text import TextColor as bcolors
 
 
@@ -115,14 +113,19 @@ class GetSiGroups:
 
 
 class GetOmGroups:
-    """Get OM groups bonded to the selcted Silicon groups"""
+    """Get OM groups bonded to the selcted Silicon groups to replace
+       with the ones in the aminopropyles"""
     def __init__(self,
                  silica: rdlmp.ReadData,  # Atoms in form of lammps
                  Si_delete: list[int],  # Index of the selected Si
                  O_delete: list[int],  # Index of the deleted ones, sanity chek
                  OMgroup: list[str]  # Name of the OM oxygen to get
                  ) -> None:
-        self.__get_OMgroups(silica, Si_delete, O_delete, OMgroup)
+        self.replace_oxy: dict[int, list[int]]  # Si with bonded O to replace
+        self.replace_oxy = self.__get_OMgroups(silica,
+                                               Si_delete,
+                                               O_delete,
+                                               OMgroup)
 
     def __get_OMgroups(self,
                        silica: rdlmp.ReadData,  # All df in form of lammps
@@ -134,8 +137,9 @@ class GetOmGroups:
         replace_o_dict: dict[int, list[int]]  # Get OM of each selected Si
         replace_o_dict = self.__get_OmSi(silica.Bonds_df,
                                          Si_delete,
-                                         df_om, O_delete)
-        self.__chk_Om(replace_o_dict, silica.Atoms_df)
+                                         df_om,
+                                         O_delete)
+        return replace_o_dict
 
     def __find_OMgroups(self,
                         Atoms: pd.DataFrame,  # Atoms df in form of lammps
@@ -172,55 +176,6 @@ class GetOmGroups:
               f'slected Si{bcolors.ENDC}\n')
         return replace_o_dict
 
-    def __chk_Om(self,
-                 replace_o_dict: dict[int, list[int]],  # Si: [bonded O]
-                 df: pd.DataFrame  # Atoms info
-                 ) -> None:
-        """check all O atoms if they are in angle with Si"""
-        a: np.array = np.array([0, 0, 0])  # Origin of the nano particle
-        b: np.array  # The silicon position
-        p: np.array  # Position of the O atom
-        # print(df)
-        for k, v in replace_o_dict.items():
-            if len(v) > 2:
-                length = {}
-                # print(k, df.iloc[k-1]['atom_id'])
-                b = np.array([df.iloc[k-1]['x'],
-                              df.iloc[k-1]['y'],
-                              df.iloc[k-1]['z']])
-                for item in v:
-                    p = np.array([df.iloc[item-1]['x'],
-                                  df.iloc[item-1]['y'],
-                                  df.iloc[item-1]['z']])
-                    # length.append((self.__lineseg_dist(p, a, b)))
-                    length[item] = self.__lineseg_dist(p, a, b)
-                    m = min(length, key=length.get)
-                # print(k, length, m, df.iloc[m-1]['atom_id'])
-            else:
-                pass
-
-    def __lineseg_dist(self,
-                       p: np.array,  # Point where the distance is caclulated
-                       a: np.array,  # One of the point where the line passing
-                       b: np.array  # One of the point where the line passing
-                       ) -> float:
-        """finding the distance of OM from line from COM to the Si"""
-
-        # normalized tangent vector
-        d = np.divide(b - a, np.linalg.norm(b - a))
-
-        # signed parallel distance components
-        s = np.dot(a - p, d)
-        t = np.dot(p - b, d)
-
-        # clamped parallel distance
-        h = np.maximum.reduce([s, t, 0])
-
-        # perpendicular distance component
-        c = np.cross(p - a, d)
-
-        return np.hypot(h, np.linalg.norm(c))
-
     def __drop_cols(self,
                     df: pd.DataFrame,  # Dataframe from selected Si atoms
                     ) -> pd.DataFrame:
@@ -242,7 +197,9 @@ class GetOxGroups:
                  fraction: float = 1  # Fraction of to select from, 0<fr<=1
                  ) -> None:
         self.O_delete: list[int]  # All the O atoms to delete
-        self.O_delete = self.__get_oxgygen(silica, Si_delete, Ogroup)
+        self.O_delete, self.bonded_si = self.__get_oxgygen(silica,
+                                                           Si_delete,
+                                                           Ogroup)
 
     def __get_oxgygen(self,
                       silica: rdlmp.ReadData,  # Atoms df in lammps full atom
@@ -257,7 +214,7 @@ class GetOxGroups:
         df: pd.DataFrame = pd.concat(O_list)
         O_delete, bonded_si = self.__get_o_delete(silica.Bonds_df,
                                                   Si_delete, df)
-        return O_delete
+        return O_delete, bonded_si
 
     def __get_o_delete(self,
                        bonds_df: pd.DataFrame,  # Bonds in the LAMMPS format
@@ -292,7 +249,6 @@ class GetOxGroups:
               f'slected Si\n'
               f'\t-> There are {len(bonded_si)} `Si` atoms bonded to the '
               f'selected `O` atoms\n{bcolors.ENDC}')
-        print(len(bonded_si), len(bonded_O))
         return bonded_O, bonded_si
 
 
