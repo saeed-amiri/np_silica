@@ -39,13 +39,13 @@ class DropOM:
         old_new_dict: dict[int, int]  # Index of new and old index of atoms
         old_new_dict = {k: v for k, v in zip(df['undrop_ind'], df['atom_id'])}
         bonds_df: pd.DataFrame = amino.Bonds_df.copy()
-        bonds_df = self.__drop_bonds(old_new_dict, dropd_OM, bonds_df)
+        self.Bonds_df = self.__drop_bonds(old_new_dict, dropd_OM, bonds_df)
         angles_df: pd.DataFrame = amino.Angles_df.copy()
-        angles_df = self.__drop_angles(old_new_dict, dropd_OM, angles_df)
+        self.Angles_df = self.__drop_angles(old_new_dict, dropd_OM, angles_df)
         dihedrals_df: pd.DataFrame = amino.Dihedrals_df.copy()
-        dihedrals_df = self.__drop_dihedrals(old_new_dict,
-                                             dropd_OM,
-                                             dihedrals_df)
+        self.Dihedrals_df = self.__drop_dihedrals(old_new_dict,
+                                                  dropd_OM,
+                                                  dihedrals_df)
 
     def __drop_om_atoms(self,
                         del_OM: int,  # Number of OM to drop
