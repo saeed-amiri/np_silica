@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import read_lmp_data as rdlmp
 import update_coords as upcord
+import drop_om as dropOM
 from colors_text import TextColor as bcolors
 
 
@@ -35,7 +36,9 @@ class PrepareAmino:
                  update: upcord.UpdateCoords,  # All the information of silica
                  amino: GetAmino  # Information about one aminos
                  ) -> None:
-        """apply the position update to the aminos"""
+        """apply the position update to the aminos' SI & OM"""
+        self.Si = 'Si'
+        self.OM = 'OM'
         self.__update_aminos(update, amino)
         self.__write_infos()
 
@@ -47,13 +50,16 @@ class PrepareAmino:
         si_df: pd.DataFrame  # Si groups with rotation angles
         si_df = update.Si_df
         si_df = self.__order_si_df(si_df)
-        self.Si = 'Si'
         Atoms_df = self.__to_origin(amino.Atoms_df)
         Atoms_df = self.__get_azimuths(Atoms_df)
+
+        # Lists to append updated aminos to be replaced
         Atoms_list: list[pd.DataFrame] = []  # Keep all the aminos to concate
         Bonds_list: list[pd.DataFrame] = []  # Keep all the aminos to concate
         Angles_list: list[pd.DataFrame] = []  # Keep all the aminos to concate
         Dihedrals_list: list[pd.DataFrame] = []  # Keep all the aminos> concate
+
+        # Update the type of the atoms before anything
         amino_masses: pd.DataFrame  # To update the atom index in masses
         amino_masses = self.__update_mass_index(update.Masses_df,
                                                 amino.Masses_df)
@@ -64,22 +70,25 @@ class PrepareAmino:
                                                      amino.Angles_df)
         amino.Dihedrals_df = self.__update_boandi_types(update.Dihedrals_df,
                                                         amino.Dihedrals_df)
+        print(len(update.Atoms_df))
         for item, row in si_df.iterrows():
             # Si from amino will be deleted later, so the rest of
             # atoms must start on lower
-            atom_level: int = (item - 1) * \
-                                (amino.NAtoms - 1) + update.NAtoms - 1
-            mol_level: int = item + update.Nmols
-            i_amino = self.__upgrade_amino(Atoms_df.copy(),
-                                           row,
-                                           atom_level,
-                                           mol_level)
-            amino.Atoms_df = i_amino
-            Atoms_list.append(self.__drop_si(i_amino))
-            boandi = UpdateBoAnDi(amino)  # Update bonds, angles, dihedrals
-            Bonds_list.append(boandi.Bonds_df)
-            Angles_list.append(boandi.Angles_df)
-            Dihedrals_list.append(boandi.Dihedrals_df)
+            if item == 351:
+                atom_level: int = (item - 1) * \
+                                    (amino.NAtoms - 3) + update.NAtoms - 3
+                mol_level: int = item + update.Nmols
+                i_amino = self.__set_si_id(Atoms_df.copy(), row)
+                amino.Atoms_df = i_amino
+                print(row['OM_list'])
+                do_om = self.__set_om_id(amino, row)
+                OM_xyz = self.__get_OM_xyz(row['OM_list'], update.Atoms_df)
+                print(OM_xyz)
+                Atoms_list.append(self.__drop_si(i_amino))
+                boandi = UpdateBoAnDi(amino)  # Update bonds, angles, dihedrals
+                Bonds_list.append(boandi.Bonds_df)
+                Angles_list.append(boandi.Angles_df)
+                Dihedrals_list.append(boandi.Dihedrals_df)
         self.All_amino_atoms = pd.concat(Atoms_list, ignore_index=True)
         self.All_amino_atoms.index += 1
         self.All_amino_bonds = pd.concat(Bonds_list, ignore_index=True)
@@ -98,29 +107,47 @@ class PrepareAmino:
               f', {len(self.All_amino_dihedrals)} dihedrals'
               f' is updated{bcolors.ENDC}')
 
-    def __upgrade_amino(self,
-                        amino_atoms: pd.DataFrame,  # Amino Atoms information,
-                        si_row: pd.DataFrame,  # A row of the dataframe
-                        atom_level: int,  # To increase the atoms index not Si
-                        mol_level: int  # To increase the mol index
-                        ) -> pd.DataFrame:
-        """rotate each amino based on the azimuuth polar angle in the row"""
+    def __set_si_id(self,
+                    amino_atoms: pd.DataFrame,  # Amino Atoms information,
+                    si_row: pd.DataFrame  # A row of the dataframe
+                    ) -> pd.DataFrame:
+        """set Si atom_id in amino based on each si_row"""
         amino_atoms['old_id'] = amino_atoms['atom_id']
-        for item, _ in amino_atoms.iterrows():
-            if item != 1:
-                amino_atoms.at[item, 'mol'] += mol_level
-                amino_atoms.at[item, 'atom_id'] += atom_level
-            else:
-                amino_atoms.at[item, 'atom_id'] = si_row['atom_id']
-                amino_atoms.at[item, 'mol'] = si_row['mol']
-                amino_atoms.at[item, 'typ'] = si_row['typ']
-                amino_atoms.at[item, 'x'] = si_row['x']
-                amino_atoms.at[item, 'y'] = si_row['y']
-                amino_atoms.at[item, 'z'] = si_row['z']
-                amino_atoms.at[item, 'rho'] = si_row['rho']
-                amino_atoms.at[item, 'azimuth'] = si_row['azimuth']
-                amino_atoms.at[item, 'polar'] = si_row['polar']
-        return self.__rotate_amino(amino_atoms)
+        column: list[str]  # Columns of the df to replace informations
+        column = ['atom_id', 'mol', 'typ', 'x', 'y', 'z', 'rho', 'azimuth',
+                  'polar']
+        for col in column:
+            amino_atoms.at[1, col] = si_row[col]
+        return amino_atoms
+
+    def __get_OM_xyz(self,
+                     OM_list: list[int],  # Atom id of OM atoms
+                     Atoms_df: pd.DataFrame  # Atoms info of NP
+                     ) -> pd.DataFrame:
+        """return atoms info for OM atoms of each si"""
+        OM_xyz: list[pd.DataFrame] = []  # Row of each OM atom in NP Atoms_df
+        for item in OM_list:
+            OM_xyz.append(Atoms_df[Atoms_df['atom_id'] == item])
+        return pd.concat(OM_xyz)
+
+    def __set_om_id(self,
+                    amino: GetAmino,  # Amino infos
+                    si_row: pd.DataFrame,  # One row of Si dataframe
+                    ) -> pd.DataFrame:
+        """set the atom ids based on the number of the OM in system"""
+        amino_OM: int = 3  # The default numbers of OM in the amino file
+        OM_order: int = len(si_row['OM_list'])
+        del_OM: int = amino_OM - OM_order
+        if del_OM == 3:
+            print(f'{bcolors.WARNING}\tNo OM bonded to the SI?\n'
+                  f'{bcolors.ENDC}')
+        elif del_OM == 0:
+            pass
+        elif del_OM < 0:
+            exit(f'{bcolors.FAIL}Error:\n'
+                 f'Wrong number of the OM atoms!\n {bcolors.ENDC}')
+        else:
+            dropOM.DropOM(amino, si_row, del_OM)
 
     def __drop_si(self,
                   amino_atoms: pd.DataFrame  # Rotated Atoms_df
@@ -173,7 +200,7 @@ class PrepareAmino:
                               silica: pd.DataFrame,  # Silica bonds/angles/dihe
                               amino: pd.DataFrame  # Amino bonds/angles/dihedra
                               ) -> pd.DataFrame:
-        """update bonds type in aminos"""
+        """update bonds/angels/dihedral type in aminos"""
         silica_ind: int = np.max(silica['typ'])
         df: pd.DataFrame = amino.copy()
         if not np.isnan(silica_ind):
