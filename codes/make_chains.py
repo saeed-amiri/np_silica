@@ -74,7 +74,7 @@ class PrepareAmino:
         for item, row in si_df.iterrows():
             # Si from amino will be deleted later, so the rest of
             # atoms must start on lower
-            if item == 351:
+            if item < 12:
                 atom_level: int = (item - 1) * \
                                     (amino.NAtoms - 3) + update.NAtoms - 3
                 mol_level: int = item + update.Nmols
@@ -143,8 +143,6 @@ class PrepareAmino:
         if del_OM == 3:
             print(f'{bcolors.WARNING}\tNo OM bonded to the SI?\n'
                   f'{bcolors.ENDC}')
-        elif del_OM == 0:
-            pass
         elif del_OM < 0:
             exit(f'{bcolors.FAIL}Error:\n'
                  f'Wrong number of the OM atoms!\n {bcolors.ENDC}')
