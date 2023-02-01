@@ -36,7 +36,7 @@ class DropOM:
                                   OM_index,
                                   si_row,
                                   amino.Atoms_df.copy())
-        # self.__update_atom_ind(df)
+        self.__update_atom_ind(df, si_row['OM_list'])
 
     def __drop_om_atoms(self,
                         del_OM: int,  # Number of OM to drop
@@ -54,6 +54,20 @@ class DropOM:
         atom_df.rename(columns={'index': 'update_ind'}, inplace=True)
         atom_df.index += 1
         return atom_df
+
+    def __update_atom_ind(self,
+                          df: pd.DataFrame,  # Amino atoms df with removed OM
+                          OM_list: list[int]  # Index of the OM in NP
+                          ) -> pd.DataFrame:
+        """update the index of df after OM was droped"""
+        print(OM_list)
+        for item, row in df.iterrows():
+            if row['name'] != 'Si':
+                if row['atom_id'] not in OM_list:
+                    df.at[item, 'atom_id'] = item
+                    df.at[item, 'old_id'] = item
+                    # print(row['atom_id'])
+        return df
 
     def __set_OM_info(self,
                       Atoms_df: pd.DataFrame,  # Atoms of the amino
