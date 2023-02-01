@@ -81,9 +81,10 @@ class PrepareAmino:
                 i_amino = self.__set_si_id(Atoms_df.copy(), row)
                 amino.Atoms_df = i_amino
                 print(row['OM_list'])
-                do_om = self.__set_om_id(amino, row)
                 OM_xyz = self.__get_OM_xyz(row['OM_list'], update.Atoms_df)
-                print(OM_xyz)
+                do_om = self.__set_om_id(amino,
+                                         row,
+                                         self.__get_azimuths(OM_xyz))
                 Atoms_list.append(self.__drop_si(i_amino))
                 boandi = UpdateBoAnDi(amino)  # Update bonds, angles, dihedrals
                 Bonds_list.append(boandi.Bonds_df)
@@ -133,6 +134,7 @@ class PrepareAmino:
     def __set_om_id(self,
                     amino: GetAmino,  # Amino infos
                     si_row: pd.DataFrame,  # One row of Si dataframe
+                    OM_xyz: pd.DataFrame  # XYZ info of OM atoms for amino
                     ) -> pd.DataFrame:
         """set the atom ids based on the number of the OM in system"""
         amino_OM: int = 3  # The default numbers of OM in the amino file
@@ -147,7 +149,7 @@ class PrepareAmino:
             exit(f'{bcolors.FAIL}Error:\n'
                  f'Wrong number of the OM atoms!\n {bcolors.ENDC}')
         else:
-            dropOM.DropOM(amino, si_row, del_OM)
+            dropOM.DropOM(amino, si_row, del_OM, OM_xyz)
 
     def __drop_si(self,
                   amino_atoms: pd.DataFrame  # Rotated Atoms_df
@@ -279,10 +281,10 @@ class PrepareAmino:
         return si_df
 
     def __get_azimuths(self,
-                       amino_atoms: pd.DataFrame  # Atoms info of Aminopropyle
+                       atoms: pd.DataFrame  # Atoms info of Aminopropyle
                        ) -> pd.DataFrame:
-        """calculate the azimuth and polar angle of Amino"""
-        df: pd.DataFrame = amino_atoms.copy()
+        """calculate the azimuth and polar angle of df"""
+        df: pd.DataFrame = atoms.copy()
         rho: list[float] = []  # Radius for all atoms
         azimuth: list[float] = []  # Azimuth for all atoms
         polar: list[float] = []  # Polar for all atoms
