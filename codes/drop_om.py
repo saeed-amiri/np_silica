@@ -23,7 +23,6 @@ class DropOM:
                   OM_xyz: pd.DataFrame  # XYZ info of OM atoms for amino
                   ) -> None:
         """drop OM atoms and update all the rest"""
-        amino_OM: int = 3  # Number of OM in amino data file
         OM_index: list[int]  # Index of OM n amino df
         OM_index = [item for item in
                     amino.Atoms_df[amino.Atoms_df['name'] == 'OM'].index]
@@ -31,42 +30,120 @@ class DropOM:
                                             si_row,
                                             OM_xyz,
                                             OM_index)
-        print(amino.Atoms_df)
-        df = self.__drop_om_atoms(del_OM,
-                                  OM_index,
-                                  si_row,
-                                  amino.Atoms_df.copy())
-        self.__update_atom_ind(df, si_row['OM_list'])
+        df, dropd_OM = self.__drop_om_atoms(del_OM,
+                                            OM_index,
+                                            si_row,
+                                            amino.Atoms_df.copy())
+
+        df = self.__update_atom_ind(df, si_row['OM_list'])
+        old_new_dict: dict[int, int]  # Index of new and old index of atoms
+        old_new_dict = {k: v for k, v in zip(df['undrop_ind'], df['atom_id'])}
+        bonds_df: pd.DataFrame = amino.Bonds_df.copy()
+        bonds_df = self.__drop_bonds(old_new_dict, dropd_OM, bonds_df)
+        angles_df: pd.DataFrame = amino.Angles_df.copy()
+        angles_df = self.__drop_angles(old_new_dict, dropd_OM, angles_df)
+        dihedrals_df: pd.DataFrame = amino.Dihedrals_df.copy()
+        dihedrals_df = self.__drop_dihedrals(old_new_dict,
+                                             dropd_OM,
+                                             dihedrals_df)
 
     def __drop_om_atoms(self,
                         del_OM: int,  # Number of OM to drop
                         OM_index: list[int],  # Index of OM in amino
                         si_row: pd.DataFrame,  # One row of si df
                         atom_df: pd.DataFrame  # Amino atoms df
-                        ) -> pd.DataFrame:
+                        ) -> tuple[pd.DataFrame, list[int]]:
         """drop extra OM from amino dataframe"""
+        drop_ind: list[int] = []  # index of dropped OM
         if del_OM < 3:
             for i in OM_index:
                 if atom_df.iloc[i-1]['atom_id'] \
                    not in si_row['OM_list']:
                     atom_df.drop(axis=0, index=i, inplace=True)
+                    drop_ind.append(i)
         atom_df.reset_index(inplace=True)
-        atom_df.rename(columns={'index': 'update_ind'}, inplace=True)
+        atom_df.rename(columns={'index': 'undrop_ind'}, inplace=True)
         atom_df.index += 1
-        return atom_df
+        return atom_df, drop_ind
 
     def __update_atom_ind(self,
                           df: pd.DataFrame,  # Amino atoms df with removed OM
                           OM_list: list[int]  # Index of the OM in NP
                           ) -> pd.DataFrame:
         """update the index of df after OM was droped"""
-        print(OM_list)
         for item, row in df.iterrows():
             if row['name'] != 'Si':
                 if row['atom_id'] not in OM_list:
                     df.at[item, 'atom_id'] = item
                     df.at[item, 'old_id'] = item
-                    # print(row['atom_id'])
+        return df
+
+    def __drop_bonds(self,
+                     old_new_dict: dict[int, int],  # Of old and updated index
+                     drop_ind: list[int],  # Index of dropped OM atoms
+                     df: pd.DataFrame  # Bonds df of amino
+                     ) -> pd.DataFrame:
+        """drop and update bonds df"""
+        df_ = df.copy()
+        for item, row in df_.iterrows():
+            if row['ai'] in drop_ind or row['aj'] in drop_ind:
+                df.drop(axis=0, index=item, inplace=True)
+        del df_
+        df_ = df.copy()
+        for item, row in df_.iterrows():
+            if row['ai'] >= np.min(drop_ind):
+                df.at[item, 'ai'] = old_new_dict[row['ai']]
+            if row['aj'] >= np.min(drop_ind):
+                df.at[item, 'aj'] = old_new_dict[row['aj']]
+        return df
+
+    def __drop_angles(self,
+                      old_new_dict: dict[int, int],  # Of old and updated index
+                      drop_ind: list[int],  # Index of dropped OM atoms
+                      df: pd.DataFrame  # Angles df of amino
+                      ) -> pd.DataFrame:
+        """drop and update angles df"""
+        df_ = df.copy()
+        for item, row in df_.iterrows():
+            if row['ai'] in drop_ind or \
+               row['aj'] in drop_ind or \
+               row['ak'] in drop_ind:
+                df.drop(axis=0, index=item, inplace=True)
+        del df_
+        df_ = df.copy()
+        for item, row in df_.iterrows():
+            if row['ai'] >= np.min(drop_ind):
+                df.at[item, 'ai'] = old_new_dict[row['ai']]
+            if row['aj'] >= np.min(drop_ind):
+                df.at[item, 'aj'] = old_new_dict[row['aj']]
+            if row['ak'] >= np.min(drop_ind):
+                df.at[item, 'ak'] = old_new_dict[row['ak']]
+        return df
+
+    def __drop_dihedrals(self,
+                         old_new_dict: dict[int, int],  # Of old and updated id
+                         drop_ind: list[int],  # Index of dropped OM atoms
+                         df: pd.DataFrame  # Dihedrals df of amino
+                         ) -> pd.DataFrame:
+        """drop and update dihedrals df"""
+        df_ = df.copy()
+        for item, row in df_.iterrows():
+            if row['ai'] in drop_ind or \
+               row['aj'] in drop_ind or \
+               row['ak'] in drop_ind or \
+               row['ah'] in drop_ind:
+                df.drop(axis=0, index=item, inplace=True)
+        del df_
+        df_ = df.copy()
+        for item, row in df_.iterrows():
+            if row['ai'] >= np.min(drop_ind):
+                df.at[item, 'ai'] = old_new_dict[row['ai']]
+            if row['aj'] >= np.min(drop_ind):
+                df.at[item, 'aj'] = old_new_dict[row['aj']]
+            if row['ak'] >= np.min(drop_ind):
+                df.at[item, 'ak'] = old_new_dict[row['ak']]
+            if row['ah'] >= np.min(drop_ind):
+                df.at[item, 'ah'] = old_new_dict[row['ah']]
         return df
 
     def __set_OM_info(self,
