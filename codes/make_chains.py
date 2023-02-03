@@ -249,17 +249,20 @@ class PrepareAmino:
         """set the atom ids based on the number of the OM in system"""
         amino_OM: int = 3  # The default numbers of OM in the amino file
         OM_order: int = len(si_row['OM_list'])
-        del_OM: int = amino_OM - OM_order
+        del_OM: int = amino_OM - OM_order  # Number of extera OM atoms
         Atoms_df = amino.Atoms_df.copy()
         Bonds_df = amino.Bonds_df.copy()
         Angles_df = amino.Angles_df.copy()
         Dihedrals_df = amino.Dihedrals_df.copy()
         if del_OM == amino_OM:
-            print(f'{bcolors.WARNING}\tNo OM bonded to the SI?\n'
+            print(f'\n{bcolors.WARNING}{self.__class__.__name__}\n'
+                  f'\tNo OM bonded to the SI?'
                   f'{bcolors.ENDC}')
         elif del_OM < 0:
-            exit(f'{bcolors.FAIL}Error:\n'
-                 f'Wrong number of the OM atoms!\n {bcolors.ENDC}')
+            exit(f'\n{bcolors.FAIL}{self.__class__.__name__}:\tError:\n'
+                 f'\tWrong number of the OM atoms! Extera OM in amino file: '
+                 f'{del_OM}\n '
+                 f'{bcolors.ENDC}')
         else:
             do_om = dropOM.DropOM(amino, si_row, del_OM, OM_xyz)
             Atoms_df = do_om.Atoms_df
