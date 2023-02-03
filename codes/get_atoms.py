@@ -124,7 +124,9 @@ class GetOmGroups:
                                                Si_df,
                                                OMgroup)
         self.Si_df: pd.DataFrame  # Si df with droped unbonded Si
+        self.Si_OM: list[int]  # Si bonded to OM
         self.Si_df = self.__update_si_df(Si_df)
+        self.Si_OM = self.__get_Si_OM(Si_df)
 
     def __get_OMgroups(self,
                        silica: rdlmp.ReadData,  # All df in form of lammps
@@ -181,6 +183,12 @@ class GetOmGroups:
             if item not in self.replace_oxy.keys():
                 df.drop(index=[item], axis=0, inplace=True)
         return df
+
+    def __get_Si_OM(self,
+                    Si_df: pd.DataFrame  # Si bonded to the OM
+                    ) -> list[int]:
+        """return list of the Si bonded to the OM"""
+        return [item for item in Si_df['atom_id']]
 
     def __drop_cols(self,
                     df: pd.DataFrame,  # Dataframe from selected Si atoms
