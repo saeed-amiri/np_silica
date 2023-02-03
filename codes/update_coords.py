@@ -25,8 +25,14 @@ class Delete:
                                       Sigroup=['SD', 'SI'],
                                       fraction=1)
         # Drop selected O atached to the Si and if there is H atom bond to them
+        om_groups = gtatom.GetOmGroups(silica,
+                                       silicons.df_Si,
+                                       OMgroup=['OM', 'OB']
+                                       )
+        # print(om_groups.OM_list)
         oxygens = gtatom.GetOxGroups(silica,
-                                     silicons.Si_delete,
+                                     om_groups.Si_OM,
+                                     om_groups.OM_list,
                                      Ogroup=['OD', 'OH', 'OMH'],
                                      fraction=1)
         # Get hydrogen bonded to the selected oxygen, to drop
@@ -34,14 +40,23 @@ class Delete:
                                        oxygens.O_delete,
                                        Hgroup=['HO'])
         # Get the O which bonded to the selected Si, to make angles and torsion
-        om_groups = gtatom.GetOmGroups(silica,
-                                       oxygens.bonded_si,
-                                       oxygens.O_delete,
-                                       silicons.df_Si,
-                                       OMgroup=['OM', 'OB']
-                                       )
-        self.Si_df = om_groups.Si_df
+        # print(om_groups.Si_df)
+        # self.Si_df = om_groups.Si_df
+        self.Si_df = self.__drop_body_Si(om_groups.Si_df,
+                                         om_groups.replace_oxy)
         self.__delete_all(silica, oxygens, hydrogens.H_delete, om_groups)
+
+    def __drop_body_Si(self,
+                       Si_df: pd.DataFrame,  # All Si bonded to the Oxygens
+                       OM_replace: dict[int, list[int]]  # Si: [OM]
+                       ) -> pd.DataFrame:
+        """Drop Si in body, they are bonded with three OM oxygens"""
+        df: pd.DataFrame = Si_df.copy()
+        for a_id, OM_l in OM_replace.items():
+            if len(OM_l) > 3:
+                df.drop(index=Si_df[Si_df["atom_id"] == a_id].index,
+                        inplace=True)
+        return df
 
     def __delete_all(self,
                      silica: rdlmp.ReadData,  # Data from LAMMPS
@@ -57,6 +72,7 @@ class Delete:
         delete_group: list[int] = []  # To extend all selected atoms
         delete_group.extend(oxygens.O_delete)
         delete_group.extend(H_delete)
+        print(len(H_delete), om_groups)
         old_new_dict, self.UAtoms_df = self.__update_atoms(silica,
                                                            delete_group)
         self.UVelocities = self.__update_velocities(silica.Velocities_df,
