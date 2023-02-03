@@ -20,10 +20,95 @@ class GetAmino(rdlmp.ReadData):
         fname: str = '/scratch/saeed/MyScripts/np_silica/data/aminopropyl.data'
         super().__init__(fname)
         self.__set_attr()
+        self.Si = 'Si'
+        Atoms_df = self.__to_origin(self.Atoms_df)
+        self.Atoms_df = self.__get_azimuths(Atoms_df)
 
     def __set_attr(self) -> None:
         """set some attributes to data file"""
         pass
+
+    def __get_azimuths(self,
+                       atoms: pd.DataFrame  # Atoms info of Aminopropyle
+                       ) -> pd.DataFrame:
+        """calculate the azimuth and polar angle of df"""
+        df: pd.DataFrame = atoms.copy()
+        rho: list[float] = []  # Radius for all atoms
+        azimuth: list[float] = []  # Azimuth for all atoms
+        polar: list[float] = []  # Polar for all atoms
+        for item, row in df.iterrows():
+            if item == 1:
+                rho.append(0)
+                azimuth.append(0)
+                polar.append(0)
+            else:
+                x = row['x']
+                y = row['y']
+                z = row['z']
+                i_rho: float = np.sqrt(x*x + y*y + z*z)
+                i_azimuth: float = np.arctan2(x, y)
+                i_polar: float = np.arccos(z/i_rho)
+                rho.append(i_rho)
+                azimuth.append(i_azimuth)
+                polar.append(i_polar)
+        df = df.assign(rho=rho, azimuth=azimuth, polar=polar)
+        return df
+
+    def __to_origin(self,
+                    amino_atoms: pd.DataFrame  # Df amino Atoms
+                    ) -> pd.DataFrame:
+        """put the coordinate of Si in Aminopropyle to zero"""
+        df: pd.DataFrame = amino_atoms.copy()
+        print(f'{bcolors.OKCYAN}\tMove Aminopropyle [Si] to origin'
+              f'{bcolors.ENDC}')
+        x_si: float = amino_atoms[amino_atoms['name'] == self.Si]['x'][1]
+        y_si: float = amino_atoms[amino_atoms['name'] == self.Si]['y'][1]
+        z_si: float = amino_atoms[amino_atoms['name'] == self.Si]['z'][1]
+        df['x'] -= x_si
+        df['y'] -= y_si
+        df['z'] -= z_si
+        return df
+
+
+class OriginAmino:
+    """Try to get amino here and do pre-ptreparation so not needed to
+    read amino file every time"""
+    def __init__(self,
+                 amino: GetAmino,
+                 ) -> None:
+        self.Si = 'Si'
+        self.__set_attrs(amino)
+
+    def __set_attrs(self,
+                    amino: GetAmino,
+                    ) -> None:
+        self.infile = amino.infile
+        self.atomsLine = amino.atomsLine
+        self.Names = amino.Names
+        self.Masses = amino.Masses
+        self.PairCoeff = amino.PairCoeff
+        self.BondCoeff = amino.BondCoeff
+        self.AngleCoeff = amino.AngleCoeff
+        self.Bonds_Names = amino.Bonds_Names
+        self.DihedralCoeff = amino.DihedralCoeff
+        self.NAtoms = amino.NAtoms
+        self.NBonds = amino.NBonds
+        self.NAngles = amino.NAngles
+        self.NAtomTyp = amino.NAtomTyp
+        self.NBondTyp = amino.NBondTyp
+        self.NAngleTyp = amino.NAngleTyp
+        self.NDihedrals = amino.NDihedrals
+        self.NDihedralTyp = amino.NDihedralTyp
+        self.Xlim = amino.Xlim
+        self.Ylim = amino.Ylim
+        self.Zlim = amino.Zlim
+        self.Velocities = amino.Velocities
+        self.Atoms_df = amino.Atoms_df
+        self.Bonds_df = amino.Bonds_df
+        self.Angles_df = amino.Angles_df
+        self.Dihedrals_df = amino.Dihedrals_df
+        self.Velocities_df = amino.Velocities_df
+        self.Masses_df = amino.Masses_df
 
 
 class PrepareAmino:
@@ -44,7 +129,7 @@ class PrepareAmino:
 
     def __update_aminos(self,
                         update: upcord.UpdateCoords,  # Information of silica
-                        amino: GetAmino  # Information about one aminos
+                        amino0: GetAmino  # Information about one aminos
                         ) -> None:
         """do"""
         si_df: pd.DataFrame  # Si groups with rotation angles
@@ -58,63 +143,61 @@ class PrepareAmino:
         for item, row in si_df.iterrows():
             # Si from amino will be deleted later, so the rest of
             # atoms must start on lower
-            #  if item == 1:
-                amino = GetAmino()
-                Atoms_df = self.__to_origin(amino.Atoms_df)
-                Atoms_df = self.__get_azimuths(Atoms_df)
+            amino = OriginAmino(amino0)
 
-                # Update the type of the atoms before anything
-                amino_masses: pd.DataFrame  # To update the atom index in masse
-                amino_masses = self.__update_mass_index(update.Masses_df,
-                                                        amino.Masses_df)
-                Atoms_df = self.__update_atom_types(Atoms_df, amino_masses)
-                amino.Bonds_df = self.__update_boandi_types(update.Bonds_df,
-                                                            amino.Bonds_df)
-                amino.Angles_df = self.__update_boandi_types(update.Angles_df,
-                                                             amino.Angles_df)
+            # Update the type of the atoms before anything
+            amino_masses: pd.DataFrame  # To update the atom index in masse
+            amino_masses = self.__update_mass_index(update.Masses_df,
+                                                    amino.Masses_df)
+            Atoms_df = self.__update_atom_types(amino.Atoms_df,
+                                                amino_masses)
+            amino.Bonds_df = self.__update_boandi_types(update.Bonds_df,
+                                                        amino.Bonds_df)
+            amino.Angles_df = self.__update_boandi_types(update.Angles_df,
+                                                         amino.Angles_df)
+            amino.Dihedrals_df = \
+                self.__update_boandi_types(update.Dihedrals_df,
+                                           amino.Dihedrals_df)
+            # calculate the level ups for Aminopropyl
+            OM_n: int = 4  # Number of extra atoms (Si, OM) in aminopropyl
+            atom_level: int  # Atom id increase
+            atom_level = (item - 1) * (amino.NAtoms - OM_n) + update.NAtoms
+            mol_level: int = item - 1 + update.Nmols
+
+            # Replace the Si atom in Aminopropyl with the proper one
+            amino.Atoms_df = self.__set_si_id(Atoms_df.copy(), row)
+
+            # Get atoms info for OM atoms from all NP date
+            OM_xyz = self.__get_OM_xyz(row['OM_list'], update.Atoms_df)
+
+            # Repalce the OM atoms info in aminopropyl with proper one
+            amino.Atoms_df, amino.Bonds_df, amino.Angles_df, \
                 amino.Dihedrals_df = \
-                    self.__update_boandi_types(update.Dihedrals_df,
-                                               amino.Dihedrals_df)
-                # calculate the level ups for Aminopropyl
-                OM_n: int = 4  # Number of extra atoms (Si, OM) in aminopropyl
-                atom_level: int  # Atom id increase
-                atom_level = (item - 1) * (amino.NAtoms - OM_n) + update.NAtoms
-                mol_level: int = item - 1 + update.Nmols
+                self.__set_om_id(amino,
+                                 row,
+                                 self.__get_azimuths(OM_xyz))
 
-                # Replace the Si atom in Aminopropyl with the proper one
-                amino.Atoms_df = self.__set_si_id(Atoms_df.copy(), row)
+            # Level up the atoms and boandi in aminopropyl data
+            i_amino = self.__level_aminos(amino.Atoms_df,
+                                          atom_level,
+                                          mol_level)
 
-                # Get atoms info for OM atoms from all NP date
-                OM_xyz = self.__get_OM_xyz(row['OM_list'], update.Atoms_df)
+            # Rotate each aminopropyl to the direction of the Si
+            i_amino = self.__rotate_amino(i_amino)
 
-                # Repalce the OM atoms info in aminopropyl with proper one
-                amino.Atoms_df, amino.Bonds_df, amino.Angles_df, \
-                    amino.Dihedrals_df = \
-                    self.__set_om_id(amino,
-                                     row,
-                                     self.__get_azimuths(OM_xyz))
+            # Replace the amino attrs of Atoms with the updated one
+            amino.Atoms_df = i_amino
 
-                # Level up the atoms and boandi in aminopropyl data
-                i_amino = self.__level_aminos(amino.Atoms_df,
-                                              atom_level,
-                                              mol_level)
+            # Appending all the atoms data
+            Atoms_list.append(self.__drop_si_om(i_amino))
 
-                # Rotate each aminopropyl to the direction of the Si
-                i_amino = self.__rotate_amino(i_amino)
+            # Update the Bonds/Angles/Dihedrals
+            boandi = UpdateBoAnDi(amino)  # Update bonds, angles, dihedrals
 
-                # Replace the amino attrs of Atoms with the updated one
-                amino.Atoms_df = i_amino
-
-                # Appending all the atoms data
-                Atoms_list.append(self.__drop_si_om(i_amino))
-
-                # Update the Bonds/Angles/Dihedrals
-                boandi = UpdateBoAnDi(amino)  # Update bonds, angles, dihedrals
-
-                # Append them for concatation
-                Bonds_list.append(boandi.Bonds_df)
-                Angles_list.append(boandi.Angles_df)
-                Dihedrals_list.append(boandi.Dihedrals_df)
+            # Append them for concatation
+            Bonds_list.append(boandi.Bonds_df)
+            Angles_list.append(boandi.Angles_df)
+            Dihedrals_list.append(boandi.Dihedrals_df)
 
         self.All_amino_atoms = pd.concat(Atoms_list, ignore_index=True)
         self.All_amino_atoms.index += 1
