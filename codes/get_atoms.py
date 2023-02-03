@@ -73,7 +73,7 @@ class GetSiGroups:
                        radius: float  # Max radius to check the shell
                        ) -> pd.DataFrame:
         """keep the Si on the shell"""
-        df = df[(df['rho'] >= radius - 5)]
+        df = df[(df['rho'] >= radius - 6)]
         print(f'{bcolors.OKBLUE}\tThere are: {len(df)} Si atoms in the '
               f'choosen area of the system, Max_radius = {radius:.3f}'
               f'{bcolors.ENDC}')
@@ -112,35 +112,30 @@ class GetSiGroups:
 
 
 class GetOmGroups:
-    """Get OM groups bonded to the selcted Silicon groups to replace
-       with the ones in the aminopropyles"""
+    """Get OM groups bonded to the selcted Silicon groups in the radius
+     to replace with the ones in the aminopropyles"""
     def __init__(self,
                  silica: rdlmp.ReadData,  # Atoms in form of lammps
-                 Si_delete: list[int],  # Index of the selected Si
-                 O_delete: list[int],  # Index of the deleted ones, sanity chek
                  Si_df: pd.DataFrame,  # Silicon in the shell
                  OMgroup: list[str]  # Name of the OM oxygen to get
                  ) -> None:
         self.replace_oxy: dict[int, list[int]]  # Si with bonded O to replace
         self.replace_oxy = self.__get_OMgroups(silica,
-                                               Si_delete,
-                                               O_delete,
+                                               Si_df,
                                                OMgroup)
         self.Si_df: pd.DataFrame  # Si df with droped unbonded Si
         self.Si_df = self.__update_si_df(Si_df)
 
     def __get_OMgroups(self,
                        silica: rdlmp.ReadData,  # All df in form of lammps
-                       Si_delete: list[int],  # Index of the selected Si
-                       O_delete: list[int],  # Index of the deleted ones
+                       Si_df: pd.DataFrame,  # DF of Si in the radius
                        OMgroup: list[str]  # Name of the OM oxygen to get
                        ) -> pd.DataFrame:
         df_om: pd.DataFrame = self.__find_OMgroups(silica.Atoms_df, OMgroup)
         replace_o_dict: dict[int, list[int]]  # Get OM of each selected Si
         replace_o_dict = self.__get_OmSi(silica.Bonds_df,
-                                         Si_delete,
                                          df_om,
-                                         O_delete)
+                                         Si_df)
         return replace_o_dict
 
     def __find_OMgroups(self,
@@ -157,19 +152,18 @@ class GetOmGroups:
 
     def __get_OmSi(self,
                    bonds_df: pd.DataFrame,  # Bonds in the LAMMPS format
-                   Si_delete: list[int],  # With selected group[Si]
                    df_om: pd.DataFrame,  # DF with selected Oxygen
-                   O_delete: list[int]  # Index of deleted O atoms
+                   Si_df: pd.DataFrame  # DF of Si in the radius
                    ) -> dict[int, list[int]]:  # index of the O to delete
         # get bonds
         all_o = [item for item in df_om['atom_id']]
         replace_o_dict: dict[int, list[int]] = {}  # Get OM of each selected Si
-        replace_o_dict = {item: [] for item in Si_delete}
+        replace_o_dict = {item: [] for item in Si_df['atom_id']}
         for _, row in bonds_df.iterrows():
-            if row['ai'] in Si_delete:
+            if row['ai'] in Si_df['atom_id']:
                 if row['aj'] in all_o:
                     replace_o_dict[row['ai']].append(row['aj'])
-            if row['aj'] in Si_delete:
+            if row['aj'] in Si_df['atom_id']:
                 if row['ai'] in all_o:
                     replace_o_dict[row['aj']].append(row['ai'])
         print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}: '
@@ -198,7 +192,7 @@ class GetOmGroups:
 
 
 class GetOxGroups:
-    """get Oxygen and/or Hydrogen groups to delete them and update
+    """get Oxygen and groups to delete them and update
     data file.
     Oxygen is bonded to the silica and Hydrogen, if any, bonded to the Oxygens.
     """
@@ -220,7 +214,7 @@ class GetOxGroups:
                       ) -> list[int]:
         """Find the hydrogen which have bonds with the selected Silicons"""
         O_list: list[pd.DataFrame] = []  # df of all Oxygen groups
-        Atoms = silica.Atoms_df
+        Atoms = silica.Atoms_df.copy()
         for item in Ogroup:
             O_list.append(Atoms[Atoms['name'] == item])
         df: pd.DataFrame = pd.concat(O_list)
