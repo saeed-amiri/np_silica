@@ -123,6 +123,7 @@ class GetOmGroups:
         self.replace_oxy = self.__get_OMgroups(silica,
                                                Si_df,
                                                OMgroup)
+        from pprint import pprint
         self.OM_list: list[int] = self.__get_OM_list()  # All OM atoms
         self.Si_df: pd.DataFrame  # Si df with droped unbonded Si
         self.Si_OM: list[int]  # Si bonded to OM
@@ -213,18 +214,20 @@ class GetOxGroups:
     def __init__(self,
                  silica: rdlmp.ReadData,  # Atoms df in form of lammps fullatom
                  Si_OM: list[int],  # With selected group[Si] & OM bonded
+                 OM_list: list[int],  # Index of OM groups to drop from delete
                  Ogroup: list[str],  # Name groups[O] to delete
                  fraction: float = 1  # Fraction of to select from, 0<fr<=1
                  ) -> None:
         self.O_delete: list[int]  # All the O atoms to delete
         self.O_delete, self.bonded_si = self.__get_oxgygen(silica,
                                                            Si_OM,
-                                                           Ogroup)
+                                                           Ogroup, OM_list)
 
     def __get_oxgygen(self,
                       silica: rdlmp.ReadData,  # Atoms df in lammps full atom
                       Si_OM:  list[int],  # With selected group[Si] & OM bonded
                       Ogroup:  list[typing.Any],  # Name|index groups[O]
+                      OM_list
                       ) -> list[int]:
         """Find the hydrogen which have bonds with the selected Silicons"""
         O_list: list[pd.DataFrame] = []  # df of all Oxygen groups
@@ -232,13 +235,17 @@ class GetOxGroups:
         for item in Ogroup:
             O_list.append(Atoms[Atoms['name'] == item])
         df_o: pd.DataFrame = pd.concat(O_list)  # All the O atoms with names
-        O_delete, bonded_si = self.__get_o_delete(silica.Bonds_df, Si_OM, df_o)
+        O_delete, bonded_si = self.__get_o_delete(silica.Bonds_df,
+                                                  Si_OM,
+                                                  df_o,
+                                                  OM_list)
         return O_delete, bonded_si
 
     def __get_o_delete(self,
                        bonds_df: pd.DataFrame,  # Bonds in the LAMMPS format
                        Si_OM: list[int],  # With selected group[Si] & OM bonded
-                       df_o: pd.DataFrame  # DF with selected Oxygen
+                       df_o: pd.DataFrame,  # DF with selected Oxygen
+                       OM_list
                        ) -> list[int]:  # index of the O to delete
         # get bonds
         all_o = [item for item in df_o['atom_id']]
