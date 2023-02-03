@@ -123,10 +123,18 @@ class GetOmGroups:
         self.replace_oxy = self.__get_OMgroups(silica,
                                                Si_df,
                                                OMgroup)
+        self.OM_list: list[int] = self.__get_OM_list()  # All OM atoms
         self.Si_df: pd.DataFrame  # Si df with droped unbonded Si
         self.Si_OM: list[int]  # Si bonded to OM
         self.Si_df = self.__update_si_df(Si_df)
         self.Si_OM = self.__get_Si_OM(Si_df)
+
+    def __get_OM_list(self) -> list[int]:
+        """return list of OM atoms"""
+        ll: list[int] = []  # Of all OM
+        for _, v in self.replace_oxy.items():
+            ll.extend(v)
+        return ll
 
     def __get_OMgroups(self,
                        silica: rdlmp.ReadData,  # All df in form of lammps
@@ -135,9 +143,7 @@ class GetOmGroups:
                        ) -> pd.DataFrame:
         df_om: pd.DataFrame = self.__find_OMgroups(silica.Atoms_df, OMgroup)
         replace_o_dict: dict[int, list[int]]  # Get OM of each selected Si
-        replace_o_dict = self.__get_OmSi(silica.Bonds_df,
-                                         df_om,
-                                         Si_df)
+        replace_o_dict = self.__get_OmSi(silica.Bonds_df, df_om, Si_df)
         return replace_o_dict
 
     def __find_OMgroups(self,
@@ -206,18 +212,18 @@ class GetOxGroups:
     """
     def __init__(self,
                  silica: rdlmp.ReadData,  # Atoms df in form of lammps fullatom
-                 Si_delete: list[int],  # With selected group[Si]
+                 Si_OM: list[int],  # With selected group[Si] & OM bonded
                  Ogroup: list[str],  # Name groups[O] to delete
                  fraction: float = 1  # Fraction of to select from, 0<fr<=1
                  ) -> None:
         self.O_delete: list[int]  # All the O atoms to delete
         self.O_delete, self.bonded_si = self.__get_oxgygen(silica,
-                                                           Si_delete,
+                                                           Si_OM,
                                                            Ogroup)
 
     def __get_oxgygen(self,
                       silica: rdlmp.ReadData,  # Atoms df in lammps full atom
-                      Si_delete: list[int],  # With selected group[Si]
+                      Si_OM:  list[int],  # With selected group[Si] & OM bonded
                       Ogroup:  list[typing.Any],  # Name|index groups[O]
                       ) -> list[int]:
         """Find the hydrogen which have bonds with the selected Silicons"""
@@ -225,26 +231,25 @@ class GetOxGroups:
         Atoms = silica.Atoms_df.copy()
         for item in Ogroup:
             O_list.append(Atoms[Atoms['name'] == item])
-        df: pd.DataFrame = pd.concat(O_list)
-        O_delete, bonded_si = self.__get_o_delete(silica.Bonds_df,
-                                                  Si_delete, df)
+        df_o: pd.DataFrame = pd.concat(O_list)  # All the O atoms with names
+        O_delete, bonded_si = self.__get_o_delete(silica.Bonds_df, Si_OM, df_o)
         return O_delete, bonded_si
 
     def __get_o_delete(self,
                        bonds_df: pd.DataFrame,  # Bonds in the LAMMPS format
-                       Si_delete: list[int],  # With selected group[Si]
+                       Si_OM: list[int],  # With selected group[Si] & OM bonded
                        df_o: pd.DataFrame  # DF with selected Oxygen
                        ) -> list[int]:  # index of the O to delete
         # get bonds
         all_o = [item for item in df_o['atom_id']]
         check_dict: dict[int, list[int]]  # to check if all si have the bond Ox
-        check_dict = {item: [] for item in Si_delete}
+        check_dict = {item: [] for item in Si_OM}
         for _, row in bonds_df.iterrows():
             # Make a dictionary of Si: Oxygens
-            if row['ai'] in Si_delete:
+            if row['ai'] in Si_OM:
                 if row['aj'] in all_o:
                     check_dict[row['ai']].append(row['aj'])
-            if row['aj'] in Si_delete:
+            if row['aj'] in Si_OM:
                 if row['ai'] in all_o:
                     check_dict[row['aj']].append(row['ai'])
         # Check if there is Si without wanted O groups
