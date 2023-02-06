@@ -248,7 +248,6 @@ class GetOxGroups:
                                                          Si_OM,
                                                          df_o,
                                                          Si_df)
-        print(type(O_delete))
         return O_delete, bonded_si, Si_df
 
     def __get_o_delete(self,
