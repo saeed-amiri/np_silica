@@ -36,7 +36,7 @@ class ConcatAll:
                                                aminos.Masses_df)
         print(f'{bcolors.OKBLUE}{self.__class__.__name__}: '
               f'({self.__module__})\n'
-              f'Concanating all the atoms\n{bcolors.ENDC}')
+              f'\tConcatenating all the atoms{bcolors.ENDC}')
         self.__set_attrs()
 
     def __concate_atoms(self,
