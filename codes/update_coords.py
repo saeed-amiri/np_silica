@@ -29,10 +29,9 @@ class Delete:
                                        silicons.df_Si,
                                        OMgroup=['OM', 'OB']
                                        )
-        # print(om_groups.OM_list)
+        # print(silicons.df_Si)
         oxygens = gtatom.GetOxGroups(silica,
                                      om_groups.Si_OM,
-                                     om_groups.OM_list,
                                      Ogroup=['OD', 'OH', 'OMH'],
                                      fraction=1)
         # Get hydrogen bonded to the selected oxygen, to drop
@@ -40,23 +39,7 @@ class Delete:
                                        oxygens.O_delete,
                                        Hgroup=['HO'])
         # Get the O which bonded to the selected Si, to make angles and torsion
-        # print(om_groups.Si_df)
-        # self.Si_df = om_groups.Si_df
-        self.Si_df = self.__drop_body_Si(om_groups.Si_df,
-                                         om_groups.replace_oxy)
         self.__delete_all(silica, oxygens, hydrogens.H_delete, om_groups)
-
-    def __drop_body_Si(self,
-                       Si_df: pd.DataFrame,  # All Si bonded to the Oxygens
-                       OM_replace: dict[int, list[int]]  # Si: [OM]
-                       ) -> pd.DataFrame:
-        """Drop Si in body, they are bonded with three OM oxygens"""
-        df: pd.DataFrame = Si_df.copy()
-        for a_id, OM_l in OM_replace.items():
-            if len(OM_l) > 3:
-                df.drop(index=Si_df[Si_df["atom_id"] == a_id].index,
-                        inplace=True)
-        return df
 
     def __delete_all(self,
                      silica: rdlmp.ReadData,  # Data from LAMMPS
