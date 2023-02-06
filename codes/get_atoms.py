@@ -256,14 +256,10 @@ class GetOxGroups:
                        df_o: pd.DataFrame,  # DF with selected Oxygen
                        Si_df: pd.DataFrame  # All selected Si atoms
                        ) -> list[int]:  # index of the O to delete
-        # get bonds
-        # Check if there is Si without wanted O groups
+        # get bonded Ox atoms
         check_dict: dict[int, list[int]]  # Si: [ox bondec]
         check_dict = self.__get_check_dict(bonds_df, Si_OM, df_o)
-        dict_cp = check_dict.copy()
-        for k, v in dict_cp.items():
-            if not v:
-                check_dict.pop(k)
+        # Add a column with all Ox bonded to them
         Si_df = self.__get_ox_column(Si_df, check_dict)
         bonded_si: list[int] = []  # Si bonded to the oxygens
         bonded_O: list[int] = []  # O bonded to the Silica
@@ -295,6 +291,11 @@ class GetOxGroups:
             if row['aj'] in Si_OM:
                 if row['ai'] in all_o:
                     check_dict[row['aj']].append(row['ai'])
+        # Check if there is Si without wanted O groups
+        dict_cp = check_dict.copy()
+        for k, v in dict_cp.items():
+            if not v:
+                check_dict.pop(k)
         return check_dict
 
     def __get_ox_column(self,
