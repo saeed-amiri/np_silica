@@ -257,6 +257,33 @@ class GetOxGroups:
                        Si_df: pd.DataFrame  # All selected Si atoms
                        ) -> list[int]:  # index of the O to delete
         # get bonds
+        # Check if there is Si without wanted O groups
+        check_dict: dict[int, list[int]]  # Si: [ox bondec]
+        check_dict = self.__get_check_dict(bonds_df, Si_OM, df_o)
+        dict_cp = check_dict.copy()
+        for k, v in dict_cp.items():
+            if not v:
+                check_dict.pop(k)
+        Si_df = self.__get_ox_column(Si_df, check_dict)
+        bonded_si: list[int] = []  # Si bonded to the oxygens
+        bonded_O: list[int] = []  # O bonded to the Silica
+        for k, v in check_dict.items():
+            bonded_si.append(k)
+            bonded_O.extend(v)
+        print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}: '
+              f'({self.__module__})\n'
+              f'\tThere are {len(bonded_O)} `O` atoms bonded to the '
+              f'slected Si\n'
+              f'\t-> There are {len(bonded_si)} `Si` atoms bonded to the '
+              f'selected `O` atoms\n{bcolors.ENDC}')
+        return bonded_O, bonded_si
+
+    def __get_check_dict(self,
+                         bonds_df: pd.DataFrame,  # Bonds in the LAMMPS format
+                         Si_OM: list[int],  # With selected group[Si] & OM bond
+                         df_o: pd.DataFrame,  # DF with selected Oxygen
+                         ) -> dict[int, list[int]]:
+        """a dict with Si and bonded Ox to them """
         all_o = [item for item in df_o['atom_id']]
         check_dict: dict[int, list[int]]  # to check if all si have the bond Ox
         check_dict = {item: [] for item in Si_OM}
@@ -265,16 +292,16 @@ class GetOxGroups:
             if row['ai'] in Si_OM:
                 if row['aj'] in all_o:
                     check_dict[row['ai']].append(row['aj'])
-                    print(row['name'])
             if row['aj'] in Si_OM:
                 if row['ai'] in all_o:
                     check_dict[row['aj']].append(row['ai'])
-                    print(row['name'])
-        # Check if there is Si without wanted O groups
-        dict_cp = check_dict.copy()
-        for k, v in dict_cp.items():
-            if not v:
-                check_dict.pop(k)
+        return check_dict
+
+    def __get_ox_column(self,
+                        Si_df: pd.DataFrame,  # All selected Si
+                        check_dict: dict[int, list[int]]  # Si: Ox bonded
+                        ) -> pd.DataFrame:
+        """return the Si_df wiht Ox info column"""
         Si_df['Ox_list']: list[typing.Any]  # Ox atoms bonded to the Si
         Si_df['Ox_list'] = [None for _ in range(len(Si_df))]
         ii: int = 0  # Count the number of Ox bonded to the Si
@@ -290,19 +317,7 @@ class GetOxGroups:
               f'\tThere are "{ii}" `Si` atoms bonded to '
               f'two, and "{iii}" `Si` atoms bonded to three Ox groups'
               f'{bcolors.ENDC}')
-
-        bonded_si: list[int] = []  # Si bonded to the oxygens
-        bonded_O: list[int] = []  # O bonded to the Silica
-        for k, v in check_dict.items():
-            bonded_si.append(k)
-            bonded_O.extend(v)
-        print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}: '
-              f'({self.__module__})\n'
-              f'\tThere are {len(bonded_O)} `O` atoms bonded to the '
-              f'slected Si\n'
-              f'\t-> There are {len(bonded_si)} `Si` atoms bonded to the '
-              f'selected `O` atoms\n{bcolors.ENDC}')
-        return bonded_O, bonded_si
+        return Si_df
 
 
 class GetHyGroups:
