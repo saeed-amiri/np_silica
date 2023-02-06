@@ -24,21 +24,24 @@ class Delete:
         silicons = gtatom.GetSiGroups(silica.Atoms_df,
                                       Sigroup=['SD', 'SI'],
                                       fraction=1)
-        # Drop selected O atached to the Si and if there is H atom bond to them
+        # Get OM atoms bonded to the selected Si, and drop the Si in the Body
         om_groups = gtatom.GetOmGroups(silica,
                                        silicons.df_Si,
                                        OMgroup=['OM', 'OB']
                                        )
-        # print(silicons.df_Si)
+        # Get Ox atoms, which should drop and replace
         oxygens = gtatom.GetOxGroups(silica,
                                      om_groups.Si_OM,
+                                     om_groups.Si_df,
                                      Ogroup=['OD', 'OH', 'OMH'],
                                      fraction=1)
         # Get hydrogen bonded to the selected oxygen, to drop
         hydrogens = gtatom.GetHyGroups(silica,
                                        oxygens.O_delete,
                                        Hgroup=['HO'])
+        # Drop selected O atached to the Si and if there is H atom bond to them
         # Get the O which bonded to the selected Si, to make angles and torsion
+        self.Si_df = om_groups.Si_df
         self.__delete_all(silica, oxygens, hydrogens.H_delete, om_groups)
 
     def __delete_all(self,
@@ -55,7 +58,6 @@ class Delete:
         delete_group: list[int] = []  # To extend all selected atoms
         delete_group.extend(oxygens.O_delete)
         delete_group.extend(H_delete)
-        print(len(H_delete), om_groups)
         old_new_dict, self.UAtoms_df = self.__update_atoms(silica,
                                                            delete_group)
         self.UVelocities = self.__update_velocities(silica.Velocities_df,
