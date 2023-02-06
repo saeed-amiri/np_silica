@@ -262,17 +262,19 @@ class GetOxGroups:
         # Add a column with all Ox bonded to them
         Si_df = self.__get_ox_column(Si_df, check_dict)
         bonded_si: list[int] = []  # Si bonded to the oxygens
-        bonded_O: list[int] = []  # O bonded to the Silica
+        bonded_O: list[int] = []  # All O bonded to the Silica
+        bonded_selected_O: list[int] = []  # All O bonded to the Silica, select
         for k, v in check_dict.items():
             bonded_si.append(k)
             bonded_O.extend(v)
+            bonded_selected_O.append(v[0])
         print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}: '
               f'({self.__module__})\n'
-              f'\tThere are {len(bonded_O)} `O` atoms bonded to the '
-              f'slected Si\n'
-              f'\t-> There are {len(bonded_si)} `Si` atoms bonded to the '
+              f'\tThere are "{len(bonded_O)}" `O` atoms bonded to the '
+              f'slected Si,  and "{len(bonded_selected_O)}" is selected\n'
+              f'\t-> There are "{len(bonded_si)}" `Si` atoms bonded to the '
               f'selected `O` atoms\n{bcolors.ENDC}')
-        return bonded_O, bonded_si
+        return bonded_selected_O, bonded_si
 
     def __get_check_dict(self,
                          bonds_df: pd.DataFrame,  # Bonds in the LAMMPS format
