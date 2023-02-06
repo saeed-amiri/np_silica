@@ -248,6 +248,7 @@ class GetOxGroups:
                                                          Si_OM,
                                                          df_o,
                                                          Si_df)
+        print(type(O_delete))
         return O_delete, bonded_si, Si_df
 
     def __get_o_delete(self,
@@ -340,13 +341,12 @@ class GetHyGroups:
                        Hgroup: list[str]  # name of the H atoms to check
                        ) -> list[int]:
         df_H: pd.DataFrame   # All the hydrogens with the selcted type
-        df_H = self.__get_hydrogens(silica.Atoms_df, O_delete, Hgroup)
+        df_H = self.__get_hydrogens(silica.Atoms_df, Hgroup)
         H_delete: list[int] = self.__H_delete(silica.Bonds_df, O_delete, df_H)
         return H_delete
 
     def __get_hydrogens(self,
                         silica_atoms: pd.DataFrame,  # All silica atoms
-                        O_delete: list[int],  # Index of O atoms to delete
                         Hgroup: list[str]  # name of the H atoms to check for
                         ) -> pd.DataFrame:
         # Get Hydrogen atoms
@@ -359,15 +359,16 @@ class GetHyGroups:
                    bonds_df: pd.DataFrame,  # All the bonds in silica
                    O_delete: list[int],  # Index of the O atoms
                    df_H: pd.DataFrame  # Df of all the Hydrogens
-                   ) -> None:
+                   ) -> list[int]:
         all_h = [item for item in df_H['atom_id']]
         delete_list: list[int] = []  # index of H atoms to delete
         for _, row in bonds_df.iterrows():
-            if row['ai'] in O_delete or row['aj'] in O_delete:
-                if row['ai'] in all_h and row['ai'] not in delete_list:
-                    delete_list.append(row['ai'])
-                if row['aj'] in all_h and row['aj'] not in delete_list:
+            if row['ai'] in O_delete:
+                if row['aj'] in all_h:
                     delete_list.append(row['aj'])
+            if row['aj'] in O_delete:
+                if row['ai'] in all_h:
+                    delete_list.append(row['ai'])
         print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}: '
               f'({self.__module__})\n'
               f'\tThere are {len(delete_list)} `H` atoms bonded to the '
