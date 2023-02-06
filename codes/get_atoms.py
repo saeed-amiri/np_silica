@@ -127,7 +127,7 @@ class GetOmGroups:
         self.Si_df: pd.DataFrame  # Si df with droped unbonded Si
         self.Si_OM: list[int]  # Si bonded to OM
         self.Si_df = self.__update_si_df(Si_df)
-        self.Si_OM = self.__get_Si_OM(Si_df)
+        self.Si_OM = self.__get_Si_OM()
 
     def __get_OM_list(self) -> list[int]:
         """return list of OM atoms"""
@@ -176,8 +176,8 @@ class GetOmGroups:
                     replace_o_dict[row['aj']].append(row['ai'])
         print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}: '
               f'({self.__module__})\n'
-              f'\tThere are {len(replace_o_dict)} `O` atoms bonded to the '
-              f'slected Si{bcolors.ENDC}\n')
+              f'\tThere are {len(replace_o_dict)} `OM` atoms bonded to the '
+              f'selected Si{bcolors.ENDC}')
         return replace_o_dict
 
     def __update_si_df(self,
@@ -187,21 +187,22 @@ class GetOmGroups:
         have more then three OM bonds, which means they are body Si"""
         df: pd.DataFrame = Si_df.copy()
         df['OM_list0']: list[int]  # Index of OM atoms bonded to the Si
-        df['OM_list0'] = [None for item in self.replace_oxy]
-        for item, row in Si_df.iterrows():
+        df['OM_list0'] = [None for _ in self.replace_oxy]
+        for item, _ in Si_df.iterrows():
             if item not in self.replace_oxy.keys():
                 df.drop(index=[item], axis=0, inplace=True)
             elif len(self.replace_oxy[item]) > 3:
                 df.drop(index=[item], axis=0, inplace=True)
             else:
                 df.at[item, 'OM_list0'] = self.replace_oxy[item]
+        print(f'{bcolors.OKBLUE}'
+              f'\tThere are {len(df)} `Si` atoms bonded to less then '
+              f'three OM atoms{bcolors.ENDC}\n')
         return df
 
-    def __get_Si_OM(self,
-                    Si_df: pd.DataFrame  # Si bonded to the OM
-                    ) -> list[int]:
+    def __get_Si_OM(self) -> list[int]:
         """return list of the Si bonded to the OM"""
-        return [item for item in Si_df['atom_id']]
+        return [item for item in self.Si_df['atom_id']]
 
     def __drop_cols(self,
                     df: pd.DataFrame,  # Dataframe from selected Si atoms
@@ -215,7 +216,8 @@ class GetOmGroups:
 class GetOxGroups:
     """get Oxygen and groups to delete them and update
     data file.
-    Oxygen is bonded to the silica and Hydrogen, if any, bonded to the Oxygens.
+    Oxygen is bonded to the silica and Hydrogen, if any, bonded to the
+    oxygens.
     """
     def __init__(self,
                  silica: rdlmp.ReadData,  # Atoms df in form of lammps fullatom
