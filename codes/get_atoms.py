@@ -186,7 +186,7 @@ class GetOmGroups:
         """drop the silicons which are not bonded from Si_df and/or
         have more then three OM bonds, which means they are body Si"""
         df: pd.DataFrame = Si_df.copy()
-        df['OM_list0']: list[int]  # Index of OM atoms bonded to the Si
+        df['OM_list0']: list[typing.Any]  # Index of OM atoms bonded to the Si
         df['OM_list0'] = [None for _ in self.replace_oxy]
         for item, _ in Si_df.iterrows():
             if item not in self.replace_oxy.keys():
@@ -222,18 +222,21 @@ class GetOxGroups:
     def __init__(self,
                  silica: rdlmp.ReadData,  # Atoms df in form of lammps fullatom
                  Si_OM: list[int],  # With selected group[Si] & OM bonded
+                 Si_df: pd.DataFrame,  # All selected Si atoms
                  Ogroup: list[str],  # Name groups[O] to delete
                  fraction: float = 1  # Fraction of to select from, 0<fr<=1
                  ) -> None:
         self.O_delete: list[int]  # All the OD atoms to delete
         self.O_delete, self.bonded_si = self.__get_oxgygen(silica,
                                                            Si_OM,
-                                                           Ogroup)
+                                                           Ogroup,
+                                                           Si_df)
 
     def __get_oxgygen(self,
                       silica: rdlmp.ReadData,  # Atoms df in lammps full atom
                       Si_OM:  list[int],  # With selected group[Si] & OM bonded
-                      Ogroup:  list[typing.Any]  # Name|index groups[O]
+                      Ogroup:  list[typing.Any],  # Name|index groups[O]
+                      Si_df: pd.DataFrame  # All selected Si atoms
                       ) -> list[int]:
         """Find the hydrogen which have bonds with the selected Silicons"""
         O_list: list[pd.DataFrame] = []  # df of all Oxygen groups
@@ -243,13 +246,15 @@ class GetOxGroups:
         df_o: pd.DataFrame = pd.concat(O_list)  # All the O atoms with names
         O_delete, bonded_si = self.__get_o_delete(silica.Bonds_df,
                                                   Si_OM,
-                                                  df_o)
+                                                  df_o,
+                                                  Si_df)
         return O_delete, bonded_si
 
     def __get_o_delete(self,
                        bonds_df: pd.DataFrame,  # Bonds in the LAMMPS format
                        Si_OM: list[int],  # With selected group[Si] & OM bonded
-                       df_o: pd.DataFrame  # DF with selected Oxygen
+                       df_o: pd.DataFrame,  # DF with selected Oxygen
+                       Si_df: pd.DataFrame  # All selected Si atoms
                        ) -> list[int]:  # index of the O to delete
         # get bonds
         all_o = [item for item in df_o['atom_id']]
@@ -260,16 +265,32 @@ class GetOxGroups:
             if row['ai'] in Si_OM:
                 if row['aj'] in all_o:
                     check_dict[row['ai']].append(row['aj'])
+                    print(row['name'])
             if row['aj'] in Si_OM:
                 if row['ai'] in all_o:
                     check_dict[row['aj']].append(row['ai'])
+                    print(row['name'])
         # Check if there is Si without wanted O groups
         dict_cp = check_dict.copy()
         for k, v in dict_cp.items():
             if not v:
                 check_dict.pop(k)
-            if len(v) > 3:
-                print(k, v)
+        Si_df['Ox_list']: list[typing.Any]  # Ox atoms bonded to the Si
+        Si_df['Ox_list'] = [None for _ in range(len(Si_df))]
+        ii: int = 0  # Count the number of Ox bonded to the Si
+        iii: int = 0  # Count the number of Ox bonded to the Si
+        for item, row in Si_df.iterrows():
+            Si_df.at[item, 'Ox_list'] = check_dict[item]
+            if len(check_dict[item]) > 1:
+                if len(check_dict[item]) == 2:
+                    ii += 1
+                elif len(check_dict[item]) == 3:
+                    iii += 1
+        print(f'{bcolors.WARNING}{self.__class__.__name__}: \n'
+              f'\tThere are "{ii}" `Si` atoms bonded to '
+              f'two, and "{iii}" `Si` atoms bonded to three Ox groups'
+              f'{bcolors.ENDC}')
+
         bonded_si: list[int] = []  # Si bonded to the oxygens
         bonded_O: list[int] = []  # O bonded to the Silica
         for k, v in check_dict.items():
