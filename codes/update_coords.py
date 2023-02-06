@@ -4,6 +4,7 @@ import pandas as pd
 import read_lmp_data as rdlmp
 import write_lmp as wrlmp
 import get_atoms as gtatom
+import update_charges as upcharge
 from colors_text import TextColor as bcolors
 
 
@@ -231,6 +232,7 @@ class UpdateCoords:
                  ) -> None:
         silica = gtatom.GetData(fname)
         update = Delete(silica)
+        upcharge.UpdateCharge(update.UAtoms_df, update.Si_df)
         self.__set_attrs(silica, update)
         self.__write_infos()
 
