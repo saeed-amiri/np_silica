@@ -227,10 +227,10 @@ class GetOxGroups:
                  fraction: float = 1  # Fraction of to select from, 0<fr<=1
                  ) -> None:
         self.O_delete: list[int]  # All the OD atoms to delete
-        self.O_delete, self.bonded_si = self.__get_oxgygen(silica,
-                                                           Si_OM,
-                                                           Ogroup,
-                                                           Si_df)
+        self.O_delete, self.bonded_si, self.Si_df = self.__get_oxgygen(silica,
+                                                                       Si_OM,
+                                                                       Ogroup,
+                                                                       Si_df)
 
     def __get_oxgygen(self,
                       silica: rdlmp.ReadData,  # Atoms df in lammps full atom
@@ -244,18 +244,19 @@ class GetOxGroups:
         for item in Ogroup:
             O_list.append(Atoms[Atoms['name'] == item])
         df_o: pd.DataFrame = pd.concat(O_list)  # All the O atoms with names
-        O_delete, bonded_si = self.__get_o_delete(silica.Bonds_df,
-                                                  Si_OM,
-                                                  df_o,
-                                                  Si_df)
-        return O_delete, bonded_si
+        O_delete, bonded_si, Si_df = self.__get_o_delete(silica.Bonds_df,
+                                                         Si_OM,
+                                                         df_o,
+                                                         Si_df)
+        return O_delete, bonded_si, Si_df
 
     def __get_o_delete(self,
                        bonds_df: pd.DataFrame,  # Bonds in the LAMMPS format
                        Si_OM: list[int],  # With selected group[Si] & OM bonded
                        df_o: pd.DataFrame,  # DF with selected Oxygen
                        Si_df: pd.DataFrame  # All selected Si atoms
-                       ) -> list[int]:  # index of the O to delete
+                       ) -> tuple[list[int], list[int], pd.DataFrame]:
+        # Return the index of the of Ox to delete, Si to attach chain and df
         # get bonded Ox atoms
         check_dict: dict[int, list[int]]  # Si: [ox bondec]
         check_dict = self.__get_check_dict(bonds_df, Si_OM, df_o)
@@ -274,7 +275,7 @@ class GetOxGroups:
               f'slected Si,  and "{len(bonded_selected_O)}" is selected\n'
               f'\t-> There are "{len(bonded_si)}" `Si` atoms bonded to the '
               f'selected `O` atoms\n{bcolors.ENDC}')
-        return bonded_selected_O, bonded_si
+        return bonded_selected_O, bonded_si, Si_df
 
     def __get_check_dict(self,
                          bonds_df: pd.DataFrame,  # Bonds in the LAMMPS format
