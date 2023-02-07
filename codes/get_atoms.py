@@ -260,6 +260,8 @@ class GetOxGroups:
         # get bonded Ox atoms
         check_dict: dict[int, list[int]]  # Si: [ox bondec]
         check_dict = self.__get_check_dict(bonds_df, Si_OM, df_o)
+        Si_df = self.__drop_si(Si_df, check_dict)
+        # Drop Si without bonds to any Ox
         # Add a column with all Ox bonded to them
         Si_df = self.__mk_ox_column(Si_df, check_dict)
         bonded_si: list[int] = []  # Si bonded to the oxygens
@@ -279,6 +281,19 @@ class GetOxGroups:
               f'\t"{len(bonded_selected_O)}" `O` atoms are selcted to delete'
               f'{bcolors.ENDC}')
         return bonded_selected_O, bonded_si, Si_df
+
+    def __drop_si(self,
+                  Si_df: pd.DataFrame,  # All the selected Si
+                  check_dict: dict[int, list[int]]  # Si: Ox
+                  ) -> pd.DataFrame:
+        """drop Si that does not have any bonds with Ox"""
+        df: pd.DataFrame = Si_df.copy()
+        Si_list: list[int]  # atom_id of the selected Si
+        Si_list = check_dict.keys()
+        for item, row in Si_df.iterrows():
+            if row['atom_id'] not in Si_list:
+                df.drop(index=item, axis=0, inplace=True)
+        return df
 
     def __get_O_drop(self,
                      o_list: list[int],  # OM atoms bond to the Si
@@ -331,7 +346,7 @@ class GetOxGroups:
         Si_df['Ox_list'] = [None for _ in range(len(Si_df))]
         ii: int = 0  # Count the number of Ox bonded to the Si
         iii: int = 0  # Count the number of Ox bonded to the Si
-        for item, row in Si_df.iterrows():
+        for item, _ in Si_df.iterrows():
             Si_df.at[item, 'Ox_list'] = check_dict[item]
             if len(check_dict[item]) > 1:
                 if len(check_dict[item]) == 2:
