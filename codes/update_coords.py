@@ -23,7 +23,7 @@ class Delete:
         drop them too"""
         # Find Si on the shell
         silicons = gtatom.GetSiGroups(silica.Atoms_df,
-                                      Sigroup=['SD', 'SI'],
+                                      Sigroup=['SD', 'SI', 'SB'],
                                       fraction=1)
         # Get OM atoms bonded to the selected Si, and drop the Si in the Body
         om_groups = gtatom.GetOmGroups(silica,
@@ -42,15 +42,16 @@ class Delete:
                                        Hgroup=['HO'])
         # Drop selected O atached to the Si and if there is H atom bond to them
         # Get the O which bonded to the selected Si, to make angles and torsion
-        self.Si_df = om_groups.Si_df
-        self.__delete_all(silica, oxygens, hydrogens.H_delete, om_groups)
+        self.Si_df: pd.DataFrame = om_groups.Si_df
+        self.old_new_dict: dict[int, int] = \
+            self.__delete_all(silica, oxygens, hydrogens.H_delete, om_groups)
 
     def __delete_all(self,
                      silica: rdlmp.ReadData,  # Data from LAMMPS
                      oxygens: gtatom.GetOxGroups,  # Index of O atoms to delete
                      H_delete: list[int],  # Index of H atoms to delete
                      om_groups: gtatom.GetOmGroups  # O atoms to replace
-                     ) -> None:
+                     ) -> dict[int, int]:
         old_new_dict: dict[int, int]  # new and old index of updated atoms df
         self.UAtoms_df: pd.DataFrame  # Atoms with updated atoms' index
         self.UVelocities: pd.DataFrame  # Velocities with updated atoms' index
@@ -74,6 +75,7 @@ class Delete:
         self.USi_df = self.__append_om(USi_df,
                                        old_new_dict,
                                        om_groups.replace_oxy)
+        return old_new_dict
 
     def __update_selected_Si(self,
                              old_new_dict: dict[int, int]  # old:new atom id
@@ -232,16 +234,19 @@ class UpdateCoords:
                  ) -> None:
         silica = gtatom.GetData(fname)
         update = Delete(silica)
-        upcharge.UpdateCharge(update.UAtoms_df, update.Si_df)
-        self.__set_attrs(silica, update)
+        upq = upcharge.UpdateCharge(update.UAtoms_df,
+                                    update.Si_df,
+                                    update.old_new_dict)
+        self.__set_attrs(silica, update, upq)
         self.__write_infos()
 
     def __set_attrs(self,
                     silica: gtatom.GetData,  # Tha main data
-                    update: Delete  # All the data read from file
+                    update: Delete,  # All the data read from file
+                    upq: upcharge.UpdateCharge  # Atoms with updated charges
                     ) -> None:
         """update all the attrs"""
-        self.Atoms_df = update.UAtoms_df
+        self.Atoms_df = upq.Atoms_df
         self.Velocities_df = update.UVelocities
         self.Bonds_df = update.UBonds_df
         self.Angles_df = update.UAngles_df
