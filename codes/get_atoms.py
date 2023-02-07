@@ -404,8 +404,22 @@ class GetHyGroups:
             if row['aj'] in O_delete:
                 if row['ai'] in all_h:
                     delete_list.append(row['ai'])
+        total_charges: float = self.__get_charges(df_H, delete_list)
         print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}: '
               f'({self.__module__})\n'
               f'\t"{len(delete_list)}" `H` atoms bonded to the '
-              f'slected O{bcolors.ENDC}')
+              f'slected O to delete, with total cahrge of: '
+              f'"{total_charges:.4f}"'
+              f'{bcolors.ENDC}')
         return delete_list
+
+    def __get_charges(self,
+                      df_H: pd.DataFrame,  # All H infos
+                      delete_list: list[int]  # H atom_id to drop
+                      ) -> float:
+        """return the total charges of the deleted Hydrogens"""
+        total_charge: float = 0  # Charge of all deleted Hydrogens
+        for _, row in df_H.iterrows():
+            if row['atom_id'] in delete_list:
+                total_charge += row['charge']
+        return total_charge
