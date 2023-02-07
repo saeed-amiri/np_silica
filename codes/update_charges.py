@@ -16,7 +16,8 @@ class UpdateCharge:
                  Si_df: pd.DataFrame,  # Si df, selected for adding chains
                  old_new_dict: dict[int, int]  # Old: new atoms id
                  ) -> None:
-        self.__update_charges(atoms_df, Si_df, old_new_dict)
+        self.Atoms_df: pd.DataFrame  # Atoms with updated charges
+        self.Atoms_df = self.__update_charges(atoms_df, Si_df, old_new_dict)
 
     def __update_charges(self,
                          atoms_df: pd.DataFrame,  # Updated silica atoms coords
@@ -27,6 +28,19 @@ class UpdateCharge:
         Si_df = self.__update_id_si(Si_df, old_new_dict)
         Si_df = self.__update_id_om(Si_df, old_new_dict)
         atoms_df = self.__update_si_charge(Si_df, atoms_df)
+        atoms_df = self.__update_om_charge(Si_df, atoms_df)
+        return atoms_df
+
+    def __update_om_charge(self,
+                           Si_df: pd.DataFrame,  # With updated atoms id
+                           atoms_df: pd.DataFrame,  # Updated silica atoms
+                           ) -> pd.DataFrame:
+        """update all the OM atoms in the O or O&H groups in the main
+        atoms dataframe"""
+        for _, row in Si_df.iterrows():
+            for ind in row['OM_list0']:
+                atoms_df.at[ind, 'charge'] = stinfo.UpdateCharge.OM
+        return atoms_df
 
     def __update_si_charge(self,
                            Si_df: pd.DataFrame,  # With updated atoms id
@@ -35,9 +49,8 @@ class UpdateCharge:
         """update all the Si atoms charges which lost O or O&H groups
         in the main atoms dataframe"""
         for item, _ in Si_df.iterrows():
-            atoms_df.at[item-1, 'charge'] = stinfo.UpdateCharge.SI
+            atoms_df.at[item, 'charge'] = stinfo.UpdateCharge.SI
         return atoms_df
-
 
     def __update_id_si(self,
                        Si_df: pd.DataFrame,  # Si df, for adding amino
