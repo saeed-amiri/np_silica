@@ -261,14 +261,17 @@ class GetOxGroups:
         check_dict: dict[int, list[int]]  # Si: [ox bondec]
         check_dict = self.__get_check_dict(bonds_df, Si_OM, df_o)
         # Add a column with all Ox bonded to them
-        Si_df = self.__get_ox_column(Si_df, check_dict)
+        Si_df = self.__mk_ox_column(Si_df, check_dict)
         bonded_si: list[int] = []  # Si bonded to the oxygens
         bonded_O: list[int] = []  # All O bonded to the Silica
         bonded_selected_O: list[int] = []  # All O bonded to the Silica, select
         for k, v in check_dict.items():
             bonded_si.append(k)
             bonded_O.extend(v)
-            bonded_selected_O.append(v[0])
+            if len(v) == 1:
+                bonded_selected_O.append(v[0])
+            elif len(v) > 1:
+                bonded_selected_O.append(self.__get_O_drop(v, df_o))
         print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}: '
               f'({self.__module__})\n'
               f'\tThere are "{len(bonded_O)}" `O` atoms bonded to the '
@@ -276,6 +279,24 @@ class GetOxGroups:
               f'\t-> There are "{len(bonded_si)}" `Si` atoms bonded to the '
               f'selected `O` atoms\n{bcolors.ENDC}')
         return bonded_selected_O, bonded_si, Si_df
+
+    def __get_O_drop(self,
+                     o_list: list[int],  # OM atoms bond to the Si
+                     df_o: pd.DataFrame  # All OM atoms
+                     ) -> int:
+        """return the index of the Ox to drop for Si atoms with more
+        than one Ox bond to them. If there is OD among them, it returns
+        that one, otherwise the atom with a smaller index"""
+        o_to_drop = None  # The atom_id of the Ox atom to drop
+        o_names: dict[int, str]  # atom_id: Name of the ox atoms in the o_list
+        o_names = {item: df_o[df_o['atom_id'] == item]['name'][item]
+                   for item in o_list}
+        for k, v in o_names.items():
+            if v == 'OD':
+                o_to_drop = k
+        if o_to_drop is None:
+            o_to_drop = np.min(o_list)
+        return o_to_drop
 
     def __get_check_dict(self,
                          bonds_df: pd.DataFrame,  # Bonds in the LAMMPS format
@@ -301,10 +322,10 @@ class GetOxGroups:
                 check_dict.pop(k)
         return check_dict
 
-    def __get_ox_column(self,
-                        Si_df: pd.DataFrame,  # All selected Si
-                        check_dict: dict[int, list[int]]  # Si: Ox bonded
-                        ) -> pd.DataFrame:
+    def __mk_ox_column(self,
+                       Si_df: pd.DataFrame,  # All selected Si
+                       check_dict: dict[int, list[int]]  # Si: Ox bonded
+                       ) -> pd.DataFrame:
         """return the Si_df wiht Ox info column"""
         Si_df['Ox_list']: list[typing.Any]  # Ox atoms bonded to the Si
         Si_df['Ox_list'] = [None for _ in range(len(Si_df))]
