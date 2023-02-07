@@ -23,7 +23,7 @@ class Delete:
         drop them too"""
         # Find Si on the shell
         silicons = gtatom.GetSiGroups(silica.Atoms_df,
-                                      Sigroup=['SD', 'SI', 'SB'],
+                                      Sigroup=['SD', 'SI'],
                                       fraction=1)
         # Get OM atoms bonded to the selected Si, and drop the Si in the Body
         om_groups = gtatom.GetOmGroups(silica,
@@ -271,7 +271,8 @@ class UpdateCoords:
         return df
 
     def __write_infos(self) -> None:
-        print(f'{bcolors.OKGREEN}\tData Summary after deleting atoms:\n'
+        print(f'{bcolors.OKGREEN}\tData Summary after deleting atoms'
+              f' and updataing charges:\n'
               f'\t\t# Atoms: {self.NAtoms}, # Atom`s types: {self.NAtomTyp}\n'
               f'\t\t# Bonds: {self.NBonds}, # Bond`s types: {self.NBondTyp}\n'
               f'\t\t# Angles: {self.NAngles}, '
