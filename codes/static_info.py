@@ -40,3 +40,10 @@ class AtomType:
     SI: int = 7
     SU: int = 8
     SD: int = 9
+
+
+class UpdateCharge:
+    """charges of the Si-OM groups which lost O or O&H atoms"""
+    OM: float = -0.900
+    OMH: float = -0.900
+    SI: float = 1.600
