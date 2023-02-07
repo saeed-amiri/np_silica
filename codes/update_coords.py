@@ -34,7 +34,7 @@ class Delete:
         oxygens = gtatom.GetOxGroups(silica,
                                      om_groups.Si_OM,
                                      om_groups.Si_df,
-                                     Ogroup=['OD', 'OH', 'OMH'],
+                                     Ogroup=['OD'],
                                      fraction=1)
         # Get hydrogen bonded to the selected oxygen, to drop
         hydrogens = gtatom.GetHyGroups(silica,
@@ -42,7 +42,7 @@ class Delete:
                                        Hgroup=['HO'])
         # Drop selected O atached to the Si and if there is H atom bond to them
         # Get the O which bonded to the selected Si, to make angles and torsion
-        self.Si_df: pd.DataFrame = om_groups.Si_df
+        self.Si_df: pd.DataFrame = oxygens.Si_df
         self.old_new_dict: dict[int, int] = \
             self.__delete_all(silica, oxygens, hydrogens.H_delete, om_groups)
 
