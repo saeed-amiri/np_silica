@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import static_info as stinfo
 from colors_text import TextColor as bcolors
 
 
@@ -25,6 +26,18 @@ class UpdateCharge:
         Si_df = self.__clean_si_df(Si_df)
         Si_df = self.__update_id_si(Si_df, old_new_dict)
         Si_df = self.__update_id_om(Si_df, old_new_dict)
+        atoms_df = self.__update_si_charge(Si_df, atoms_df)
+
+    def __update_si_charge(self,
+                           Si_df: pd.DataFrame,  # With updated atoms id
+                           atoms_df: pd.DataFrame,  # Updated silica atoms
+                           ) -> pd.DataFrame:
+        """update all the Si atoms charges which lost O or O&H groups
+        in the main atoms dataframe"""
+        for item, _ in Si_df.iterrows():
+            atoms_df.at[item-1, 'charge'] = stinfo.UpdateCharge.SI
+        return atoms_df
+
 
     def __update_id_si(self,
                        Si_df: pd.DataFrame,  # Si df, for adding amino
@@ -36,6 +49,7 @@ class UpdateCharge:
         df['old_atom_id'] = df['atom_id']
         for item, _ in Si_df.iterrows():
             df.at[item, 'atom_id'] = old_new_dict[item]
+        df.index = df['atom_id']
         return df
 
     def __update_id_om(self,
