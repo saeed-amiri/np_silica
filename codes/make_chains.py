@@ -468,7 +468,7 @@ class PrepareAmino:
               f'\t\t# Angles in aminos` group: {len(self.All_amino_angles)}\n'
               f'\t\t# Dihedrals in aminos` group: '
               f'{len(self.All_amino_dihedrals)}\n'
-              f'\t\tTotal charge: {self.All_amino_atoms["charge"].sum()}\n'
+              f'\t\tTotal charge: {self.All_amino_atoms["charge"].sum():.4f}\n'
               f'\t\tMin charge: {self.All_amino_atoms["charge"].min()}\n'
               f'\t\tMax charge: {self.All_amino_atoms["charge"].max()}'
               f'{bcolors.ENDC}'

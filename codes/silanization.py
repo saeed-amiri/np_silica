@@ -152,7 +152,7 @@ class ConcatAll:
               f'# Angle`s types: {self.NAngleTyp}\n'
               f'\t\t# Dihedrals: {self.NDihedrals}, '
               f'# Dihedral`s types: {self.NDihedralTyp}\n'
-              f'\t\tTotal charge: {self.Atoms_df["charge"].sum()}\n'
+              f'\t\tTotal charge: {self.Atoms_df["charge"].sum():.4f}\n'
               f'\t\tMin charge: {self.Atoms_df["charge"].min()}\n'
               f'\t\tMax charge: {self.Atoms_df["charge"].max()}'
               f'{bcolors.ENDC}'

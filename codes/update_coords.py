@@ -34,7 +34,7 @@ class Delete:
         oxygens = gtatom.GetOxGroups(silica,
                                      om_groups.Si_OM,
                                      om_groups.Si_df,
-                                     Ogroup=['OD'],
+                                     Ogroup=['OD', 'OH', 'OMH'],
                                      fraction=1)
         # Get hydrogen bonded to the selected oxygen, to drop
         hydrogens = gtatom.GetHyGroups(silica,
@@ -279,7 +279,7 @@ class UpdateCoords:
               f'# Angle`s types: {self.NAngleTyp}\n'
               f'\t\t# Dihedrals: {self.NDihedrals}, '
               f'# Dihedral`s types: {self.NDihedralTyp}\n'
-              f'\t\tTotal charge: {self.Atoms_df["charge"].sum()}\n'
+              f'\t\tTotal charge: {self.Atoms_df["charge"].sum():.4f}\n'
               f'\t\tMin charge: {self.Atoms_df["charge"].min()}\n'
               f'\t\tMax charge: {self.Atoms_df["charge"].max()}'
               f'{bcolors.ENDC}'
