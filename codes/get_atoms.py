@@ -274,10 +274,10 @@ class GetOxGroups:
                 bonded_selected_O.append(self.__get_O_drop(v, df_o))
         print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}: '
               f'({self.__module__})\n'
-              f'\tThere are "{len(bonded_O)}" `O` atoms bonded to the '
-              f'slected Si,  and "{len(bonded_selected_O)}" is selected\n'
               f'\t-> There are "{len(bonded_si)}" `Si` atoms bonded to the '
-              f'selected `O` atoms\n{bcolors.ENDC}')
+              f'"{len(bonded_O)}" `O` atoms\n'
+              f'\t"{len(bonded_selected_O)}" `O` atoms are selcted to delete'
+              f'{bcolors.ENDC}')
         return bonded_selected_O, bonded_si, Si_df
 
     def __get_O_drop(self,
@@ -285,8 +285,8 @@ class GetOxGroups:
                      df_o: pd.DataFrame  # All OM atoms
                      ) -> int:
         """return the index of the Ox to drop for Si atoms with more
-        than one Ox bond to them. If there is OD among them, it returns
-        that one, otherwise the atom with a smaller index"""
+        than one Ox bond to them. If OD is among them, it returns that
+        one; otherwise, it returns the atom with a smaller index."""
         o_to_drop = None  # The atom_id of the Ox atom to drop
         o_names: dict[int, str]  # atom_id: Name of the ox atoms in the o_list
         o_names = {item: df_o[df_o['atom_id'] == item]['name'][item]
@@ -391,6 +391,6 @@ class GetHyGroups:
                     delete_list.append(row['ai'])
         print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}: '
               f'({self.__module__})\n'
-              f'\tThere are {len(delete_list)} `H` atoms bonded to the '
+              f'\t"{len(delete_list)}" `H` atoms bonded to the '
               f'slected O{bcolors.ENDC}')
         return delete_list
