@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import typing
 import numpy as np
@@ -83,6 +84,7 @@ class Header:
         # Setting dictionaries to save data of each block in the header
         self.set_attrs()
         self.set_attr_zero()
+        self.set_diameter()
         # Setting flags to save data correctly
         Masses, PairCoeff, BondCoeff, AngleCoeff, DihedralCoeff, Atoms\
             = False, False, False, False, False, False
@@ -179,14 +181,15 @@ class Header:
 
     def set_attr_zero(self) -> None:
         """set the intial values to zero"""
-        self.NAtoms = 0
-        self.NBonds = 0
-        self.NAngles = 0
-        self.NAtomTyp = 0
-        self.NBondTyp = 0
-        self.NAngleTyp = 0
-        self.NDihedrals = 0
-        self.NDihedralTyp = 0
+        self.NAtoms: int = 0
+        self.NBonds: int = 0
+        self.NAngles: int = 0
+        self.NAtomTyp: int = 0
+        self.NBondTyp: int = 0
+        self.NAngleTyp: int = 0
+        self.NDihedrals: int = 0
+        self.NDihedralTyp: int = 0
+        self.diameter: int = 0
 
     def get_axis_lim(self, lim: typing.Any) -> list:
         try:
@@ -285,6 +288,13 @@ class Header:
                                             style=i_style,
                                             coeff=i_coeff
                                            )
+
+    def set_diameter(self) -> None:
+        # Set the radius if nanoparticle
+        try:
+            self.diameter = float(re.findall(r'\d+', self.infile)[0])
+        except IndexError:
+            pass
 
 
 class Body(Header):
