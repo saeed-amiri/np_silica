@@ -274,11 +274,13 @@ class GetOxGroups:
                 bonded_selected_O.append(v[0])
             elif len(v) > 1:
                 bonded_selected_O.append(self.__get_O_drop(v, df_o))
+        total_charge: float = self.__get_charges(df_o, bonded_selected_O)
         print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}: '
               f'({self.__module__})\n'
               f'\t-> There are "{len(bonded_si)}" `Si` atoms bonded to the '
               f'"{len(bonded_O)}" `O` atoms\n'
               f'\t"{len(bonded_selected_O)}" `O` atoms are selcted to delete'
+              f' with total charge: "{total_charge: .4f}"'
               f'{bcolors.ENDC}')
         return bonded_selected_O, bonded_si, Si_df
 
@@ -359,6 +361,17 @@ class GetOxGroups:
               f'{bcolors.ENDC}')
         return Si_df
 
+    def __get_charges(self,
+                      df_o: pd.DataFrame,  # All Ox infos
+                      delete_list: list[int]  # Ox atom_id to drop
+                      ) -> float:
+        """return the total charges of the deleted Oxygens"""
+        total_charge: float = 0  # Charge of all deleted Oxygens
+        for _, row in df_o.iterrows():
+            if row['atom_id'] in delete_list:
+                total_charge += row['charge']
+        return total_charge
+
 
 class GetHyGroups:
     """Find Hydrogen groups bonded to the Oxygen atoms"""
@@ -408,7 +421,7 @@ class GetHyGroups:
         print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}: '
               f'({self.__module__})\n'
               f'\t"{len(delete_list)}" `H` atoms bonded to the '
-              f'slected O to delete, with total cahrge of: '
+              f'slected O to delete, with total charge of: '
               f'"{total_charges:.4f}"'
               f'{bcolors.ENDC}')
         return delete_list
