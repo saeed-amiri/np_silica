@@ -120,9 +120,10 @@ class GetOmGroups:
                  OMgroup: list[str]  # Name of the OM oxygen to get
                  ) -> None:
         self.replace_oxy: dict[int, list[int]]  # Si with bonded O to replace
-        self.replace_oxy = self.__get_OMgroups(silica,
-                                               Si_df,
-                                               OMgroup)
+        self.replace_oxy_name: dict[int, list[str]]  # Si with bonded OM names
+        self.replace_oxy, self.replace_oxy_name = self.__get_OMgroups(silica,
+                                                                      Si_df,
+                                                                      OMgroup)
         self.OM_list: list[int] = self.__get_OM_list()  # All OM atoms
         self.Si_df: pd.DataFrame  # Si df with droped unbonded Si
         self.Si_OM: list[int]  # Si bonded to OM
@@ -143,8 +144,11 @@ class GetOmGroups:
                        ) -> pd.DataFrame:
         df_om: pd.DataFrame = self.__find_OMgroups(silica.Atoms_df, OMgroup)
         replace_o_dict: dict[int, list[int]]  # Get OM of each selected Si
-        replace_o_dict = self.__get_OmSi(silica.Bonds_df, df_om, Si_df)
-        return replace_o_dict
+        name_o_dict: dict[int, list[str]]  # Get the name of OM to distinguish
+        replace_o_dict, name_o_dict = self.__get_OmSi(silica.Bonds_df,
+                                                      df_om,
+                                                      Si_df)
+        return replace_o_dict, name_o_dict
 
     def __find_OMgroups(self,
                         Atoms: pd.DataFrame,  # Atoms df in form of lammps
@@ -162,15 +166,22 @@ class GetOmGroups:
                    bonds_df: pd.DataFrame,  # Bonds in the LAMMPS format
                    df_om: pd.DataFrame,  # DF with selected Oxygen
                    Si_df: pd.DataFrame  # DF of Si in the radius
-                   ) -> dict[int, list[int]]:  # index of the O to delete
+                   ) -> tuple[dict[int, list[int]], dict[int, list[str]]]:
+        """return index & name of the OM atoms to repalce with the ones
+        in the nanoparticles"""
         # get bonds
         all_o = [item for item in df_om['atom_id']]
         replace_o_dict: dict[int, list[int]] = {}  # Get OM of each selected Si
         replace_o_dict = {item: [] for item in Si_df['atom_id']}
+        name_o_dict: dict[int, list[str]]  # Get the name of OM to distinguish
+        name_o_dict = {item: [] for item in Si_df['atom_id']}
         for _, row in bonds_df.iterrows():
             if row['ai'] in Si_df['atom_id']:
                 if row['aj'] in all_o:
                     replace_o_dict[row['ai']].append(row['aj'])
+                    name: str  # Name of the OM atom
+                    name = df_om[df_om.index == row['aj']]['name'][row['aj']]
+                    name_o_dict[row['ai']].append(name)
             if row['aj'] in Si_df['atom_id']:
                 if row['ai'] in all_o:
                     replace_o_dict[row['aj']].append(row['ai'])
@@ -178,7 +189,7 @@ class GetOmGroups:
               f'({self.__module__})\n'
               f'\tThere are {len(replace_o_dict)} `OM` atoms bonded to the '
               f'selected Si{bcolors.ENDC}')
-        return replace_o_dict
+        return replace_o_dict, name_o_dict
 
     def __update_si_df(self,
                        Si_df: pd.DataFrame  # DF of selected Si
