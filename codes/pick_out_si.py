@@ -1,4 +1,5 @@
 import typing
+import random
 import numpy as np
 import pandas as pd
 from colors_text import TextColor as bcolors
@@ -31,7 +32,7 @@ class PickSi:
         area method."""
         si_coverage: float = self.__get_coverage(Si_df, diameter)
         si_de_num: float = self.__get_si_num(diameter)
-        if si_coverage <= si_de_num:
+        if si_coverage <= self.__de_coverage:
             print(f'\n{bcolors.WARNING}{self.__class__.__name__}:'
                   f' ({self.__module__})\n'
                   f'\tGrafting all the Si gives ({si_coverage:.4f}) '
@@ -40,19 +41,17 @@ class PickSi:
                   f'{bcolors.ENDC}')
         else:
             if self.__method == 'random':
-                print('randomly  sparse the coverage')
-                self.__random_sparse(Si_df, diameter, Atoms)
+                self.__random_sparse(Si_df, si_de_num, si_coverage, Atoms)
             else:
                 self.__set_lables(Si_df, diameter)
 
     def __random_sparse(self,
                         Si_df: pd.DataFrame,  # All the non-body Si in radius
-                        diameter: float,  # The diameter of the Nanoparticles
+                        si_de_num: int,  # Number of deleted Si
+                        si_coverage: float,  # Availabel coverage
                         Atoms: pd.DataFrame  # All the atoms in the nanoparticl
                         ) -> pd.DataFrame:
         """sparse the Si randomly"""
-        si_coverage: float = self.__get_coverage(Si_df, diameter)
-        si_de_num: float = self.__get_si_num(diameter)
         print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}:'
               f' ({self.__module__})\n'
               f'\tGrafting all the Si group gives coverage of '
@@ -60,7 +59,19 @@ class PickSi:
               f'\tDroping "{len(Si_df)-si_de_num}" Si to get the coverage'
               f' of "{self.__de_coverage}"'
               f'{bcolors.ENDC}')
-        print(-si_de_num+len(Si_df))
+        no_od_si: list[int]  # All the Si which are not bonded to an OD
+        no_od_si = self.__get_ox_list(Si_df)
+        drop_si: list[int]  # Si id to drop from the Si_df
+        drop_si = random.sample(no_od_si, len(Si_df)-si_de_num)
+        print(drop_si)
+
+    def __get_ox_list(self,
+                      Si_df: pd.DataFrame  # Si df
+                      ) -> list[int]:
+        """return atom_id of the Si which thier Ox is not OD
+        To make sure all the OD will be replaced with Amine chain"""
+        return [item for item in Si_df['atom_id'] if
+                Si_df['Ox_drop_name'][item] != 'OD']
 
     def __set_lables(self,
                      Si_df: pd.DataFrame,  # All the non-body Si in the radius
