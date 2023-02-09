@@ -270,7 +270,7 @@ class GetOxGroups:
                                                          Si_OM,
                                                          df_o,
                                                          Si_df)
-        Si_df = self.__set_ox_name(df_o, Si_df, O_delete)                                                            
+        Si_df = self.__set_ox_name(df_o, Si_df, O_delete)
         return O_delete, bonded_si, Si_df
 
     def __set_ox_name(self,
