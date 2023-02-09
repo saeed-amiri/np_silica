@@ -14,31 +14,53 @@ class PickSi:
     """label each si based on thier azimuth and polar angles"""
     def __init__(self,
                  Si_df: pd.DataFrame,  # All the non-body Si in the radius
-                 diameter: float  # The diameter of the Nanoparticles
+                 diameter: float,  # The diameter of the Nanoparticles
+                 Atoms: pd.DataFrame  # All the atoms in the nanoparticles
                  ) -> None:
         self.__de_coverage: float = 3.0  # The desire coverage
         self.__method: str = 'random'  # random or area
-        self.__set_coverage(Si_df, diameter)
+        self.__set_coverage(Si_df, diameter, Atoms)
 
     def __set_coverage(self,
                        Si_df: pd.DataFrame,  # All the non-body Si in the radiu
-                       diameter: float  # The diameter of the Nanoparticles
+                       diameter: float,  # The diameter of the Nanoparticles
+                       Atoms: pd.DataFrame  # All the atoms in the nanoparticle
                        ) -> pd.DataFrame:
         """select the method of randomly setting the coverage by
         eliminating some of the Si from the data frame or based on the
         area method."""
-        if self.__method == 'random':
-            print('random sparse the coverag')
-            self.__random_sparse(Si_df, diameter)
+        si_coverage: float = self.__get_coverage(Si_df, diameter)
+        si_de_num: float = self.__get_si_num(diameter)
+        if si_coverage <= si_de_num:
+            print(f'\n{bcolors.WARNING}{self.__class__.__name__}:'
+                  f' ({self.__module__})\n'
+                  f'\tGrafting all the Si gives ({si_coverage:.4f}) '
+                  f'less or equal to the desire coverage '
+                  f'({self.__de_coverage:.4f})! Returns.'
+                  f'{bcolors.ENDC}')
         else:
-            self.__set_lables(Si_df, diameter)
+            if self.__method == 'random':
+                print('randomly  sparse the coverage')
+                self.__random_sparse(Si_df, diameter, Atoms)
+            else:
+                self.__set_lables(Si_df, diameter)
 
     def __random_sparse(self,
                         Si_df: pd.DataFrame,  # All the non-body Si in radius
-                        diameter: float  # The diameter of the Nanoparticles
+                        diameter: float,  # The diameter of the Nanoparticles
+                        Atoms: pd.DataFrame  # All the atoms in the nanoparticl
                         ) -> pd.DataFrame:
         """sparse the Si randomly"""
-        pass
+        si_coverage: float = self.__get_coverage(Si_df, diameter)
+        si_de_num: float = self.__get_si_num(diameter)
+        print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}:'
+              f' ({self.__module__})\n'
+              f'\tGrafting all the Si group gives coverage of '
+              f'"{si_coverage:.5f}"\n'
+              f'\tDroping "{len(Si_df)-si_de_num}" Si to get the coverage'
+              f' of "{self.__de_coverage}"'
+              f'{bcolors.ENDC}')
+        print(-si_de_num+len(Si_df))
 
     def __set_lables(self,
                      Si_df: pd.DataFrame,  # All the non-body Si in the radius
