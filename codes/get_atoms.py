@@ -281,7 +281,9 @@ class GetOxGroups:
               f'\t-> There are "{len(Si_df)}" `Si` atoms bonded to the '
               f'" `Ox` atoms\n'
               f'\t"{len(O_delete)}" `O` atoms are selcted to delete'
-              f' with total charge: "{total_charge: .4f}"'
+              f' with total charge: "{total_charge: .4f}"\n'
+              f'\tThis gives the total coverage of '
+              f'"{len(Si_df)/(np.pi*silica.diameter*silica.diameter):.4f}"'
               f'{bcolors.ENDC}')
         return O_delete, bonded_si, Si_df
 
