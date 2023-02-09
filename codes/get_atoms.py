@@ -127,7 +127,8 @@ class GetOmGroups:
         self.OM_list: list[int] = self.__get_OM_list()  # All OM atoms
         self.Si_df: pd.DataFrame  # Si df with droped unbonded Si
         self.Si_OM: list[int]  # Si bonded to OM
-        self.Si_df = self.__update_si_df(Si_df)
+        Si_df = self.__update_si_df(Si_df)
+        self.Si_df = self.__set_om_names(Si_df)
         self.Si_OM = self.__get_Si_OM()
 
     def __get_OM_list(self) -> list[int]:
@@ -209,6 +210,16 @@ class GetOmGroups:
         print(f'{bcolors.OKBLUE}'
               f'\tThere are {len(df)} `Si` atoms bonded to less then '
               f'three OM atoms{bcolors.ENDC}\n')
+        return df
+
+    def __set_om_names(self,
+                       Si_df: pd.DataFrame  # DF of selected Si with OM list
+                       ) -> pd.DataFrame:
+        """set the list of OM names to the all Si"""
+        df: pd.DataFrame = Si_df.copy()
+        df['OM_name']: list[list[str]] = [None for _ in range(len(Si_df))]
+        for item, _ in Si_df.iterrows():
+            df.at[item, 'OM_name'] = self.replace_oxy_name[item]
         return df
 
     def __get_Si_OM(self) -> list[int]:
