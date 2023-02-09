@@ -270,7 +270,24 @@ class GetOxGroups:
                                                          Si_OM,
                                                          df_o,
                                                          Si_df)
+        Si_df = self.__set_ox_name(df_o, Si_df, O_delete)                                                            
         return O_delete, bonded_si, Si_df
+
+    def __set_ox_name(self,
+                      df_o: pd.DataFrame,  # Ox atoms df in lammps full atom
+                      Si_df: pd.DataFrame,  # Updated df Si with all
+                      O_delete: list[int]  # Index of selected Ox atoms to drop
+                      ) -> pd.DataFrame:
+        """set the index and name of the selcted Ox to drop for each
+        Si"""
+        Si_df['Ox_drop']: list[int] = O_delete
+        df: pd.DataFrame = Si_df.copy()
+        df['Ox_drop_name']: list[str] = [None for _ in O_delete]
+        for item, row in Si_df.iterrows():
+            ind: int = row['Ox_drop']  # atom_id of the Ox
+            name: str = df_o[df_o['atom_id'] == ind]['name'][ind]
+            df.at[item, 'Ox_drop_name'] = name
+        return df
 
     def __get_o_delete(self,
                        bonds_df: pd.DataFrame,  # Bonds in the LAMMPS format
