@@ -15,17 +15,15 @@ class PickSi:
     """label each si based on thier azimuth and polar angles"""
     def __init__(self,
                  Si_df: pd.DataFrame,  # All the non-body Si in the radius
-                 diameter: float,  # The diameter of the Nanoparticles
-                 Atoms: pd.DataFrame  # All the atoms in the nanoparticles
+                 diameter: float  # The diameter of the Nanoparticles
                  ) -> None:
         self.__de_coverage: float = 3.0  # The desire coverage
         self.__method: str = 'random'  # random or area
-        self.__set_coverage(Si_df, diameter, Atoms)
+        self.Si_df: pd.DataFrame = self.__set_coverage(Si_df, diameter)
 
     def __set_coverage(self,
                        Si_df: pd.DataFrame,  # All the non-body Si in the radiu
-                       diameter: float,  # The diameter of the Nanoparticles
-                       Atoms: pd.DataFrame  # All the atoms in the nanoparticle
+                       diameter: float  # The diameter of the Nanoparticles
                        ) -> pd.DataFrame:
         """select the method of randomly setting the coverage by
         eliminating some of the Si from the data frame or based on the
@@ -41,15 +39,15 @@ class PickSi:
                   f'{bcolors.ENDC}')
         else:
             if self.__method == 'random':
-                self.__random_sparse(Si_df, si_de_num, si_coverage, Atoms)
+                Si_df = self.__random_sparse(Si_df, si_de_num, si_coverage)
             else:
-                self.__set_lables(Si_df, diameter)
+                Si_df = self.__set_lables(Si_df, diameter)
+        return Si_df
 
     def __random_sparse(self,
                         Si_df: pd.DataFrame,  # All the non-body Si in radius
                         si_de_num: int,  # Number of deleted Si
-                        si_coverage: float,  # Availabel coverage
-                        Atoms: pd.DataFrame  # All the atoms in the nanoparticl
+                        si_coverage: float  # Availabel coverage
                         ) -> pd.DataFrame:
         """sparse the Si randomly"""
         print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}:'
@@ -63,7 +61,11 @@ class PickSi:
         no_od_si = self.__get_ox_list(Si_df)
         drop_si: list[int]  # Si id to drop from the Si_df
         drop_si = random.sample(no_od_si, len(Si_df)-si_de_num)
-        print(drop_si)
+        df: pd.DataFrame = Si_df.copy()
+        for item in Si_df['atom_id']:
+            if item in drop_si:
+                df.drop(axis=0, index=item, inplace=True)
+        return df
 
     def __get_ox_list(self,
                       Si_df: pd.DataFrame  # Si df
