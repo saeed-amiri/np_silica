@@ -2,6 +2,7 @@ import typing
 import numpy as np
 import pandas as pd
 import read_lmp_data as rdlmp
+import pick_out_si as pickSi
 from colors_text import TextColor as bcolors
 
 
@@ -271,6 +272,17 @@ class GetOxGroups:
                                                          df_o,
                                                          Si_df)
         Si_df = self.__set_ox_name(df_o, Si_df, O_delete)
+        pick = pickSi.PickSi(Si_df, silica.diameter)
+        Si_df = pick.Si_df
+        O_delete = list(Si_df['Ox_drop'])
+        total_charge: float = self.__get_charges(df_o, O_delete)
+        print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}: '
+              f'({self.__module__})\n'
+              f'\t-> There are "{len(Si_df)}" `Si` atoms bonded to the '
+              f'" `Ox` atoms\n'
+              f'\t"{len(O_delete)}" `O` atoms are selcted to delete'
+              f' with total charge: "{total_charge: .4f}"'
+              f'{bcolors.ENDC}')
         return O_delete, bonded_si, Si_df
 
     def __set_ox_name(self,
@@ -313,14 +325,6 @@ class GetOxGroups:
                 bonded_selected_O.append(v[0])
             elif len(v) > 1:
                 bonded_selected_O.append(self.__get_O_drop(v, df_o))
-        total_charge: float = self.__get_charges(df_o, bonded_selected_O)
-        print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}: '
-              f'({self.__module__})\n'
-              f'\t-> There are "{len(bonded_si)}" `Si` atoms bonded to the '
-              f'"{len(bonded_O)}" `O` atoms\n'
-              f'\t"{len(bonded_selected_O)}" `O` atoms are selcted to delete'
-              f' with total charge: "{total_charge: .4f}"'
-              f'{bcolors.ENDC}')
         return bonded_selected_O, bonded_si, Si_df
 
     def __drop_si(self,
