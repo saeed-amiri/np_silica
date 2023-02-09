@@ -248,7 +248,7 @@ class GetOxGroups:
                       Si_OM:  list[int],  # With selected group[Si] & OM bonded
                       Ogroup:  list[typing.Any],  # Name|index groups[O]
                       Si_df: pd.DataFrame  # All selected Si atoms
-                      ) -> list[int]:
+                      ) -> tuple[list[int], list[int], pd.DataFrame]:
         """Find the hydrogen which have bonds with the selected Silicons"""
         O_list: list[pd.DataFrame] = []  # df of all Oxygen groups
         Atoms = silica.Atoms_df.copy()
@@ -302,7 +302,7 @@ class GetOxGroups:
         """drop Si that does not have any bonds with Ox"""
         df: pd.DataFrame = Si_df.copy()
         Si_list: list[int]  # atom_id of the selected Si
-        Si_list = check_dict.keys()
+        Si_list = list(check_dict.keys())
         for item, row in Si_df.iterrows():
             if row['atom_id'] not in Si_list:
                 df.drop(index=item, axis=0, inplace=True)
