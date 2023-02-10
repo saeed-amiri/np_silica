@@ -47,8 +47,8 @@ class UpdateCharge:
     If No need to change set them equal to None, ex.:
         OM: float = None
     """
-    OM: float = -0.900
-    SI: float = 1.600
+    OM: float = -0.720
+    SI: float = 1.400
 
 
 class Constants:
@@ -57,3 +57,15 @@ class Constants:
     Coverage: float = 3.0
     # The thiknes of the shell from surface to look for Si atoms
     Shell_radius: float = 6.0
+
+
+class AtomGroup:
+    """list of name of the atoms to work with"""
+    # Si groups to find them in shell and add APTES to them
+    SiGroup: list[str] = ['SD', 'SI', 'SB']
+    # Oxygen groups which are bonded to Si on the shell, SHOULD NOT replace
+    OMGroup: list[str] = ['OM', 'OB']
+    # Oxygen groups bonded to Si on the shell to drop 
+    OxGroup: list[int] = ['OD', 'OH', 'OMH']
+    # Hydrogen groups bonded to the Ox groups to drop
+    HyGroup: list[str] = ['HO']
