@@ -1,9 +1,10 @@
 import sys
 import numpy as np
 import pandas as pd
-import read_lmp_data as rdlmp
 import write_lmp as wrlmp
 import get_atoms as gtatom
+import static_info as stinfo
+import read_lmp_data as rdlmp
 import update_charges as upcharge
 from colors_text import TextColor as bcolors
 
@@ -23,23 +24,23 @@ class Delete:
         drop them too"""
         # Find Si on the shell
         silicons = gtatom.GetSiGroups(silica.Atoms_df,
-                                      Sigroup=['SD', 'SI'],
+                                      Sigroup=stinfo.AtomGroup.SiGroup,
                                       fraction=1)
         # Get OM atoms bonded to the selected Si, and drop the Si in the Body
         om_groups = gtatom.GetOmGroups(silica,
                                        silicons.df_Si,
-                                       OMgroup=['OM', 'OB']
+                                       OMgroup=stinfo.AtomGroup.OMGroup
                                        )
         # Get Ox atoms, which should drop and replace
         oxygens = gtatom.GetOxGroups(silica,
                                      om_groups.Si_OM,
                                      om_groups.Si_df,
-                                     Ogroup=['OD', 'OH', 'OMH'],
+                                     Ogroup=stinfo.AtomGroup.OxGroup,
                                      fraction=1)
         # Get hydrogen bonded to the selected oxygen, to drop
         hydrogens = gtatom.GetHyGroups(silica,
                                        oxygens.O_delete,
-                                       Hgroup=['HO'])
+                                       Hgroup=stinfo.AtomGroup.HyGroup)
         # Drop selected O atached to the Si and if there is H atom bond to them
         # Get the O which bonded to the selected Si, to make angles and torsion
         self.Si_df: pd.DataFrame = oxygens.Si_df
