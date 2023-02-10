@@ -19,8 +19,7 @@ class GetSiGroups:
     """get silinol groups to add cahin to them"""
     def __init__(self,
                  Atoms: pd.DataFrame,  # Atoms df in form of lammps fullatom
-                 Sigroup: list[typing.Any],  # Name | index to select group[Si]
-                 fraction: float = 1  # Fraction of Silica to remove
+                 Sigroup: list[typing.Any]  # Name | index to select group[Si]
                  ) -> None:
         self.df_Si = self.__get_silica(Atoms, Sigroup)
         self.Si_delete: list[int] = [item for item in self.df_Si['atom_id']]
@@ -247,8 +246,7 @@ class GetOxGroups:
                  silica: rdlmp.ReadData,  # Atoms df in form of lammps fullatom
                  Si_OM: list[int],  # With selected group[Si] & OM bonded
                  Si_df: pd.DataFrame,  # All selected Si atoms
-                 Ogroup: list[str],  # Name groups[O] to delete
-                 fraction: float = 1  # Fraction of to select from, 0<fr<=1
+                 Ogroup: list[str]  # Name groups[O] to delete
                  ) -> None:
         self.O_delete: list[int]  # All the OD atoms to delete
         self.O_delete, self.bonded_si, self.Si_df = self.__get_oxgygen(silica,
