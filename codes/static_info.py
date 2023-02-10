@@ -55,15 +55,15 @@ class Constants:
     """The constants which are used in the script"""
     # The desire coverage for grafting on NP
     Coverage: float = 3.0
-    # The thiknes of the shell from surface to look for Si atoms
+    # The thickness of the shell from surface to look for Si atoms
     Shell_radius: float = 6.0
 
 
 class AtomGroup:
     """list of name of the atoms to work with"""
     # Si groups to find them in shell and add APTES to them
-    SiGroup: list[str] = ['SD', 'SI', 'SB']
-    # Oxygen groups which are bonded to Si on the shell, SHOULD NOT replace
+    SiGroup: list[str] = ['SD', 'SI']
+    # Oxygen groups which are bonded to Si on the shell, SHOULD NOT replace!
     OMGroup: list[str] = ['OM', 'OB']
     # Oxygen groups bonded to Si on the shell to drop 
     OxGroup: list[int] = ['OD', 'OH', 'OMH']
