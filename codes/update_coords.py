@@ -24,8 +24,7 @@ class Delete:
         drop them too"""
         # Find Si on the shell
         silicons = gtatom.GetSiGroups(silica.Atoms_df,
-                                      Sigroup=stinfo.AtomGroup.SiGroup,
-                                      fraction=1)
+                                      Sigroup=stinfo.AtomGroup.SiGroup)
         # Get OM atoms bonded to the selected Si, and drop the Si in the Body
         om_groups = gtatom.GetOmGroups(silica,
                                        silicons.df_Si,
@@ -35,8 +34,7 @@ class Delete:
         oxygens = gtatom.GetOxGroups(silica,
                                      om_groups.Si_OM,
                                      om_groups.Si_df,
-                                     Ogroup=stinfo.AtomGroup.OxGroup,
-                                     fraction=1)
+                                     Ogroup=stinfo.AtomGroup.OxGroup)
         # Get hydrogen bonded to the selected oxygen, to drop
         hydrogens = gtatom.GetHyGroups(silica,
                                        oxygens.O_delete,
