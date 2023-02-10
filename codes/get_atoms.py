@@ -1,8 +1,9 @@
 import typing
 import numpy as np
 import pandas as pd
-import read_lmp_data as rdlmp
 import pick_out_si as pickSi
+import read_lmp_data as rdlmp
+import static_info as stinfo
 from colors_text import TextColor as bcolors
 
 
@@ -74,7 +75,7 @@ class GetSiGroups:
                        radius: float  # Max radius to check the shell
                        ) -> pd.DataFrame:
         """keep the Si on the shell"""
-        df = df[(df['rho'] >= radius - 6)]
+        df = df[(df['rho'] >= radius - stinfo.Constants.Shell_radius)]
         print(f'{bcolors.OKBLUE}\tThere are: {len(df)} Si atoms in the '
               f'choosen area of the system, Max_radius = {radius:.3f}'
               f'{bcolors.ENDC}')
