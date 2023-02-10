@@ -43,7 +43,8 @@ class UpdateCharge:
             print(f'\t\tOM charges are remain unchanged!'
                   f'{bcolors.ENDC}')
         else:
-            print(f'\t\tOM charges are set to {stinfo.UpdateCharge.OM}'
+            print(f'\t\tCharges of OM bonded to the Amine groups are set '
+                  f'to {stinfo.UpdateCharge.OM}'
                   f'{bcolors.ENDC}')
             for _, row in Si_df.iterrows():
                 for ind in row['OM_list0']:
@@ -58,10 +59,11 @@ class UpdateCharge:
         in the main atoms dataframe"""
         print(f'\t{bcolors.HEADER}{self.__class__.__name__}:')
         if stinfo.UpdateCharge.SI is None:
-            print(f'\t\tSi charges are remain unchanged!'
+            print(f'\t\tSi charges that are remain unchanged!'
                   f'{bcolors.ENDC}')
         else:
-            print(f'\t\tSi charges are set to {stinfo.UpdateCharge.SI}'
+            print(f'\t\tCharges of Si bonded to the Amine groups are set '
+                  f'to {stinfo.UpdateCharge.SI}'
                   f'{bcolors.ENDC}')
             for item, _ in Si_df.iterrows():
                 atoms_df.at[item, 'charge'] = stinfo.UpdateCharge.SI
