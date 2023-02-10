@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
+import drop_om as dropOM
 import read_lmp_data as rdlmp
 import update_coords as upcord
-import drop_om as dropOM
 from colors_text import TextColor as bcolors
 
 
@@ -142,7 +142,10 @@ class PrepareAmino:
         si_df = self.__order_si_df(si_df)
         for item, row in si_df.iterrows():
             # Si from amino will be deleted later, so the rest of
-            # atoms must start on lower
+            # atoms must start on lower id
+            # I made a mistake here in working with the attributes of
+            # an external class; as a workaround, I used another class
+            # to avoid re-reading data many times.
             amino = OriginAmino(amino0)
 
             # Update the type of the atoms before anything
