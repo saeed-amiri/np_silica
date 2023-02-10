@@ -2,6 +2,7 @@ import typing
 import random
 import numpy as np
 import pandas as pd
+import static_info as stinfo
 from colors_text import TextColor as bcolors
 
 
@@ -17,7 +18,6 @@ class PickSi:
                  Si_df: pd.DataFrame,  # All the non-body Si in the radius
                  diameter: float  # The diameter of the Nanoparticles
                  ) -> None:
-        self.__de_coverage: float = 3.0  # The desire coverage
         self.__method: str = 'random'  # random or area
         self.Si_df: pd.DataFrame = self.__set_coverage(Si_df, diameter)
 
@@ -30,12 +30,12 @@ class PickSi:
         area method."""
         si_coverage: float = self.__get_coverage(Si_df, diameter)
         si_de_num: float = self.__get_si_num(diameter)
-        if si_coverage <= self.__de_coverage:
+        if si_coverage <= stinfo.Constants.Coverage:
             print(f'\n{bcolors.WARNING}{self.__class__.__name__}:'
                   f' ({self.__module__})\n'
                   f'\tGrafting all the Si gives "{si_coverage:.4f}" '
                   f'less or equal to the desire coverage '
-                  f'"{self.__de_coverage:.4f}"! Returns'
+                  f'"{stinfo.Constants.Coverage:.4f}"! Returns'
                   f'{bcolors.ENDC}')
         else:
             if self.__method == 'random':
@@ -55,7 +55,7 @@ class PickSi:
               f'\tGrafting all the Si group gives coverage of '
               f'"{si_coverage:.5f}"\n'
               f'\tDroping "{len(Si_df)-si_de_num}" Si to get the coverage'
-              f' of "{self.__de_coverage}"'
+              f' of "{stinfo.Constants.Coverage}"'
               f'{bcolors.ENDC}')
         no_od_si: list[int]  # All the Si which are not bonded to an OD
         no_od_si = self.__get_ox_list(Si_df)
@@ -112,4 +112,5 @@ class PickSi:
                      diameter: float  # The diameter of the Nanoparticles
                      ) -> float:
         """return number of Si for desire coverage of chains on the np"""
-        return int(np.floor(np.pi*self.__de_coverage*diameter*diameter)) + 1
+        return int(np.floor(
+                   np.pi*stinfo.Constants.Coverage*diameter*diameter)) + 1
