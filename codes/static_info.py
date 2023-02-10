@@ -43,7 +43,17 @@ class AtomType:
 
 
 class UpdateCharge:
-    """charges of the Si-OM groups which lost O or O&H atoms"""
+    """charges of the Si-OM groups which lost O or O&H atoms
+    If No need to change set them equal to None, ex.:
+        OM: float = None
+    """
     OM: float = -0.900
-    OMH: float = -0.900
     SI: float = 1.600
+
+
+class Constants:
+    """The constants which are used in the script"""
+    # The desire coverage for grafting on NP
+    Coverage: float = 3.0
+    # The thiknes of the shell from surface to look for Si atoms
+    Shell_radius: float = 6.0
