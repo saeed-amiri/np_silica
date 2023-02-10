@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import drop_om as dropOM
+import static_info as stinfo
 import read_lmp_data as rdlmp
 import update_coords as upcord
 from colors_text import TextColor as bcolors
@@ -17,7 +18,7 @@ class GetAmino(rdlmp.ReadData):
     """read the main Aminopropyle coordinates and put the Si position
     to zero"""
     def __init__(self) -> None:
-        fname: str = '/scratch/saeed/MyScripts/np_silica/data/aminopropyl.data'
+        fname: str = stinfo.DataFile.APTES
         super().__init__(fname)
         self.__set_attr()
         self.Si = 'Si'

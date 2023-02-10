@@ -1,5 +1,5 @@
 class Doc:
-    """All the constant values for types of the partcles"""
+    """All the constant values use in the silanization"""
 
 
 class AtomMass:
@@ -69,3 +69,8 @@ class AtomGroup:
     OxGroup: list[int] = ['OD', 'OH', 'OMH']
     # Hydrogen groups bonded to the Ox groups to drop
     HyGroup: list[str] = ['HO']
+
+
+class DataFile:
+    """Get data directory which are used in the script"""
+    APTES: str = '/scratch/saeed/MyScripts/np_silica/data/aminopropyl.data'
