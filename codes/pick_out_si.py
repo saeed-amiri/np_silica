@@ -33,9 +33,9 @@ class PickSi:
         if si_coverage <= self.__de_coverage:
             print(f'\n{bcolors.WARNING}{self.__class__.__name__}:'
                   f' ({self.__module__})\n'
-                  f'\tGrafting all the Si gives ({si_coverage:.4f}) '
+                  f'\tGrafting all the Si gives "{si_coverage:.4f}" '
                   f'less or equal to the desire coverage '
-                  f'({self.__de_coverage:.4f})! Returns.'
+                  f'"{self.__de_coverage:.4f}"! Returns'
                   f'{bcolors.ENDC}')
         else:
             if self.__method == 'random':
@@ -112,4 +112,4 @@ class PickSi:
                      diameter: float  # The diameter of the Nanoparticles
                      ) -> float:
         """return number of Si for desire coverage of chains on the np"""
-        return int(np.pi*self.__de_coverage*diameter*diameter) + 1
+        return int(np.floor(np.pi*self.__de_coverage*diameter*diameter)) + 1
