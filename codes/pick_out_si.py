@@ -6,13 +6,13 @@ from colors_text import TextColor as bcolors
 
 
 class Doc:
-    """to pick selected Si (based on radius and non-body) based on the
-    angles (theta and phi). To avoid close grafting chains on the
-    surface of the nanoparticles."""
+    """Sparse the Grafting on the top nanoparticles, randomly or with
+    any other method.
+    Right now it only uses the random sparsing!"""
 
 
 class PickSi:
-    """label each si based on thier azimuth and polar angles"""
+    """sparse the nanoparticle"""
     def __init__(self,
                  Si_df: pd.DataFrame,  # All the non-body Si in the radius
                  diameter: float  # The diameter of the Nanoparticles
