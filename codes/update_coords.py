@@ -5,7 +5,6 @@ import read_lmp_data as rdlmp
 import write_lmp as wrlmp
 import get_atoms as gtatom
 import update_charges as upcharge
-import pick_out_si as pickSi
 from colors_text import TextColor as bcolors
 
 

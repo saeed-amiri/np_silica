@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 import static_info as stinfo
 from colors_text import TextColor as bcolors

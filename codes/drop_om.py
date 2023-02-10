@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import update_coords as upcord
 from colors_text import TextColor as bcolors
 
 
