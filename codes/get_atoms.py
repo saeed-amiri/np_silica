@@ -279,7 +279,7 @@ class GetOxGroups:
         print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}: '
               f'({self.__module__})\n'
               f'\t-> There are "{len(Si_df)}" `Si` atoms bonded to the '
-              f'" `Ox` atoms\n'
+              f'`Ox` atoms\n'
               f'\t"{len(O_delete)}" `O` atoms are selcted to delete'
               f' with total charge: "{total_charge: .4f}"\n'
               f'\tThis gives the total coverage of '
