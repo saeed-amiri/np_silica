@@ -2,8 +2,8 @@ import typing
 import numpy as np
 import pandas as pd
 import pick_out_si as pickSi
-import read_lmp_data as rdlmp
 import static_info as stinfo
+import read_lmp_data as rdlmp
 from colors_text import TextColor as bcolors
 
 
