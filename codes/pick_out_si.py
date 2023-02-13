@@ -6,8 +6,8 @@ from colors_text import TextColor as bcolors
 
 
 class Doc:
-    """Sparse the Grafting on the top nanoparticles, randomly or with
-    any other method.
+    """Sparse the Grafting on the top of the nanoparticles, randomly
+    or with any other method.
     Right now it only uses the random sparsing!"""
 
 
