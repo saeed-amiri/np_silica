@@ -512,7 +512,7 @@ class UpdateBoAnDi:
         return df
 
     def __update_angles(self,
-                        Angles_df: pd.DataFrame,  # Bonds data frame
+                        Angles_df: pd.DataFrame,  # Angles data frame
                         dict_id: dict[int, int]  # Atoms ids
                         ) -> pd.DataFrame:
         """update atom indexs in the angles"""
@@ -524,7 +524,7 @@ class UpdateBoAnDi:
         return df
 
     def __update_dihedrals(self,
-                           Dihedrlas_df: pd.DataFrame,  # Bonds data frame
+                           Dihedrlas_df: pd.DataFrame,  # Dihedrals data frame
                            dict_id: dict[int, int]  # Atoms ids
                            ) -> pd.DataFrame:
         """update atom indexs in the dihedrals"""
