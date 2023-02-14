@@ -25,7 +25,15 @@ class Roughness:
                         np_data  # Data of nanoparticles in LAMMPS format
                         ) -> None:
         """Calculate the roughness by finding atoms on the shell"""
-        self.__mk_rho(np_data.Atoms_df)
+        df: pd.DataFrame = self.__mk_rho(np_data.Atoms_df)
+        df = self.__select_atoms(df)
+        print(df)
+
+    def __select_atoms(self,
+                       df: pd.DataFrame  # Select atoms inside the shell
+                       ) -> pd.DataFrame:
+        """return atoms which ate inside the shell"""
+        return df[df['rho'] >= 0]
 
     def __mk_rho(self,
                  Atoms_df: pd.DataFrame  # Atoms info in Lammps format
