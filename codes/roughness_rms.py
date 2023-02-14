@@ -19,15 +19,32 @@ class Roughness:
     def __init__(self,
                  np_data  # Data of nanoparticles in LAMMPS format
                  ) -> None:
-        self.__get_roughness(np_data)
+        self.__roughness(np_data)
 
-    def __get_roughness(self,
-                        np_data  # Data of nanoparticles in LAMMPS format
-                        ) -> None:
+    def __roughness(self,
+                    np_data  # Data of nanoparticles in LAMMPS format
+                    ) -> None:
         """Calculate the roughness by finding atoms on the shell"""
         df: pd.DataFrame = self.__mk_rho(np_data.Atoms_df)
         df = self.__select_atoms(df)
-        print(df)
+        self.rms: float = self.__get_roughness(df)
+        self.__print_info()
+        del df
+
+    def __print_info(self) -> None:
+        """print info on std"""
+        print(f'{bcolors.OKCYAN}{self.__class__.__name__}: '
+              f'({self.__module__})\n'
+              f'\tRoot mean square roughness for shell of size '
+              f'"{stinfo.Constants.Shell_radius}" is "{self.rms: .3f}"'
+              f'{bcolors.ENDC}')
+
+    def __get_roughness(self,
+                        df: pd.DataFrame  # Atoms df with select atoms
+                        ) -> float:
+        """calculate the roughness of the atoms inside the shell"""
+        rms: list[float] = list(df['rho']*df['rho'])
+        return np.sqrt(np.mean(rms))
 
     def __select_atoms(self,
                        df: pd.DataFrame  # Select atoms inside the shell
@@ -52,8 +69,6 @@ class Roughness:
                       ) -> pd.DataFrame:
         """cut the out the radius of the shell from rho to find atoms
         inside the shell"""
-        print(stinfo.Constants.Shell_radius)
-        print(np.max(Atoms_df['rho']))
         inner_r: float  # min of the shell (inner radius)
         inner_r = np.max(Atoms_df['rho'] - stinfo.Constants.Shell_radius)
         df: pd.DataFrame = Atoms_df.copy()
