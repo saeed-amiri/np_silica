@@ -278,7 +278,7 @@ class UpdateCoords:
               f'# Angle`s types: {self.NAngleTyp}\n'
               f'\t\t# Dihedrals: {self.NDihedrals}, '
               f'# Dihedral`s types: {self.NDihedralTyp}\n'
-              f'\t\tTotal charge: {self.Atoms_df["charge"].sum():.4f}\n'
+              f'\t\tTotal charge: {self.Atoms_df["charge"].sum():.3f}\n'
               f'\t\tMin charge: {self.Atoms_df["charge"].min()}\n'
               f'\t\tMax charge: {self.Atoms_df["charge"].max()}'
               f'{bcolors.ENDC}'

@@ -32,9 +32,9 @@ class PickSi:
         if si_coverage <= stinfo.Constants.Coverage:
             print(f'\n{bcolors.WARNING}{self.__class__.__name__}:'
                   f' ({self.__module__})\n'
-                  f'\tGrafting all the Si gives "{si_coverage:.4f}" '
+                  f'\tGrafting all the Si gives "{si_coverage:.3f}" '
                   f'less or equal to the desire coverage '
-                  f'"{stinfo.Constants.Coverage:.4f}"! Returns'
+                  f'"{stinfo.Constants.Coverage:.3f}"! Returns'
                   f'{bcolors.ENDC}')
         else:
             if self.__method == 'random':
