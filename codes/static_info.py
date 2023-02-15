@@ -17,6 +17,7 @@ class AtomMass:
 
 class AtomCharge:
     """atomic masses of the particles"""
+    # Charges of the silica atoms, before silanization
     N: float = 0.000
     HO: float = 0.400
     OH: float = -0.800
@@ -54,9 +55,13 @@ class UpdateCharge:
 class Constants:
     """The constants which are used in the script"""
     # The desire coverage for grafting on NP
-    Coverage: float = 3.0
+    Coverage: float = 30.0
     # The thickness of the shell from surface to look for Si atoms
     Shell_radius: float = 6.0
+    # calculate the level ups for Aminopropyl
+    OM_n: int = 4  # Number of extra atoms (Si, OM) in aminopropyl
+    Amino_OM: int = 3  # The default numbers of OM in the amino file
+
 
 
 class AtomGroup:
