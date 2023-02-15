@@ -33,12 +33,14 @@ class DropOM:
                                   OM_index,
                                   si_row,
                                   amino.Atoms_df.copy())
-
+        # print(df)
         df = self.__update_atom_ind(df, si_row['OM_list'])
         old_new_dict: dict[int, int]  # Index of new and old index of atoms
         old_new_dict = {k: v for k, v in zip(df['undrop_ind'], df['atom_id'])}
         df.drop(axis=1, columns=['undrop_ind'], inplace=True)
+
         self.Atoms_df = df
+
         bonds_df: pd.DataFrame = amino.Bonds_df.copy()
         self.Bonds_df = self.__drop_bonds(old_new_dict,
                                           bonds_df,
@@ -65,9 +67,24 @@ class DropOM:
                     atom_df.drop(axis=0, index=i, inplace=True)
         else:
             pass
+        # Check duplicacy: in case there is duplication after updating
+        atom_df = self.__OM_duplicacy_check(atom_df)
         atom_df.reset_index(inplace=True)
+        # Keep the index of all atoms before drop
         atom_df.rename(columns={'index': 'undrop_ind'}, inplace=True)
         atom_df.index += 1
+        return atom_df
+
+    def __OM_duplicacy_check(self,
+                             atom_df: pd.DataFrame  # Atoms_df of OM after ind
+                             ) -> pd.DataFrame:
+        """check if there are OM atoms with same atom index and drop
+        if so"""
+        df = atom_df[atom_df['name'] == 'OM']
+        if not df['atom_id'].is_unique:
+            atom_df.drop_duplicates(subset=['atom_id', 'name'],
+                                    keep='first',
+                                    inplace=True)
         return atom_df
 
     def __update_atom_ind(self,
@@ -80,6 +97,11 @@ class DropOM:
                 if row['atom_id'] not in OM_list:
                     df.at[item, 'atom_id'] = item
                     df.at[item, 'old_id'] = item
+        if len(df[df['name'] == 'OM']) != len(OM_list):
+            print(f'{bcolors.WARNING}{self.__class__.__name__}'
+                  f'({self.__module__}):\n'
+                  f'\tThere are more OM in amino list then the bonded'
+                  f' OM atoms{bcolors.ENDC}')
         return df
 
     def __drop_bonds(self,
