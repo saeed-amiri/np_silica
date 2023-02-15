@@ -74,6 +74,12 @@ class GetSiGroups:
                        radius: float  # Max radius to check the shell
                        ) -> pd.DataFrame:
         """keep the Si on the shell"""
+        # Check logic of the Shell size
+        if stinfo.Constants.Shell_radius > np.max(df['rho']):
+            exit(f'\t{bcolors.FAIL}Error: shell size: '
+                 f'"{stinfo.Constants.Shell_radius:.4f}" is bigger then '
+                 f'maximum radius which is: "{np.max(df["rho"]):.4f}"\n'
+                 f'{bcolors.ENDC}')
         df = df[(df['rho'] >= radius - stinfo.Constants.Shell_radius)]
         print(f'{bcolors.OKBLUE}\tThere are: {len(df)} Si atoms in the '
               f'choosen area of the system, Max_radius = {radius:.3f}'
