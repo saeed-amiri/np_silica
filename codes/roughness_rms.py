@@ -36,7 +36,7 @@ class Roughness:
         print(f'{bcolors.OKCYAN}{self.__class__.__name__}: '
               f'({self.__module__})\n'
               f'\tRoot mean square roughness for shell of size '
-              f'"{stinfo.Constants.Shell_radius}" is "{self.rms: .3f}"'
+              f'"{stinfo.Constants.Shell_radius}" is "{self.rms:.3f}"'
               f'{bcolors.ENDC}')
 
     def __get_roughness(self,
