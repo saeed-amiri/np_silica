@@ -163,7 +163,7 @@ class PrepareAmino:
                 self.__update_boandi_types(update.Dihedrals_df,
                                            amino.Dihedrals_df)
             # calculate the level ups for Aminopropyl
-            OM_n: int = 4  # Number of extra atoms (Si, OM) in aminopropyl
+            OM_n = stinfo.Constants.OM_n
             atom_level: int  # Atom id increase
             atom_level = (item - 1) * (amino.NAtoms - OM_n) + update.NAtoms
             mol_level: int = item - 1 + update.Nmols
@@ -251,7 +251,7 @@ class PrepareAmino:
                     ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame,
                                pd.DataFrame]:
         """set the atom ids based on the number of the OM in system"""
-        amino_OM: int = 3  # The default numbers of OM in the amino file
+        amino_OM = stinfo.Constants.Amino_OM
         OM_order: int = len(si_row['OM_list'])
         del_OM: int = amino_OM - OM_order  # Number of extera OM atoms
         Atoms_df = amino.Atoms_df.copy()
