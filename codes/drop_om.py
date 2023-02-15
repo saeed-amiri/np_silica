@@ -94,13 +94,13 @@ class DropOM:
         """update the index of df after OM was droped"""
         for item, row in df.iterrows():
             if row['name'] != 'Si':
-                if row['atom_id'] not in OM_list:
+                if row['name'] != 'OM':
                     df.at[item, 'atom_id'] = item
                     df.at[item, 'old_id'] = item
         if len(df[df['name'] == 'OM']) != len(OM_list):
             print(f'{bcolors.WARNING}{self.__class__.__name__}'
                   f'({self.__module__}):\n'
-                  f'\tThere are more OM in amino list then the bonded'
+                  f'\tThere are more OM in the amino list then the bonded'
                   f' OM atoms{bcolors.ENDC}')
         return df
 
