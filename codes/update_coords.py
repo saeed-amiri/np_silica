@@ -2,6 +2,7 @@ import sys
 import numpy as np
 import pandas as pd
 import write_lmp as wrlmp
+import bond_check as bchek
 import get_atoms as gtatom
 import roughness_rms as rms
 import static_info as stinfo
@@ -234,6 +235,7 @@ class UpdateCoords:
                  ) -> None:
         silica = gtatom.GetData(fname)
         rq = rms.Roughness(silica)
+        bc = bchek.CheckBond(silica)
         update = Delete(silica)
         upq = upcharge.UpdateCharge(update.UAtoms_df,
                                     update.Si_df,
