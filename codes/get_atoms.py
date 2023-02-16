@@ -76,7 +76,7 @@ class GetSiGroups:
         """keep the Si on the shell"""
         # Check logic of the Shell size
         if stinfo.Constants.Shell_radius > np.max(df['rho']):
-            print(f'\t{bcolors.WARNING}Warning: shell size: '
+            print(f'\t{bcolors.CAUTION}Warning: shell size: '
                  f'"{stinfo.Constants.Shell_radius:.3f}" is bigger then '
                  f'maximum radius which is: "{np.max(df["rho"]):.3f}"\n'
                  f'{bcolors.ENDC}')
