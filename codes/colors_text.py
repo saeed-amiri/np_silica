@@ -9,3 +9,4 @@ class TextColor:
     ENDC: str = '\033[0m'
     BOLD: str = '\033[1m'
     UNDERLINE: str = '\033[4m'
+    CAUTION: str = '\u001b[38;5;208m'
