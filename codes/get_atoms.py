@@ -77,8 +77,8 @@ class GetSiGroups:
         # Check logic of the Shell size
         if stinfo.Constants.Shell_radius > np.max(df['rho']):
             print(f'\t{bcolors.WARNING}Warning: shell size: '
-                 f'"{stinfo.Constants.Shell_radius:.4f}" is bigger then '
-                 f'maximum radius which is: "{np.max(df["rho"]):.4f}"\n'
+                 f'"{stinfo.Constants.Shell_radius:.3f}" is bigger then '
+                 f'maximum radius which is: "{np.max(df["rho"]):.3f}"\n'
                  f'{bcolors.ENDC}')
         df = df[(df['rho'] >= radius - stinfo.Constants.Shell_radius)]
         print(f'{bcolors.OKBLUE}\tThere are: {len(df)} Si atoms in the '
