@@ -61,6 +61,10 @@ class Constants:
     # calculate the level ups for Aminopropyl
     OM_n: int = 4  # Number of extra atoms (Si, OM) in aminopropyl
     Amino_OM: int = 3  # The default numbers of OM in the amino file
+    # Silicon name in Aminopropyl file:
+    SI_amino: str = 'SI'
+    # OM name in Aminopropyl file:
+    OM_amino: str = 'OM'
 
 
 
