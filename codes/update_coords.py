@@ -235,7 +235,7 @@ class UpdateCoords:
                  ) -> None:
         silica = gtatom.GetData(fname)
         rq = rms.Roughness(silica)
-        bc = bchek.CheckBond(silica)
+        # bc = bchek.CheckBond(silica)
         update = Delete(silica)
         upq = upcharge.UpdateCharge(update.UAtoms_df,
                                     update.Si_df,
