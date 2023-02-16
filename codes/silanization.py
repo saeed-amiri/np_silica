@@ -3,6 +3,7 @@ import sys
 import numpy as np
 import pandas as pd
 import write_lmp as wrlmp
+import bond_check as bchek
 import make_chains as mkchin
 import update_coords as upcord
 from colors_text import TextColor as bcolors
@@ -165,6 +166,8 @@ if __name__ == '__main__':
     amino = mkchin.GetAmino()
     up_aminos = mkchin.PrepareAmino(update, amino)
     silanized_data = ConcatAll(update, up_aminos)
+    # if need to check the bonds:
+    # bc = bchek.CheckBond(silanized_data)
     np_size: int = int(re.findall(r'\d+', fname)[0])
     fout: str = f'silanized_{np_size}nm.data'
     wrt = wrlmp.WriteLmp(obj=silanized_data, output=fout)
