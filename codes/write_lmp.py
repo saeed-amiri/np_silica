@@ -1,5 +1,4 @@
 import json
-from pprint import pprint
 import sys
 import typing
 import numpy as np
@@ -214,9 +213,12 @@ class WriteLmp(GetData):
                 df.to_csv(f, sep=' ', index=True, columns=columns, header=None)
             except KeyError:
                 columns = ['typ', 'ai', 'aj', 'cmt', 'name']
+                if 'name' not in list(df.columns):
+                    df['name'] = self.mk_boandi_name(df, ['ai', 'aj'])
+                    df['cmt'] = ['#' for _ in df.index]
                 df.to_csv(f, sep=' ', index=True, columns=columns, header=None)
             f.write(f'\n')
-            # self.write_BoAnDi_infos(df, 'bonds')
+            self.write_BoAnDi_infos(df, 'bonds')
         else:
             print(f'{bcolors.WARNING}'
                   f'\tWARNING: Bonds section is empty{bcolors.ENDC}\n')
@@ -230,10 +232,21 @@ class WriteLmp(GetData):
                 columns = ['typ', 'ai', 'aj', 'ak', 'cmt', 'name', 'type_name']
                 df.to_csv(f, sep=' ', index=True, columns=columns, header=None)
             except KeyError:
-                columns = ['typ', 'ai', 'aj', 'ak']
-                df.to_csv(f, sep=' ', index=True, columns=columns, header=None)
+                if 'name' not in list(df.columns):
+                    df['name'] = self.mk_boandi_name(df, ['ai', 'aj', 'ak'])
+                    columns = ['typ', 'ai', 'aj', 'ak', 'cmt', 'name']
+                    df['cmt'] = ['#' for _ in df.index]
+                    df.to_csv(f,
+                              sep=' ',
+                              index=True,
+                              columns=columns,
+                              header=None)
+                else:
+                    print(f'{bcolors.CAUTION}Caution:\n'
+                          f'\t There is problem in the angles datafram'
+                          f'{bcolors.ENDC}')
             f.write(f'\n')
-            # self.write_BoAnDi_infos(df, 'angles')
+            self.write_BoAnDi_infos(df, 'angles')
         else:
             print(f'{bcolors.WARNING}'
                   f'\tWARNING: Angels section is empty{bcolors.ENDC}\n')
@@ -248,13 +261,43 @@ class WriteLmp(GetData):
                            'type_name']
                 df.to_csv(f, sep=' ', index=True, columns=columns, header=None)
             except KeyError:
-                columns = ['typ', 'ai', 'aj', 'ak', 'ah']
-                df.to_csv(f, sep=' ', index=True, columns=columns, header=None)
+                if 'name' not in list(df.columns):
+                    df['name'] = self.mk_boandi_name(df, ['ai',
+                                                          'aj',
+                                                          'ak',
+                                                          'ah'])
+                    columns = ['typ', 'ai', 'aj', 'ak', 'ah', 'cmt', 'name']
+                    df['cmt'] = ['#' for _ in df.index]
+                    df.to_csv(f,
+                              sep=' ',
+                              index=True,
+                              columns=columns,
+                              header=None)
+                else:
+                    print(f'{bcolors.CAUTION}Caution:\n'
+                          f'\t There is problem in the dihedrals datafram'
+                          f'{bcolors.ENDC}')
             f.write(f'\n')
-            # self.write_BoAnDi_infos(df, 'dihedrals')
+            self.write_BoAnDi_infos(df, 'dihedrals')
         else:
             print(f'{bcolors.WARNING}'
                   f'\tWARNING: Dihedrals section is empty{bcolors.ENDC}\n')
+
+    def mk_boandi_name(self,
+                       df: pd.DataFrame,  # The dataframe
+                       a_list: list[str]  # All the atoms involved, e.g., ai...
+                       ) -> list[str]:
+        """make a name column for the bonds"""
+        atom_name: dict[int, str]  # id and name of the atoms
+        atom_name = {k: v for k, v in zip(self.obj.Atoms_df['atom_id'],
+                                          self.obj.Atoms_df['name'])}
+        name_list: list[str] = []  # Name of the bo/an/di
+        for _, row in df.iterrows():
+            names = []
+            for a in a_list:
+                names.append(atom_name[row[a]])
+            name_list.append('_'.join(names))
+        return name_list
 
     def write_comb_json(self) -> None:
         """write a json file with the update names and types for next
