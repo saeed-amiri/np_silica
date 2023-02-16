@@ -33,19 +33,18 @@ class DropOM:
                                   OM_index,
                                   si_row,
                                   amino.Atoms_df.copy())
-        # print(df)
         df = self.__update_atom_ind(df, si_row['OM_list'])
         old_new_dict: dict[int, int]  # Index of new and old index of atoms
         old_new_dict = {k: v for k, v in zip(df['undrop_ind'], df['atom_id'])}
         df.drop(axis=1, columns=['undrop_ind'], inplace=True)
 
         self.Atoms_df = df
+        del df
 
         bonds_df: pd.DataFrame = amino.Bonds_df.copy()
         self.Bonds_df = self.__drop_bonds(old_new_dict,
                                           bonds_df,
                                           OM_index)
-        del df
         angles_df: pd.DataFrame = amino.Angles_df.copy()
         self.Angles_df = self.__drop_angles(old_new_dict, OM_index, angles_df)
         dihedrals_df: pd.DataFrame = amino.Dihedrals_df.copy()
@@ -85,6 +84,10 @@ class DropOM:
             atom_df.drop_duplicates(subset=['atom_id', 'name'],
                                     keep='first',
                                     inplace=True)
+            print(f'\n{bcolors.CAUTION}{self.__class__.__name__}: '
+                  f'({self.__module__})\n'
+                  f'\tTaking care of atom_id complication in updating'
+                  f' atom_id in the aminopropyl chain{bcolors.ENDC}')
         return atom_df
 
     def __update_atom_ind(self,
