@@ -21,7 +21,7 @@ class GetAmino(rdlmp.ReadData):
         fname: str = stinfo.DataFile.APTES
         super().__init__(fname)
         self.__set_attr()
-        self.Si = 'Si'
+        self.Si = stinfo.Constants.SI_amino
         Atoms_df = self.__to_origin(self.Atoms_df)
         self.Atoms_df = self.__get_azimuths(Atoms_df)
 
@@ -77,7 +77,7 @@ class OriginAmino:
     def __init__(self,
                  amino: GetAmino,
                  ) -> None:
-        self.Si = 'Si'
+        self.Si = stinfo.Constants.SI_amino
         self.__set_attrs(amino)
 
     def __set_attrs(self,
@@ -123,8 +123,8 @@ class PrepareAmino:
                  amino: GetAmino  # Information about one aminos
                  ) -> None:
         """apply the position update to the aminos' SI & OM"""
-        self.Si = 'Si'
-        self.OM = 'OM'
+        self.Si = stinfo.Constants.SI_amino
+        self.OM = stinfo.Constants.OM_amino
         self.__update_aminos(update, amino)
         self.__write_infos()
 
@@ -280,8 +280,8 @@ class PrepareAmino:
                      ) -> pd.DataFrame:
         """drop the silicon, since it is already in the main data"""
         df: pd.DataFrame = amino_atoms.copy()
-        df.drop(amino_atoms[amino_atoms['name'] == 'Si'].index, inplace=True)
-        df.drop(amino_atoms[amino_atoms['name'] == 'OM'].index, inplace=True)
+        df.drop(amino_atoms[amino_atoms['name'] == self.Si].index, inplace=True)
+        df.drop(amino_atoms[amino_atoms['name'] == self.OM].index, inplace=True)
         df.reset_index(inplace=True)
         df.drop(columns=['index', 'old_id'], inplace=True, axis=1)
         df.index += 1
@@ -292,8 +292,8 @@ class PrepareAmino:
                           ) -> pd.DataFrame:
         """Drop Si from amino masses, it is only one Si in atoms"""
         df: pd.DataFrame = amino_masses.copy()
-        df.drop(amino_masses[amino_masses['name'] == 'Si'].index, inplace=True)
-        df.drop(amino_masses[amino_masses['name'] == 'OM'].index, inplace=True)
+        df.drop(amino_masses[amino_masses['name'] == self.Si].index, inplace=True)
+        df.drop(amino_masses[amino_masses['name'] == self.OM].index, inplace=True)
         df.reset_index(inplace=True)
         df.drop(columns=['index'], inplace=True, axis=1)
         df.index += 1
@@ -346,8 +346,8 @@ class PrepareAmino:
         Si_OM: list[str] = ['Si', 'OM']
         df: pd.DataFrame = Atoms_df.copy()
         root_n: int  # Number of atoms root of the chain (Si-OM)
-        root_n = len(Atoms_df[(Atoms_df['name'] == 'Si') |
-                     (Atoms_df['name'] == 'OM')])
+        root_n = len(Atoms_df[(Atoms_df['name'] == self.Si) |
+                     (Atoms_df['name'] == self.OM)])
         for item, row in Atoms_df.iterrows():
             if row['name'] not in Si_OM:
                 df.at[item, 'atom_id'] += atom_level - root_n
