@@ -59,7 +59,7 @@ class GetSiGroups:
               f'({self.__module__}):\n'
               f'\t"{len(df)-len(df_)}" of selected Si atoms are dropped'
               f' due to the small atom_id of Si in df (less then '
-              f'{stinfo.Constants.Num_amino}'
+              f'{stinfo.Constants.Num_amino})'
               f'{bcolors.ENDC}')
         return df_
 
@@ -162,15 +162,20 @@ class GetOmGroups:
         """Check if index of OM is less then 17: the number of atoms in
         amino atoms, as workaround for similar index problem"""
         df: pd.DataFrame = Si_df.copy()
+        df.to_csv('10nm.test', sep=' ')
         for item, row in Si_df.iterrows():
             for om in row['OM_list0']:
                 if om < stinfo.Constants.Num_amino:
-                    df.drop(axis=0, index=[item], inplace=True)
+                    try:
+                        df.drop(axis=0, index=[item], inplace=True)
+                    except KeyError:
+                        pass
+
         print(f'{bcolors.CAUTION}{self.__class__.__name__}:'
               f'({self.__module__}):\n'
               f'\t"{len(Si_df)-len(df)}" of selected Si atoms are dropped'
               f' due to the small atom_id of OM atoms in df (less then '
-              f'{stinfo.Constants.Num_amino}'
+              f'{stinfo.Constants.Num_amino})'
               f'{bcolors.ENDC}')
         return df
 
