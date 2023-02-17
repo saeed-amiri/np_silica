@@ -38,6 +38,9 @@ class GetSiGroups:
         df = self.__drop_cols(df)
         # Check if contain atoms:
         df = self.__check_si_df(df, Sigroup)
+        # Check if index of Si is less then 17: the number of atoms in
+        # amino atoms, as workaround for similar index problem
+        df = self.__check_si_id(df)
         # Get the nano particle radius:
         max_radius: float = self.__get_sys_radius(Atoms)
         # Get spherical coords for Si atoms:
@@ -45,6 +48,13 @@ class GetSiGroups:
         # Drop atom outside the shell:
         df = self.__apply_radius(df, max_radius)
         return df
+
+    def __check_si_id(self,
+                      df: pd.DataFrame  # Silcons in the silica
+                      ) -> pd.DataFrame:
+        """Check if index of Si is less then 17: the number of atoms in
+        amino atoms, as workaround for similar index problem"""
+        return df[df['atom_id'] > stinfo.Constants.Num_amino] 
 
     def __drop_cols(self,
                     df: pd.DataFrame,  # Dataframe from selected Si atoms
@@ -135,8 +145,21 @@ class GetOmGroups:
         self.Si_df: pd.DataFrame  # Si df with droped unbonded Si
         self.Si_OM: list[int]  # Si bonded to OM
         Si_df = self.__update_si_df(Si_df)
+        Si_df = self.__drop_small_id(Si_df)
         self.Si_df = self.__set_om_names(Si_df)
         self.Si_OM = self.__get_Si_OM()
+
+    def __drop_small_id(self,
+                        Si_df: pd.DataFrame  # Si_df with OM_names
+                        ) -> pd.DataFrame:
+        """Check if index of OM is less then 17: the number of atoms in
+        amino atoms, as workaround for similar index problem"""
+        df: pd.DataFrame = Si_df.copy()
+        for item, row in Si_df.iterrows():
+            for om in row['OM_list0']:
+                if om < stinfo.Constants.Num_amino:
+                    df.drop(axis=0, index=[item], inplace=True)
+        return df
 
     def __get_OM_list(self) -> list[int]:
         """return list of OM atoms"""
