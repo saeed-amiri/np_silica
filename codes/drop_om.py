@@ -56,7 +56,8 @@ class DropOM:
         dihedrals_df: pd.DataFrame = amino.Dihedrals_df.copy()
         self.Dihedrals_df = self.__drop_dihedrals(old_new_dict,
                                                   OM_index,
-                                                  dihedrals_df)
+                                                  dihedrals_df,
+                                                  self.Atoms_df)
 
     def __drop_replicate_boandi(self,
                                 df: pd.DataFrame,  # Data to check
@@ -168,27 +169,21 @@ class DropOM:
     def __drop_dihedrals(self,
                          old_new_dict: dict[int, int],  # Of old and updated id
                          OM_index: list[int],  # Index of the OM atoms
-                         df: pd.DataFrame  # Dihedrals df of amino
+                         df: pd.DataFrame,  # Dihedrals df of amino
+                         atoms_df: pd.DataFrame  # Atoms df to get names
                          ) -> pd.DataFrame:
         """drop and update dihedrals df"""
         df_ = df.copy()
         for item, row in df_.iterrows():
-            if row['ai'] in OM_index or \
-               row['aj'] in OM_index or \
-               row['ak'] in OM_index or \
-               row['ah'] in OM_index:
-                df.drop(axis=0, index=item, inplace=True)
-        del df_
-        df_ = df.copy()
-        for item, row in df_.iterrows():
-            if row['ai'] >= np.min(OM_index):
+            try:
                 df.at[item, 'ai'] = old_new_dict[row['ai']]
-            if row['aj'] >= np.min(OM_index):
                 df.at[item, 'aj'] = old_new_dict[row['aj']]
-            if row['ak'] >= np.min(OM_index):
                 df.at[item, 'ak'] = old_new_dict[row['ak']]
-            if row['ah'] >= np.min(OM_index):
                 df.at[item, 'ah'] = old_new_dict[row['ah']]
+            except KeyError:
+                df.drop(axis=0, index=item, inplace=True)
+        names = check_boandi_name(atoms_df, df, ['ai', 'aj', 'ak', 'ak'])
+        df = self.__drop_replicate_boandi(df, names)
         return df
 
     def __set_OM_info(self,
