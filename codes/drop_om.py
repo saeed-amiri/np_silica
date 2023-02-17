@@ -26,6 +26,7 @@ class DropOM:
         OM_index: list[int]  # Index of OM n amino df
         OM_index = [item for item in
                     amino.Atoms_df[amino.Atoms_df['name'] == 'OM'].index]
+
         amino.Atoms_df = self.__set_OM_info(amino.Atoms_df,
                                             si_row,
                                             OM_xyz,
@@ -38,7 +39,6 @@ class DropOM:
         old_new_dict: dict[int, int]  # Index of new and old index of atoms
         old_new_dict = {k: v for k, v in zip(df['undrop_ind'], df['atom_id'])}
         df.drop(axis=1, columns=['undrop_ind'], inplace=True)
-
         self.Atoms_df = df
         del df
 
@@ -46,11 +46,13 @@ class DropOM:
         self.Bonds_df = self.__drop_bonds(old_new_dict,
                                           bonds_df,
                                           self.Atoms_df)
+
         angles_df: pd.DataFrame = amino.Angles_df.copy()
         self.Angles_df = self.__drop_angles(old_new_dict,
                                             OM_index,
                                             angles_df,
                                             self.Atoms_df)
+
         dihedrals_df: pd.DataFrame = amino.Dihedrals_df.copy()
         self.Dihedrals_df = self.__drop_dihedrals(old_new_dict,
                                                   OM_index,
@@ -69,7 +71,7 @@ class DropOM:
             names = row['name'].split('_')
             if set(names).issubset(NP_LIST):
                 df.drop(axis=0, index=item, inplace=True)
-        # df.drop(axis=1, columns=['name'], inplace=True)
+        df.drop(axis=1, columns=['name'], inplace=True)
         return df
 
     def __drop_om_atoms(self,
@@ -213,8 +215,8 @@ def check_boandi_name(Atoms_df: pd.DataFrame,  # Updated atoms df
                       df: pd.DataFrame,  # The df to make name for
                       a_list: list[str]  # list of the atoms columns: ai, aj
                       ) -> None:
-    """check the name of the bonds, angles, dihedrals"""
-    """make a name column for the bonds"""
+    """check the name of the bonds, angles, dihedrals
+        make a name column for the bonds"""
     atom_name: dict[int, str]  # id and name of the atoms
     atom_name = {k: v for k, v in zip(Atoms_df['atom_id'],
                                       Atoms_df['name'])}
