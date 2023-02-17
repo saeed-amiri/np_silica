@@ -201,6 +201,7 @@ class PrepareAmino:
             # Append them for concatation
             Bonds_list.append(boandi.Bonds_df)
             Angles_list.append(boandi.Angles_df)
+            self.__check_boandi_name(amino.Atoms_df, boandi)
             Dihedrals_list.append(boandi.Dihedrals_df)
 
         self.All_amino_atoms = pd.concat(Atoms_list, ignore_index=True)
@@ -220,6 +221,26 @@ class PrepareAmino:
               f', {len(self.All_amino_angles)} angles'
               f', {len(self.All_amino_dihedrals)} dihedrals'
               f' is updated{bcolors.ENDC}')
+
+    def __check_boandi_name(self,
+                            Atoms_df: pd.DataFrame,  # Updated atoms df
+                            boandi  # All the data after complete update
+                            ) -> list[str]:
+        """check the name of the bonds, angles, dihedrals"""
+        """make a name column for the bonds"""
+        atom_name: dict[int, str]  # id and name of the atoms
+        atom_name = {k: v for k, v in zip(Atoms_df['atom_id'],
+                                          Atoms_df['name'])}
+        name_list: list[str] = []  # Name of the bo/an/di
+        df = boandi.Bonds_df
+        a_list = ['ai', 'aj']
+        for _, row in df.iterrows():
+            names = []
+            for a in a_list:
+                names.append(atom_name[row[a]])
+            name_list.append('_'.join(names))
+        df['name'] = name_list
+        return name_list
 
     def __set_si_id(self,
                     amino_atoms: pd.DataFrame,  # Amino Atoms information,
@@ -280,8 +301,10 @@ class PrepareAmino:
                      ) -> pd.DataFrame:
         """drop the silicon, since it is already in the main data"""
         df: pd.DataFrame = amino_atoms.copy()
-        df.drop(amino_atoms[amino_atoms['name'] == self.Si].index, inplace=True)
-        df.drop(amino_atoms[amino_atoms['name'] == self.OM].index, inplace=True)
+        df.drop(amino_atoms[amino_atoms['name'] == self.Si].index,
+                inplace=True)
+        df.drop(amino_atoms[amino_atoms['name'] == self.OM].index,
+                inplace=True)
         df.reset_index(inplace=True)
         df.drop(columns=['index', 'old_id'], inplace=True, axis=1)
         df.index += 1
@@ -292,8 +315,10 @@ class PrepareAmino:
                           ) -> pd.DataFrame:
         """Drop Si from amino masses, it is only one Si in atoms"""
         df: pd.DataFrame = amino_masses.copy()
-        df.drop(amino_masses[amino_masses['name'] == self.Si].index, inplace=True)
-        df.drop(amino_masses[amino_masses['name'] == self.OM].index, inplace=True)
+        df.drop(amino_masses[amino_masses['name'] == self.Si].index,
+                inplace=True)
+        df.drop(amino_masses[amino_masses['name'] == self.OM].index,
+                inplace=True)
         df.reset_index(inplace=True)
         df.drop(columns=['index'], inplace=True, axis=1)
         df.index += 1
@@ -343,7 +368,8 @@ class PrepareAmino:
                        ) -> pd.DataFrame:
         """update atom id and mol id of atoms in aminopropyl to append
         to silica NP"""
-        Si_OM: list[str] = ['Si', 'OM']
+        Si_OM: list[str] = [stinfo.Constants.SI_amino,
+                            stinfo.Constants.OM_amino]
         df: pd.DataFrame = Atoms_df.copy()
         root_n: int  # Number of atoms root of the chain (Si-OM)
         root_n = len(Atoms_df[(Atoms_df['name'] == self.Si) |
@@ -507,8 +533,14 @@ class UpdateBoAnDi:
         """update atom indexs in the bonds"""
         df = Bonds_df.copy()
         for item, row in Bonds_df.iterrows():
-            df.at[item, 'ai'] = dict_id[row['ai']]
-            df.at[item, 'aj'] = dict_id[row['aj']]
+            try:
+                df.at[item, 'ai'] = dict_id[row['ai']]
+            except KeyError:
+                pass
+            try:
+                df.at[item, 'aj'] = dict_id[row['aj']]
+            except KeyError:
+                pass
         return df
 
     def __update_angles(self,
@@ -518,9 +550,18 @@ class UpdateBoAnDi:
         """update atom indexs in the angles"""
         df = Angles_df.copy()
         for item, row in Angles_df.iterrows():
-            df.at[item, 'ai'] = dict_id[row['ai']]
-            df.at[item, 'aj'] = dict_id[row['aj']]
-            df.at[item, 'ak'] = dict_id[row['ak']]
+            try:
+                df.at[item, 'ai'] = dict_id[row['ai']]
+            except KeyError:
+                pass
+            try:
+                df.at[item, 'aj'] = dict_id[row['aj']]
+            except KeyError:
+                pass
+            try:
+                df.at[item, 'ak'] = dict_id[row['ak']]
+            except KeyError:
+                pass
         return df
 
     def __update_dihedrals(self,
@@ -530,8 +571,20 @@ class UpdateBoAnDi:
         """update atom indexs in the dihedrals"""
         df = Dihedrlas_df.copy()
         for item, row in Dihedrlas_df.iterrows():
-            df.at[item, 'ai'] = dict_id[row['ai']]
-            df.at[item, 'aj'] = dict_id[row['aj']]
-            df.at[item, 'ak'] = dict_id[row['ak']]
-            df.at[item, 'ah'] = dict_id[row['ah']]
+            try:
+                df.at[item, 'ai'] = dict_id[row['ai']]
+            except KeyError:
+                pass
+            try:
+                df.at[item, 'aj'] = dict_id[row['aj']]
+            except KeyError:
+                pass
+            try:
+                df.at[item, 'ak'] = dict_id[row['ak']]
+            except KeyError:
+                pass
+            try:
+                df.at[item, 'ah'] = dict_id[row['ah']]
+            except KeyError:
+                pass
         return df
