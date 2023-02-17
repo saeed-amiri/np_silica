@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import static_info as stinfo
 from colors_text import TextColor as bcolors
 
 
@@ -44,13 +45,32 @@ class DropOM:
         bonds_df: pd.DataFrame = amino.Bonds_df.copy()
         self.Bonds_df = self.__drop_bonds(old_new_dict,
                                           bonds_df,
-                                          OM_index)
+                                          self.Atoms_df)
         angles_df: pd.DataFrame = amino.Angles_df.copy()
-        self.Angles_df = self.__drop_angles(old_new_dict, OM_index, angles_df)
+        self.Angles_df = self.__drop_angles(old_new_dict,
+                                            OM_index,
+                                            angles_df,
+                                            self.Atoms_df)
         dihedrals_df: pd.DataFrame = amino.Dihedrals_df.copy()
         self.Dihedrals_df = self.__drop_dihedrals(old_new_dict,
                                                   OM_index,
                                                   dihedrals_df)
+
+    def __drop_replicate_boandi(self,
+                                df: pd.DataFrame,  # Data to check
+                                n_list: list[str]  # Name of the set
+                                ) -> pd.DataFrame:
+        """check if there is boandi which all in ['SI', 'OM']"""
+        df['name'] = n_list
+        df_ = df.copy()
+        NP_LIST: list[str]  # Name of the amino's root in nanoparticles
+        NP_LIST = [stinfo.Constants.SI_amino, stinfo.Constants.OM_amino]
+        for item, row in df_.iterrows():
+            names = row['name'].split('_')
+            if set(names).issubset(NP_LIST):
+                df.drop(axis=0, index=item, inplace=True)
+        # df.drop(axis=1, columns=['name'], inplace=True)
+        return df
 
     def __drop_om_atoms(self,
                         del_OM: int,  # Number of OM to drop
@@ -96,7 +116,7 @@ class DropOM:
                           ) -> pd.DataFrame:
         """update the index of df after OM was droped"""
         for item, row in df.iterrows():
-            if row['name'] != 'Si':
+            if row['name'] != stinfo.Constants.SI_amino:
                 if row['name'] != 'OM':
                     df.at[item, 'atom_id'] = item
                     df.at[item, 'old_id'] = item
@@ -110,43 +130,37 @@ class DropOM:
     def __drop_bonds(self,
                      old_new_dict: dict[int, int],  # Of old and updated index
                      df: pd.DataFrame,  # Bonds df of amino
-                     OM_index: list[int]  # Index of the OM atoms
+                     atoms_df: pd.DataFrame  # Atoms df
                      ) -> pd.DataFrame:
         """drop and update bonds df"""
         df_ = df.copy()
         for item, row in df_.iterrows():
-            if row['ai'] in OM_index or row['aj'] in OM_index:
-                df.drop(axis=0, index=item, inplace=True)
-        del df_
-        df_ = df.copy()
-        for item, row in df_.iterrows():
-            if row['ai'] >= np.min(OM_index):
+            try:
                 df.at[item, 'ai'] = old_new_dict[row['ai']]
-            if row['aj'] >= np.min(OM_index):
                 df.at[item, 'aj'] = old_new_dict[row['aj']]
+            except KeyError:
+                df.drop(axis=0, index=item, inplace=True)
+        names = check_boandi_name(atoms_df, df, ['ai', 'aj'])
+        df = self.__drop_replicate_boandi(df, names)
         return df
 
     def __drop_angles(self,
                       old_new_dict: dict[int, int],  # Of old and updated index
                       OM_index: list[int],  # Index of the OM atoms
-                      df: pd.DataFrame  # Angles df of amino
+                      df: pd.DataFrame,  # Angles df of amino
+                      atoms_df: pd.DataFrame  # Atoms df to get the names
                       ) -> pd.DataFrame:
         """drop and update angles df"""
         df_ = df.copy()
         for item, row in df_.iterrows():
-            if row['ai'] in OM_index or \
-               row['aj'] in OM_index or \
-               row['ak'] in OM_index:
-                df.drop(axis=0, index=item, inplace=True)
-        del df_
-        df_ = df.copy()
-        for item, row in df_.iterrows():
-            if row['ai'] >= np.min(OM_index):
+            try:
                 df.at[item, 'ai'] = old_new_dict[row['ai']]
-            if row['aj'] >= np.min(OM_index):
                 df.at[item, 'aj'] = old_new_dict[row['aj']]
-            if row['ak'] >= np.min(OM_index):
                 df.at[item, 'ak'] = old_new_dict[row['ak']]
+            except KeyError:
+                df.drop(axis=0, index=item, inplace=True)
+        names = check_boandi_name(atoms_df, df, ['ai', 'aj', 'ak'])
+        df = self.__drop_replicate_boandi(df, names)
         return df
 
     def __drop_dihedrals(self,
@@ -193,3 +207,22 @@ class DropOM:
                 df.at[k, col] = OM_row[col][j]
             del OM_row
         return df
+
+
+def check_boandi_name(Atoms_df: pd.DataFrame,  # Updated atoms df
+                      df: pd.DataFrame,  # The df to make name for
+                      a_list: list[str]  # list of the atoms columns: ai, aj
+                      ) -> None:
+    """check the name of the bonds, angles, dihedrals"""
+    """make a name column for the bonds"""
+    atom_name: dict[int, str]  # id and name of the atoms
+    atom_name = {k: v for k, v in zip(Atoms_df['atom_id'],
+                                      Atoms_df['name'])}
+    name_list: list[str] = []  # Name of the bo/an/di
+    for _, row in df.iterrows():
+        names = []
+        for a in a_list:
+            names.append(atom_name[row[a]])
+        name_list.append('_'.join(names))
+    df['name'] = name_list
+    return name_list
