@@ -55,7 +55,7 @@ class UpdateCharge:
 class Constants:
     """The constants which are used in the script"""
     # The desire coverage for grafting on NP
-    Coverage: float = 1.0
+    Coverage: float = 3.0
     # The thickness of the shell from surface to look for Si atoms
     Shell_radius: float = 6.0
     # calculate the level ups for Aminopropyl
@@ -65,6 +65,8 @@ class Constants:
     SI_amino: str = 'SI'
     # OM name in Aminopropyl file:
     OM_amino: str = 'OM'
+    # total number of atoms in aminoproyl file
+    Num_amino: int = 17
 
 
 
