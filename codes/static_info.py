@@ -1,5 +1,4 @@
-class Doc:
-    """All the constant values use in the silanization"""
+"""All the constant values use in the silanization"""
 
 
 class AtomMass:
