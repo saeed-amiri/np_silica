@@ -34,7 +34,7 @@ class Delete:
         # Get Ox atoms, which should drop and replace
         oxygens = gtatom.GetOxGroups(silica,
                                      om_groups.Si_OM,
-                                     om_groups.Si_df,
+                                     om_groups.si_df,
                                      Ogroup=stinfo.AtomGroup.OxGroup)
         # Get hydrogen bonded to the selected oxygen, to drop
         hydrogens = gtatom.GetHyGroups(silica,
@@ -42,7 +42,7 @@ class Delete:
                                        h_group=stinfo.AtomGroup.HyGroup)
         # Drop selected O atached to the Si and if there is H atom bond to them
         # Get the O which bonded to the selected Si, to make angles and torsion
-        self.Si_df: pd.DataFrame = oxygens.Si_df
+        self.si_df: pd.DataFrame = oxygens.si_df
         self.old_new_dict: dict[int, int] = \
             self.__delete_all(silica, oxygens, hydrogens.h_delete, om_groups)
 
@@ -71,8 +71,8 @@ class Delete:
         self.UAngles_df = self.__update_angles(silica.Angles_df,
                                                old_new_dict,
                                                delete_group)
-        USi_df = self.__update_selected_Si(old_new_dict)
-        self.USi_df = self.__append_om(USi_df,
+        Usi_df = self.__update_selected_Si(old_new_dict)
+        self.Usi_df = self.__append_om(Usi_df,
                                        old_new_dict,
                                        om_groups.replace_oxy)
         return old_new_dict
@@ -81,7 +81,7 @@ class Delete:
                              old_new_dict: dict[int, int]  # old:new atom id
                              ) -> pd.DataFrame:
         """update atom index of the deleted atoms indes"""
-        df: pd.DataFrame = self.Si_df.copy()
+        df: pd.DataFrame = self.si_df.copy()
         new_ai = []  # New index for ai
         for item, _ in df.iterrows():
             new_ai.append(old_new_dict[item])
@@ -121,16 +121,16 @@ class Delete:
         return Atoms_df
 
     def __append_om(self,
-                    Si_df: pd.DataFrame,  # Updated Si df
+                    si_df: pd.DataFrame,  # Updated Si df
                     old_new_dict: dict[int, int],  # old: new atom id
                     replace_oxy: dict[int, list[int]]  # Si atoms with O atoms
                     ) -> pd.DataFrame:
         """append indices of OM atoms which are bonded to the Si"""
         om: dict[int, list[int]] = self.__update_om_id(old_new_dict,
                                                        replace_oxy)
-        df: pd.DataFrame = Si_df.copy()
+        df: pd.DataFrame = si_df.copy()
         df['OM_list'] = [None for _ in df.index]
-        for item, row in Si_df.iterrows():
+        for item, row in si_df.iterrows():
             df.at[item, 'OM_list'] = om[row['atom_id']]
         return df
 
@@ -237,7 +237,7 @@ class UpdateCoords:
         # bc = bchek.CheckBond(silica)
         update = Delete(silica)
         upq = upcharge.UpdateCharge(update.UAtoms_df,
-                                    update.Si_df,
+                                    update.si_df,
                                     update.old_new_dict)
         self.__set_attrs(silica, update, upq)
         self.__write_infos()
@@ -253,7 +253,7 @@ class UpdateCoords:
         self.Bonds_df = update.UBonds_df
         self.Angles_df = update.UAngles_df
         self.Masses_df = silica.Masses_df
-        self.Si_df = update.USi_df
+        self.si_df = update.Usi_df
         self.NAtoms = len(update.UAtoms_df)
         self.Nmols = np.max(update.UAtoms_df['mol'])
         self.Dihedrals_df = self.__set_dihedrlas()

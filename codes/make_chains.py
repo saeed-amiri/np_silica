@@ -134,7 +134,7 @@ class PrepareAmino:
                         ) -> None:
         """do"""
         si_df: pd.DataFrame  # Si groups with rotation angles
-        si_df = update.Si_df
+        si_df = update.si_df
         # Lists to append updated aminos to be replaced
         Atoms_list: list[pd.DataFrame] = []  # Keep all the aminos to concate
         Bonds_list: list[pd.DataFrame] = []  # Keep all the aminos to concate
