@@ -1,14 +1,13 @@
+"""Sparse the Grafting on the top of the nanoparticles, randomly
+    or with any other method.
+    Right now it only uses the random sparsing!"""
+
+
 import random
 import numpy as np
 import pandas as pd
 import static_info as stinfo
 from colors_text import TextColor as bcolors
-
-
-class Doc:
-    """Sparse the Grafting on the top of the nanoparticles, randomly
-    or with any other method.
-    Right now it only uses the random sparsing!"""
 
 
 class PickSi:
@@ -40,7 +39,7 @@ class PickSi:
             if self.__method == 'random':
                 si_df = self.__random_sparse(si_df, si_de_num, si_coverage)
             else:
-                si_df = self.__set_lables(si_df, diameter)
+                self.__set_lables(si_df)
         return si_df
 
     def __random_sparse(self,
@@ -60,11 +59,11 @@ class PickSi:
         no_od_si = self.__get_ox_list(si_df)
         drop_si: list[int]  # Si id to drop from the si_df
         drop_si = random.sample(no_od_si, len(si_df)-si_de_num)
-        df: pd.DataFrame = si_df.copy()
+        df_c: pd.DataFrame = si_df.copy()
         for item in si_df['atom_id']:
             if item in drop_si:
-                df.drop(axis=0, index=item, inplace=True)
-        return df
+                df_c.drop(axis=0, index=item, inplace=True)
+        return df_c
 
     def __get_ox_list(self,
                       si_df: pd.DataFrame  # Si df
@@ -75,18 +74,17 @@ class PickSi:
                 si_df['Ox_drop_name'][item] != 'OD']
 
     def __set_lables(self,
-                     si_df: pd.DataFrame,  # All the non-body Si in the radius
-                     diameter: float  # The diameter of the Nanoparticles
-                     ) -> pd.DataFrame:
+                     si_df: pd.DataFrame  # All the non-body Si in the radius
+                     ) -> None:
         """adding label to all the Si in the dataframe"""
-        N: int = 112
+        n_si: int = 112
         counter: int = 0
         az_list: list[int] = []
         for _, row in si_df.iterrows():
             label_flag: bool = False
             theta_i: float = -np.pi
-            for i in range(N):
-                theta = 2*np.pi/N + theta_i
+            for i in range(n_si):
+                theta = 2*np.pi/n_si + theta_i
                 if row['azimuth'] < theta and row['azimuth'] >= theta_i:
                     label_flag = True
                     counter += 1
