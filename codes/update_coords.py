@@ -5,7 +5,6 @@ import sys
 import numpy as np
 import pandas as pd
 import write_lmp as wrlmp
-import bond_check as bchek
 import get_atoms as gtatom
 import roughness_rms as rms
 import static_info as stinfo
@@ -29,13 +28,13 @@ class Delete:
         # Get OM atoms bonded to the selected Si, and drop the Si in the Body
         om_groups = gtatom.GetOmGroups(silica,
                                        silicons.df_Si,
-                                       OMgroup=stinfo.AtomGroup.OMGroup
+                                       om_group=stinfo.AtomGroup.OMGroup
                                        )
         # Get Ox atoms, which should drop and replace
         oxygens = gtatom.GetOxGroups(silica,
                                      om_groups.Si_OM,
                                      om_groups.si_df,
-                                     Ogroup=stinfo.AtomGroup.OxGroup)
+                                     o_group=stinfo.AtomGroup.OxGroup)
         # Get hydrogen bonded to the selected oxygen, to drop
         hydrogens = gtatom.GetHyGroups(silica,
                                        oxygens.o_delete,
@@ -71,13 +70,13 @@ class Delete:
         self.UAngles_df = self.__update_angles(silica.Angles_df,
                                                old_new_dict,
                                                delete_group)
-        Usi_df = self.__update_selected_Si(old_new_dict)
+        Usi_df = self.__update_selected_si(old_new_dict)
         self.Usi_df = self.__append_om(Usi_df,
                                        old_new_dict,
                                        om_groups.replace_oxy)
         return old_new_dict
 
-    def __update_selected_Si(self,
+    def __update_selected_si(self,
                              old_new_dict: dict[int, int]  # old:new atom id
                              ) -> pd.DataFrame:
         """update atom index of the deleted atoms indes"""
@@ -233,29 +232,28 @@ class UpdateCoords:
                  fname: str,  # Main data
                  ) -> None:
         silica = gtatom.GetData(fname)
-        rq = rms.Roughness(silica)
-        # bc = bchek.CheckBond(silica)
-        update = Delete(silica)
-        upq = upcharge.UpdateCharge(update.UAtoms_df,
-                                    update.si_df,
-                                    update.old_new_dict)
-        self.__set_attrs(silica, update, upq)
+        rms.Roughness(silica)
+        up_data = Delete(silica)
+        upq = upcharge.UpdateCharge(up_data.UAtoms_df,
+                                    up_data.si_df,
+                                    up_data.old_new_dict)
+        self.__set_attrs(silica, up_data, upq)
         self.__write_infos()
 
     def __set_attrs(self,
                     silica: gtatom.GetData,  # Tha main data
-                    update: Delete,  # All the data read from file
-                    upq: upcharge.UpdateCharge  # Atoms with updated charges
+                    up_data: Delete,  # All the data read from file
+                    upq: upcharge.UpdateCharge  # Atoms with up_datad charges
                     ) -> None:
-        """update all the attrs"""
+        """up_data all the attrs"""
         self.Atoms_df = upq.Atoms_df
-        self.Velocities_df = update.UVelocities
-        self.Bonds_df = update.UBonds_df
-        self.Angles_df = update.UAngles_df
+        self.Velocities_df = up_data.UVelocities
+        self.Bonds_df = up_data.UBonds_df
+        self.Angles_df = up_data.UAngles_df
         self.Masses_df = silica.Masses_df
-        self.si_df = update.Usi_df
-        self.NAtoms = len(update.UAtoms_df)
-        self.Nmols = np.max(update.UAtoms_df['mol'])
+        self.si_df = up_data.Usi_df
+        self.NAtoms = len(up_data.UAtoms_df)
+        self.Nmols = np.max(up_data.UAtoms_df['mol'])
         self.Dihedrals_df = self.__set_dihedrlas()
         self.NAtomTyp: int = np.max(self.Masses_df['typ'])
         self.NBonds: int = len(self.Bonds_df)
@@ -289,7 +287,7 @@ class UpdateCoords:
 
 
 if __name__ == '__main__':
-    fname = sys.argv[1]
-    update = UpdateCoords(fname)
+    F_NAME = sys.argv[1]
+    update = UpdateCoords(F_NAME)
     wrt = wrlmp.WriteLmp(obj=update, output='after_del.data')
     wrt.write_lmp()
