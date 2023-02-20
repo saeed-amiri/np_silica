@@ -69,15 +69,14 @@ class Constants:
     Num_amino: int = 17
 
 
-
 class AtomGroup:
     """list of name of the atoms to work with"""
     # Si groups to find them in shell and add APTES to them
     SiGroup: list[str] = ['SD', 'SI']
     # Oxygen groups which are bonded to Si on the shell, SHOULD NOT replace!
     OMGroup: list[str] = ['OM', 'OB']
-    # Oxygen groups bonded to Si on the shell to drop 
-    OxGroup: list[int] = ['OD', 'OH', 'OMH']
+    # Oxygen groups bonded to Si on the shell to drop
+    OxGroup: list[str] = ['OD', 'OH', 'OMH']
     # Hydrogen groups bonded to the Ox groups to drop
     HyGroup: list[str] = ['HO']
 
