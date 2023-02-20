@@ -58,7 +58,7 @@ class Roughness:
         """calculate and add rho column (distance from origin) of all
         the atom"""
         df: pd.DataFrame = Atoms_df.copy()
-        df['rho']: list[float] = [-1 for _ in df['atom_id']]
+        df['rho']: list[int] = [-1 for _ in df['atom_id']]
         for item, row in Atoms_df.iterrows():
             df.at[item, 'rho'] = self.__get_rho(row['x'], row['y'], row['z'])
         df = self.__apply_shell(df)
