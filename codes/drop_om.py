@@ -212,13 +212,12 @@ def check_boandi_name(Atoms_df: pd.DataFrame,  # Updated atoms df
     """check the name of the bonds, angles, dihedrals
         make a name column for the bonds"""
     atom_name: dict[int, str]  # id and name of the atoms
-    atom_name = {k: v for k, v in zip(Atoms_df['atom_id'],
-                                      Atoms_df['name'])}
+    atom_name = dict(zip(Atoms_df['atom_id'], Atoms_df['name']))
     name_list: list[str] = []  # Name of the bo/an/di
     for _, row in df.iterrows():
         names = []
-        for a in a_list:
-            names.append(atom_name[row[a]])
+        for a_i in a_list:
+            names.append(atom_name[row[a_i]])
         name_list.append('_'.join(names))
     df['name'] = name_list
     return name_list
