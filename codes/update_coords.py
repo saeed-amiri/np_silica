@@ -1,3 +1,6 @@
+"""read data files and update positions and index of them"""
+
+
 import sys
 import numpy as np
 import pandas as pd
@@ -9,10 +12,6 @@ import static_info as stinfo
 import read_lmp_data as rdlmp
 import update_charges as upcharge
 from colors_text import TextColor as bcolors
-
-
-class Doc:
-    """read data files and update positions and index of them"""
 
 
 class Delete:
