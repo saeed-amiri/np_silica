@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 import static_info as stinfo
 from colors_text import TextColor as bcolors
@@ -209,7 +208,7 @@ class DropOM:
 def check_boandi_name(Atoms_df: pd.DataFrame,  # Updated atoms df
                       df: pd.DataFrame,  # The df to make name for
                       a_list: list[str]  # list of the atoms columns: ai, aj
-                      ) -> None:
+                      ) -> list[str]:
     """check the name of the bonds, angles, dihedrals
         make a name column for the bonds"""
     atom_name: dict[int, str]  # id and name of the atoms
