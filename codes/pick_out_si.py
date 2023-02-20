@@ -28,7 +28,7 @@ class PickSi:
         eliminating some of the Si from the data frame or based on the
         area method."""
         si_coverage: float = self.__get_coverage(Si_df, diameter)
-        si_de_num: float = self.__get_si_num(diameter)
+        si_de_num: int = self.__get_si_num(diameter)
         if si_coverage <= stinfo.Constants.Coverage:
             print(f'\n{bcolors.WARNING}{self.__class__.__name__}:'
                   f' ({self.__module__})\n'
@@ -79,11 +79,10 @@ class PickSi:
                      diameter: float  # The diameter of the Nanoparticles
                      ) -> pd.DataFrame:
         """adding label to all the Si in the dataframe"""
-        si_coverage: float = self.__get_coverage(Si_df, diameter)
         N: int = 112
         counter: int = 0
-        az_list: list[float] = []
-        for item, row in Si_df.iterrows():
+        az_list: list[int] = []
+        for _, row in Si_df.iterrows():
             label_flag: bool = False
             theta_i: float = -np.pi
             for i in range(N):
@@ -109,7 +108,7 @@ class PickSi:
 
     def __get_si_num(self,
                      diameter: float  # The diameter of the Nanoparticles
-                     ) -> float:
+                     ) -> int:
         """return number of Si for desire coverage of chains on the np"""
         return int(np.floor(
                    np.pi*stinfo.Constants.Coverage*diameter*diameter)) + 1
