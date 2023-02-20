@@ -1,9 +1,6 @@
-import typing
 import numpy as np
 import pandas as pd
-import concurrent.futures
 import read_lmp_data as rdlmp
-from colors_text import TextColor as bcolors
 
 
 class Doc:
@@ -18,7 +15,7 @@ class Doc:
 class CheckBond:
     """calculate all length of all the bonds"""
     def __init__(self,
-                 data: rdlmp.ReadData  # In the form of the LAMMPS data, Atoms_df, Bonds_df
+                 data: rdlmp.ReadData  # In the form of the LAMMPS data
                  ) -> None:
         self.__check_bonds(data)
 
@@ -48,6 +45,6 @@ class CheckBond:
                    a_j: pd.DataFrame  # atom a_j in the bond
                    ) -> float:
         """claculate the length of bond between atom a_i and a_j"""
-        p1 = np.array([a_i['x'], a_i['y'],a_i['z']])
-        p2 = np.array([a_j['x'], a_j['y'],a_j['z']])
+        p1 = np.array([a_i['x'], a_i['y'], a_i['z']])
+        p2 = np.array([a_j['x'], a_j['y'], a_j['z']])
         return np.linalg.norm(p1 - p2)
