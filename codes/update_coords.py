@@ -26,7 +26,7 @@ class Delete:
         drop them too"""
         # Find Si on the shell
         silicons = gtatom.GetSiGroups(silica.Atoms_df,
-                                      Sigroup=stinfo.AtomGroup.SiGroup)
+                                      si_group=stinfo.AtomGroup.SiGroup)
         # Get OM atoms bonded to the selected Si, and drop the Si in the Body
         om_groups = gtatom.GetOmGroups(silica,
                                        silicons.df_Si,
@@ -39,18 +39,18 @@ class Delete:
                                      Ogroup=stinfo.AtomGroup.OxGroup)
         # Get hydrogen bonded to the selected oxygen, to drop
         hydrogens = gtatom.GetHyGroups(silica,
-                                       oxygens.O_delete,
-                                       Hgroup=stinfo.AtomGroup.HyGroup)
+                                       oxygens.o_delete,
+                                       h_group=stinfo.AtomGroup.HyGroup)
         # Drop selected O atached to the Si and if there is H atom bond to them
         # Get the O which bonded to the selected Si, to make angles and torsion
         self.Si_df: pd.DataFrame = oxygens.Si_df
         self.old_new_dict: dict[int, int] = \
-            self.__delete_all(silica, oxygens, hydrogens.H_delete, om_groups)
+            self.__delete_all(silica, oxygens, hydrogens.h_delete, om_groups)
 
     def __delete_all(self,
                      silica: rdlmp.ReadData,  # Data from LAMMPS
                      oxygens: gtatom.GetOxGroups,  # Index of O atoms to delete
-                     H_delete: list[int],  # Index of H atoms to delete
+                     h_delete: list[int],  # Index of H atoms to delete
                      om_groups: gtatom.GetOmGroups  # O atoms to replace
                      ) -> dict[int, int]:
         old_new_dict: dict[int, int]  # new and old index of updated atoms df
@@ -59,8 +59,8 @@ class Delete:
         self.UBonds_df: pd.DataFrame  # Bonds with updated atoms' index
         self.UAngles_df: pd.DataFrame  # Angles with updated atoms' index
         delete_group: list[int] = []  # To extend all selected atoms
-        delete_group.extend(oxygens.O_delete)
-        delete_group.extend(H_delete)
+        delete_group.extend(oxygens.o_delete)
+        delete_group.extend(h_delete)
         old_new_dict, self.UAtoms_df = self.__update_atoms(silica,
                                                            delete_group)
         self.UVelocities = self.__update_velocities(silica.Velocities_df,
