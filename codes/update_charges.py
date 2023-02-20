@@ -1,11 +1,10 @@
+"""update charges in the data file in which all the selected atoms
+    are removed and prepared for the silanizations"""
+
+
 import pandas as pd
 import static_info as stinfo
 from colors_text import TextColor as bcolors
-
-
-class Doc:
-    """update charges in the data file in which all the selected atoms
-    are removed and prepared for the silanizations"""
 
 
 class UpdateCharge:
@@ -90,13 +89,13 @@ class UpdateCharge:
         after the omission of Ox and H atoms"""
         df: pd.DataFrame = si_df.copy()
         df['OM_list_old'] = df['OM_list0']
-        OM_list: list[int]  # To append new atom_id
+        om_list: list[int]  # To append new atom_id
         for item, row in si_df.iterrows():
-            OM_list = []
+            om_list = []
             for ind in row['OM_list0']:
-                OM_list.append(old_new_dict[ind])
-            df.at[item, 'OM_list0'] = OM_list
-            del OM_list
+                om_list.append(old_new_dict[ind])
+            df.at[item, 'OM_list0'] = om_list
+            del om_list
         return df
 
     def __clean_si_df(self,
