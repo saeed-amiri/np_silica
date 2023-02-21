@@ -15,6 +15,7 @@ class UpdateCharge:
                  old_new_dict: dict[int, int]  # Old: new atoms id
                  ) -> None:
         self.Atoms_df: pd.DataFrame  # Atoms with updated charges
+        self.__update_si_df(si_df)
         self.Atoms_df = self.__update_charges(atoms_df, si_df, old_new_dict)
 
     def __update_charges(self,
@@ -28,6 +29,33 @@ class UpdateCharge:
         atoms_df = self.__update_si_charge(si_df, atoms_df)
         atoms_df = self.__update_om_charge(si_df, atoms_df)
         return atoms_df
+
+    def __update_si_df(self,
+                       si_df: pd.DataFrame  # Si_df, selected for adding chains
+                       ) -> pd.DataFrame:
+        """get all the O bonded to the selected Si to update thier
+        charges"""
+        df_c: pd.DataFrame = si_df.copy()
+        df_c['OM_q_list'] = [None for _ in si_df.index]
+        for item, row in si_df.iterrows():
+            if len(row['OM_replace']) == 3:
+                df_c.at[item, 'OM_q_list'] = row['OM_replace']
+            elif len(row['OM_name']) < 3:
+                df_c.at[item, 'OM_q_list'] = self.__get_undrop_ox(row)
+        return df_c
+
+    def __get_undrop_ox(self,
+                        row: pd.DataFrame  # A row of si_df to get the Ox
+                        ) -> list[int]:
+        """get the undrop ox from ox_list and add it(them) with
+        OM_replace to a new list and return for OM_q_list"""
+        # print(row['Ox_list'], row['Ox_drop'])
+        undrop_ox: list[int]  # List of undroped Ox
+        undrop_ox = [item for item in row['Ox_list'] if item != row['Ox_drop']]
+        om_q_list: list[int] = []
+        om_q_list.extend(row['OM_replace'])
+        om_q_list.extend(undrop_ox)
+        return om_q_list
 
     def __update_om_charge(self,
                            si_df: pd.DataFrame,  # With updated atoms id
@@ -45,7 +73,6 @@ class UpdateCharge:
                   f'to {stinfo.UpdateCharge.OM}'
                   f'{bcolors.ENDC}')
             for _, row in si_df.iterrows():
-                # print(row['OM_replace'])
                 for ind in row['OM_replace']:
                     atoms_df.at[ind, 'charge'] = stinfo.UpdateCharge.OM
         return atoms_df
