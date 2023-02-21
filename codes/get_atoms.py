@@ -157,7 +157,6 @@ class GetOmGroups:
         self.replace_oxy, self.replace_oxy_name = self.__get_omgroups(silica,
                                                                       si_df,
                                                                       om_group)
-        print(self.replace_oxy)
         self.OM_list: list[int] = self.__get_OM_list()  # All OM atoms
         self.si_df: pd.DataFrame  # Si df with droped unbonded Si
         self.Si_OM: list[int]  # Si bonded to OM
@@ -172,7 +171,6 @@ class GetOmGroups:
         """Check if index of OM is less then 17: the number of atoms in
         amino atoms, as workaround for similar index problem"""
         df: pd.DataFrame = si_df.copy()
-        df.to_csv('10nm.test', sep=' ')
         for item, row in si_df.iterrows():
             for om in row['OM_replace']:
                 if om < stinfo.Constants.Num_amino:
