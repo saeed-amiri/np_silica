@@ -157,6 +157,7 @@ class GetOmGroups:
         self.replace_oxy, self.replace_oxy_name = self.__get_omgroups(silica,
                                                                       si_df,
                                                                       om_group)
+        print(self.replace_oxy)
         self.OM_list: list[int] = self.__get_OM_list()  # All OM atoms
         self.si_df: pd.DataFrame  # Si df with droped unbonded Si
         self.Si_OM: list[int]  # Si bonded to OM
@@ -173,7 +174,7 @@ class GetOmGroups:
         df: pd.DataFrame = si_df.copy()
         df.to_csv('10nm.test', sep=' ')
         for item, row in si_df.iterrows():
-            for om in row['OM_list0']:
+            for om in row['OM_replace']:
                 if om < stinfo.Constants.Num_amino:
                     try:
                         df.drop(axis=0, index=[item], inplace=True)
@@ -255,15 +256,15 @@ class GetOmGroups:
         """drop the silicons which are not bonded from si_df and/or
         have more then three OM bonds, which means they are body Si"""
         df: pd.DataFrame = si_df.copy()
-        df['OM_list0']: list[typing.Any]  # Index of OM atoms bonded to the Si
-        df['OM_list0'] = [None for _ in self.replace_oxy]
+        df['OM_replace']: list[typing.Any]  # Index of OM atoms bonded to the Si
+        df['OM_replace'] = [None for _ in self.replace_oxy]
         for item, _ in si_df.iterrows():
             if item not in self.replace_oxy.keys():
                 df.drop(index=[item], axis=0, inplace=True)
             elif len(self.replace_oxy[item]) > 3:
                 df.drop(index=[item], axis=0, inplace=True)
             else:
-                df.at[item, 'OM_list0'] = self.replace_oxy[item]
+                df.at[item, 'OM_replace'] = self.replace_oxy[item]
         print(f'{bcolors.OKBLUE}'
               f'\tThere are {len(df)} `Si` atoms bonded to less then '
               f'three OM atoms{bcolors.ENDC}\n')

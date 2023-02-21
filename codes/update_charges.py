@@ -45,7 +45,8 @@ class UpdateCharge:
                   f'to {stinfo.UpdateCharge.OM}'
                   f'{bcolors.ENDC}')
             for _, row in si_df.iterrows():
-                for ind in row['OM_list0']:
+                # print(row['OM_replace'])
+                for ind in row['OM_replace']:
                     atoms_df.at[ind, 'charge'] = stinfo.UpdateCharge.OM
         return atoms_df
 
@@ -88,13 +89,13 @@ class UpdateCharge:
         """update the atom_id of the OM atoms in the list with new ones
         after the omission of Ox and H atoms"""
         df: pd.DataFrame = si_df.copy()
-        df['OM_list_old'] = df['OM_list0']
+        df['OM_list_old'] = df['OM_replace']
         om_list: list[int]  # To append new atom_id
         for item, row in si_df.iterrows():
             om_list = []
-            for ind in row['OM_list0']:
+            for ind in row['OM_replace']:
                 om_list.append(old_new_dict[ind])
-            df.at[item, 'OM_list0'] = om_list
+            df.at[item, 'OM_replace'] = om_list
             del om_list
         return df
 
