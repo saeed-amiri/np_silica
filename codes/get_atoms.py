@@ -330,12 +330,14 @@ class GetOxGroups:
         si_df = pick.si_df
         o_delete = list(si_df['Ox_drop'])
         total_charge: float = self.__get_charges(df_o, o_delete)
+        df_od: pd.DataFrame = si_df[si_df['Ox_drop_name'] == 'OD']
         print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}: '
               f'({self.__module__})\n'
               f'\t-> There are "{len(si_df)}" `Si` atoms bonded to the '
               f'`Ox` atoms\n'
               f'\t"{len(o_delete)}" `O` atoms are selcted to delete'
               f' with total charge: "{total_charge: .4f}"\n'
+              f'\t["{len(df_od)}" `OD` atoms with charge -1.0]\n'
               f'\tThis gives the total coverage of '
               f'"{len(si_df)/(np.pi*silica.diameter*silica.diameter):.4f}"'
               f'{bcolors.ENDC}')
