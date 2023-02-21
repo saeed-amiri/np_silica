@@ -15,7 +15,7 @@ class UpdateCharge:
                  old_new_dict: dict[int, int]  # Old: new atoms id
                  ) -> None:
         self.Atoms_df: pd.DataFrame  # Atoms with updated charges
-        self.__update_si_df(si_df)
+        si_df = self.__update_si_df(si_df)
         self.Atoms_df = self.__update_charges(atoms_df, si_df, old_new_dict)
 
     def __update_charges(self,
@@ -41,15 +41,14 @@ class UpdateCharge:
             if len(row['OM_replace']) == 3:
                 df_c.at[item, 'OM_q_list'] = row['OM_replace']
             elif len(row['OM_name']) < 3:
-                df_c.at[item, 'OM_q_list'] = self.__get_undrop_ox(row)
+                df_c.at[item, 'OM_q_list'] = self.__get_si_bonded_o(row)
         return df_c
 
-    def __get_undrop_ox(self,
-                        row: pd.DataFrame  # A row of si_df to get the Ox
-                        ) -> list[int]:
+    def __get_si_bonded_o(self,
+                          row: pd.DataFrame  # A row of si_df to get the Ox
+                          ) -> list[int]:
         """get the undrop ox from ox_list and add it(them) with
         OM_replace to a new list and return for OM_q_list"""
-        # print(row['Ox_list'], row['Ox_drop'])
         undrop_ox: list[int]  # List of undroped Ox
         undrop_ox = [item for item in row['Ox_list'] if item != row['Ox_drop']]
         om_q_list: list[int] = []
@@ -73,7 +72,7 @@ class UpdateCharge:
                   f'to {stinfo.UpdateCharge.OM}'
                   f'{bcolors.ENDC}')
             for _, row in si_df.iterrows():
-                for ind in row['OM_replace']:
+                for ind in row['OM_q_list']:
                     atoms_df.at[ind, 'charge'] = stinfo.UpdateCharge.OM
         return atoms_df
 
@@ -116,13 +115,13 @@ class UpdateCharge:
         """update the atom_id of the OM atoms in the list with new ones
         after the omission of Ox and H atoms"""
         df: pd.DataFrame = si_df.copy()
-        df['OM_list_old'] = df['OM_replace']
+        df['OM_list_old'] = df['OM_q_list']
         om_list: list[int]  # To append new atom_id
         for item, row in si_df.iterrows():
             om_list = []
-            for ind in row['OM_replace']:
+            for ind in row['OM_q_list']:
                 om_list.append(old_new_dict[ind])
-            df.at[item, 'OM_replace'] = om_list
+            df.at[item, 'OM_q_list'] = om_list
             del om_list
         return df
 
