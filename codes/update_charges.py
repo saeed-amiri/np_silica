@@ -73,7 +73,8 @@ class UpdateCharge:
                   f'{bcolors.ENDC}')
             for _, row in si_df.iterrows():
                 for ind in row['OM_q_list']:
-                    atoms_df.at[ind, 'charge'] = stinfo.UpdateCharge.OM
+                    if atoms_df.iloc[ind-1]['charge'] != stinfo.UpdateCharge.OM:
+                        atoms_df.at[ind, 'charge'] = stinfo.UpdateCharge.OM
         return atoms_df
 
     def __update_si_charge(self,
