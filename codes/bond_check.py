@@ -1,15 +1,14 @@
-import numpy as np
-import pandas as pd
-import read_lmp_data as rdlmp
-
-
-class Doc:
-    """sanity check!
+"""sanity check!
     Check the length of all the bonds.
     There were some strange long bonds in the data file sometimes,
     This could be because of the random selection of dropping Si from
     silanization or maybe because of the python dataframe selection
     algorithm"""
+
+
+import numpy as np
+import pandas as pd
+import read_lmp_data as rdlmp
 
 
 class CheckBond:
