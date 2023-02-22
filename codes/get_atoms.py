@@ -159,10 +159,10 @@ class GetOmGroups:
                                                                       om_group)
         self.OM_list: list[int] = self.__get_OM_list()  # All OM atoms
         self.si_df: pd.DataFrame  # Si df with droped unbonded Si
-        self.Si_OM: list[int]  # Si bonded to OM
         si_df = self.__update_si_df(si_df)
         si_df = self.__drop_small_id(si_df)
         self.si_df = self.__set_om_names(si_df)
+        self.Si_OM: list[int]  # Si bonded to OM
         self.Si_OM = self.__get_si_om()
 
     def __drop_small_id(self,
@@ -173,17 +173,16 @@ class GetOmGroups:
         df: pd.DataFrame = si_df.copy()
         for item, row in si_df.iterrows():
             for om in row['OM_replace']:
-                if om < stinfo.Constants.Num_amino:
+                if om < stinfo.Constants.Num_amino + 2:
                     try:
                         df.drop(axis=0, index=[item], inplace=True)
                     except KeyError:
                         pass
-
         print(f'{bcolors.CAUTION}{self.__class__.__name__}:'
               f'({self.__module__}):\n'
               f'\t"{len(si_df)-len(df)}" of selected Si atoms are dropped'
               f' due to the small atom_id of OM atoms in df (less then '
-              f'{stinfo.Constants.Num_amino})'
+              f'{stinfo.Constants.Num_amino+2})'
               f'{bcolors.ENDC}')
         return df
 
@@ -256,7 +255,7 @@ class GetOmGroups:
         df: pd.DataFrame = si_df.copy()
         df['OM_replace']: list[typing.Any]  # Index of OM atoms bonded to the Si
         df['OM_replace'] = [None for _ in self.replace_oxy]
-        for item, _ in si_df.iterrows():
+        for item, row in si_df.iterrows():
             if item not in self.replace_oxy.keys():
                 df.drop(index=[item], axis=0, inplace=True)
             elif len(self.replace_oxy[item]) > 3:
@@ -266,6 +265,7 @@ class GetOmGroups:
         print(f'{bcolors.OKBLUE}'
               f'\tThere are {len(df)} `Si` atoms bonded to less then '
               f'three OM atoms{bcolors.ENDC}\n')
+        df.sort_values(by=['atom_id'], axis=0, inplace=True)
         return df
 
     def __set_om_names(self,
