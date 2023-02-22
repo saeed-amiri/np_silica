@@ -60,7 +60,7 @@ class GetAmino(rdlmp.ReadData):
                     ) -> pd.DataFrame:
         """put the coordinate of Si in Aminopropyle to zero"""
         df: pd.DataFrame = amino_atoms.copy()
-        print(f'{bcolors.OKCYAN}\tMove Aminopropyle [Si] to origin'
+        print(f'{bcolors.OKCYAN}\tMove Aminopropyl [Si] to origin'
               f'{bcolors.ENDC}')
         x_si: float = amino_atoms[amino_atoms['name'] == self.Si]['x'][1]
         y_si: float = amino_atoms[amino_atoms['name'] == self.Si]['y'][1]
@@ -126,7 +126,7 @@ class PrepareAmino:
         self.Si = stinfo.Constants.SI_amino
         self.OM = stinfo.Constants.OM_amino
         self.__update_aminos(update, amino)
-        self.__write_infos()
+        self.__write_infos(update.si_df)
 
     def __update_aminos(self,
                         update: upcord.UpdateCoords,  # Information of silica
@@ -271,7 +271,7 @@ class PrepareAmino:
                     OM_xyz: pd.DataFrame  # XYZ info of OM atoms for amino
                     ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame,
                                pd.DataFrame]:
-        """set the atom ids based on the number of the OM in system"""
+        """set the atom ids based on the id of the OM in system"""
         amino_OM = stinfo.Constants.Amino_OM
         OM_order: int = len(si_row['OM_list'])
         del_OM: int = amino_OM - OM_order  # Number of extera OM atoms
@@ -491,8 +491,11 @@ class PrepareAmino:
         df['z'] -= z_si
         return df
 
-    def __write_infos(self) -> None:
+    def __write_infos(self,
+                      si_df: pd.DataFrame  # Si_df from update silica
+                      ) -> None:
         print(f'{bcolors.OKGREEN}\tData Summary of all aminopropyl:\n'
+              f'\t\t# Chains: {len(si_df)}\n'
               f'\t\t# Atoms in aminos` group: {len(self.All_amino_atoms)}\n'
               f'\t\t# Bonds in aminos` group: {len(self.All_amino_bonds)}\n'
               f'\t\t# Angles in aminos` group: {len(self.All_amino_angles)}\n'
