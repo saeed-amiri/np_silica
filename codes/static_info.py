@@ -47,8 +47,8 @@ class UpdateCharge:
     If No need to change set them equal to None, ex.:
         OM: float = None
     """
-    OM: float = -0.720
-    SI: float = 1.400
+    OM: float = -0.80
+    SI: float = 1.600
 
 
 class Constants:
