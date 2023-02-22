@@ -62,19 +62,21 @@ class UpdateCharge:
                            ) -> pd.DataFrame:
         """update all the OM atoms in the O or O&H groups in the main
         atoms dataframe"""
+        count_om: int = 0  # Get the number of OM with charge-change
         print(f'\t{bcolors.HEADER}{self.__class__.__name__}:')
-
         if stinfo.UpdateCharge.OM is None:
-            print(f'\t\tOM charges are remain unchanged!'
-                  f'{bcolors.ENDC}')
+            print(f'\t\tOM charges are remain unchanged!')
         else:
             print(f'\t\tCharges of OM bonded to the Amine groups are set '
-                  f'to {stinfo.UpdateCharge.OM}'
-                  f'{bcolors.ENDC}')
+                  f'to {stinfo.UpdateCharge.OM}')
             for _, row in si_df.iterrows():
                 for ind in row['OM_q_list']:
-                    if atoms_df.iloc[ind-1]['charge'] != stinfo.UpdateCharge.OM:
+                    if (atoms_df.iloc[ind-1]['charge'] !=
+                        stinfo.UpdateCharge.OM):
                         atoms_df.at[ind, 'charge'] = stinfo.UpdateCharge.OM
+                        count_om +=1
+        print(f'\t\t["{count_om}" O atoms changed during set charges]'
+              f'{bcolors.ENDC}')
         return atoms_df
 
     def __update_si_charge(self,
@@ -83,17 +85,19 @@ class UpdateCharge:
                            ) -> pd.DataFrame:
         """update all the Si atoms charges which lost O or O&H groups
         in the main atoms dataframe"""
+        count_si: int = 0  # Get the number of si atoms with charge-change
         print(f'\t{bcolors.HEADER}{self.__class__.__name__}:')
         if stinfo.UpdateCharge.SI is None:
-            print(f'\t\tSi charges that are remain unchanged!'
-                  f'{bcolors.ENDC}')
+            print(f'\t\tSi charges that are remain unchanged!')
         else:
             print(f'\t\tCharges of Si bonded to the Amine groups are set '
-                  f'to {stinfo.UpdateCharge.SI}'
-                  f'{bcolors.ENDC}')
+                  f'to {stinfo.UpdateCharge.SI}')
             for item, _ in si_df.iterrows():
-                atoms_df.at[item, 'charge'] = stinfo.UpdateCharge.SI
-
+                if atoms_df.iloc[item-1]['charge'] != stinfo.UpdateCharge.SI:
+                    atoms_df.at[item, 'charge'] = stinfo.UpdateCharge.SI
+                    count_si += 1
+        print(f'\t\t["{count_si}" Si atoms changed during set charges]'
+              f'{bcolors.ENDC}')
         return atoms_df
 
     def __update_id_si(self,
