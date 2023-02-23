@@ -3,6 +3,7 @@
     Right now it only uses the random sparsing!"""
 
 
+import sys
 import random
 import numpy as np
 import pandas as pd
@@ -58,7 +59,12 @@ class PickSi:
         no_od_si: list[int]  # All the Si which are not bonded to an OD
         no_od_si = self.__get_ox_list(si_df)
         drop_si: list[int]  # Si id to drop from the si_df
-        drop_si = random.sample(no_od_si, len(si_df)-si_de_num)
+        try:
+            drop_si = random.sample(no_od_si, len(si_df)-si_de_num)
+        except ValueError:
+            sys.exit(f'{bcolors.FAIL}\tError: The selected coverage '
+                     f'"{stinfo.Constants.Coverage}" is small'
+                     f'{bcolors.ENDC}\n')
         df_c: pd.DataFrame = si_df.copy()
         for item in si_df['atom_id']:
             if item in drop_si:
