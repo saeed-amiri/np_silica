@@ -331,6 +331,8 @@ class GetOxGroups:
         o_delete = list(si_df['Ox_drop'])
         total_charge: float = self.__get_charges(df_o, o_delete)
         df_od: pd.DataFrame = si_df[si_df['Ox_drop_name'] == 'OD']
+        surface_area: float  # Surface of the NP
+        surface_area = np.pi*silica.diameter*silica.diameter
         print(f'\n{bcolors.OKBLUE}{self.__class__.__name__}: '
               f'({self.__module__})\n'
               f'\t-> There are "{len(si_df)}" `Si` atoms bonded to the '
@@ -339,7 +341,8 @@ class GetOxGroups:
               f' with total charge: "{total_charge: .4f}"\n'
               f'\t["{len(df_od)}" `OD` atoms with charge -1.0]\n'
               f'\tThis gives the total coverage of '
-              f'"{len(si_df)/(np.pi*silica.diameter*silica.diameter):.4f}"'
+              f'"{len(si_df)/surface_area:.4f}"\n'
+              f'\tTotal are of the surface is: "{surface_area:.4f}"'
               f'{bcolors.ENDC}')
         return o_delete, bonded_si, si_df
 
