@@ -39,7 +39,9 @@ class ConcatAll:
         self.max_radius: float = self.__get_max_radius()  # Max radius of NP
         print(f'{bcolors.OKBLUE}{self.__class__.__name__}: '
               f'({self.__module__})\n'
-              f'\tConcatenating all the atoms{bcolors.ENDC}')
+              f'\tConcatenating all the atoms, max radius: '
+              f'"{self.max_radius:.3f}"'
+              f'{bcolors.ENDC}')
         self.__set_attrs()
 
     def __concate_atoms(self,
