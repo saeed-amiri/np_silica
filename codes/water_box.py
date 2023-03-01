@@ -38,8 +38,7 @@ the water box based on the limitations.
 """
 
 import sys
-import subprocess
-import pandas as pd
+import numpy as np
 import static_info as stinfo
 from colors_text import TextColor as bcolors
 
@@ -49,29 +48,52 @@ class InFile:
     def __init__(self,
                  radius: float  # Radius of the NP after silanization
                  ) -> None:
-        self.__prepare_input(radius)
+        self.prepare_input(radius)
+        self.print_info()
 
-    def __prepare_input(self,
-                        radius: float  # Radius of the NP after silanization
-                        ) -> None:
+    def prepare_input(self,
+                      radius: float  # Radius of the NP after silanization
+                      ) -> None:
         """prepare the input file for the PACKMOL"""
         self.__get_mols_num(radius)
 
     def __get_mols_num(self,
                        radius: float  # Radius of the NP after silanization
                       ) -> int:
-        """get numbers of molecules based on the valume of the water
+        """get numbers of molecules based on the volume of the water
         box"""
-        box_volume: float = self._get_box_valume()
+        box_volume: float = self.__get_box_volume()
+        sphere_volume: float = self.__get_sphere_volume(radius)
+        print(box_volume,sphere_volume)
 
-    def _get_box_valume(self) -> float:
-        """calculate the valume of the box including sphere's area"""
+    def __get_box_volume(self) -> float:
+        """calculate the volume of the box including sphere's area"""
         x_lim: float = stinfo.Hydration.X_MAX - stinfo.Hydration.X_MIN
         y_lim: float = stinfo.Hydration.Y_MAX - stinfo.Hydration.Y_MIN
         z_lim: float = stinfo.Hydration.Z_MAX - stinfo.Hydration.Z_MIN
-        box_valume: float = x_lim*y_lim*z_lim
-        if box_valume <= 0:
+        box_volume: float = x_lim*y_lim*z_lim
+        if box_volume <= 0:
             sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}:\n'
-                     f'\tZero valume, there in problem in setting box '
-                     f'limitaion, box_volume is "{box_valume:.3f}"'
+                     f'\tZero volume, there in problem in setting box '
+                     f'limitaion, box_volume is "{box_volume:.3f}"'
                      f'{bcolors.ENDC}')
+        return box_volume
+
+    def __get_sphere_volume(self,
+                            radius: float  # Radius of the NP after silanizatio
+                            ) -> float:
+        """calculate the volume of the sphere for the NP"""
+        sphere_volume: float = 4*np.pi*(radius**3)/3
+        if sphere_volume <= 0:
+            sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}:\n'
+                     f'\tZero volume, there in problem in setting sphere '
+                     f'valume, it is "{sphere_volume:.3f}"'
+                     f'{bcolors.ENDC}')
+        return sphere_volume
+
+    def print_info(self) -> None:
+        """print infos"""
+        print("TEST")
+
+if __name__ == "__main__":
+    infile = InFile(10)
