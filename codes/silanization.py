@@ -36,6 +36,7 @@ class ConcatAll:
                                                      )
         self.Masses_df = self.__concate_masses(silica.Masses_df,
                                                aminos.Masses_df)
+        self.max_radius: float = self.__get_max_radius()  # Max radius of NP
         print(f'{bcolors.OKBLUE}{self.__class__.__name__}: '
               f'({self.__module__})\n'
               f'\tConcatenating all the atoms{bcolors.ENDC}')
@@ -133,6 +134,18 @@ class ConcatAll:
         df = pd.DataFrame(columns=columns)
         df = pd.concat([df_silica, df_amino])
         return df
+
+    def __get_max_radius(self) -> float:
+        """find the maximum radius of the NP
+        Doing it in a simple way, find the maximum of the absolute
+        values in each direction and return the maximum one."""
+        axis: list[str] = ['x', 'y', 'z']
+        max_list: list[float] = []  # All the max along each direction
+        for ax in axis:
+            i_max: float = np.max([np.abs(np.max(self.Atoms_df[ax])),
+                                   np.abs(np.min(self.Atoms_df[ax]))])
+            max_list.append(i_max)
+        return np.max(max_list)
 
     def __set_attrs(self) -> None:
         """set attributes to object(self)"""
