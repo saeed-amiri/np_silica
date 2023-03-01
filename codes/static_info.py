@@ -83,3 +83,15 @@ class AtomGroup:
 class DataFile:
     """Get data directory which are used in the script"""
     APTES: str = '/scratch/saeed/MyScripts/np_silica/data/aminopropyl.data'
+
+
+class Hydration:
+    """set all the info for water box
+    Limitation for the box are added to the maximum radius of the NP"""
+    TOLERANCE: float = 2.0
+    X_MIN: float = -10.0
+    Y_MIN: float = -10.0
+    Z_MIN: float = -10.0
+    X_max: float = 10.0
+    Y_max: float = 10.0
+    Z_max: float = 10.0
