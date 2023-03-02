@@ -104,3 +104,5 @@ class Hydration:
     WATER_PDB: str = '/scratch/saeed/MyScripts/np_silica/data/water.pdb'
     INP_FILE: str = 'water_box.inp'
     OUT_FILE: str = 'water_box.pdb'
+    # PACKMOL lib
+    PACKMOL: str = '/home/saeed/Downloads/packmol/packmol'
