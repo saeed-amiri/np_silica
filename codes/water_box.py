@@ -179,7 +179,7 @@ class InFile:
 
     def print_info(self) -> None:
         """print infos"""
-        print(f'{bcolors.OKCYAN}{self.__class__.__name__}: '
+        print(f'\n{bcolors.OKCYAN}{self.__class__.__name__}: '
               f'({self.__module__}):\n'
               '\tThe input file for PACKMOL is written in: '
               f'"{stinfo.Hydration.INP_FILE}"\n'
@@ -192,22 +192,32 @@ class RunPackMol:
         """run the input with subprocess"""
         pack_mol: str = stinfo.Hydration.PACKMOL  # Compiler of PACKMOL
         inp_file: str = stinfo.Hydration.INP_FILE  # Input file for packmol
-        self.make_water(pack_mol, inp_file)
-        self.print_info()
+        pack_flag: int  # If PACKMOL executed successfully
+        pack_flag = self.make_water(pack_mol, inp_file)
+        self.print_info(pack_flag)
 
     def make_water(self,
                    pack_mol: str,  # Compiler of PACKMOL
                    inp_file: str  # Input file for packmol
-                   ) -> None:
+                   ) -> int:
         """call the subprocess and run the input file"""
-        subprocess.call(f'{pack_mol} < {inp_file}', shell=True, cwd='./')
+        pack_flag: int = subprocess.call(f'{pack_mol} < {inp_file}>/dev/null',
+                                         shell=True, cwd='./')
+        return pack_flag
 
-    def print_info(self) -> None:
+    def print_info(self,
+                   pack_flag: int  # If PACKMOL executed successfully
+                   ) -> None:
         """print infos"""
-        print(f'{bcolors.OKCYAN}{self.__class__.__name__}: '
-              f'({self.__module__}):\n'
-              f'\tPACKMOL ran the input file: "{stinfo.Hydration.INP_FILE}"\n'
-              f'{bcolors.ENDC}')
+        if pack_flag == 0:
+            print(f'\n{bcolors.OKCYAN}{self.__class__.__name__}:'
+                  f' ({self.__module__})\n'
+                  '\tPACKMOL executed successfully, output is: '
+                  f'{stinfo.Hydration.OUT_FILE}'
+                  f'{bcolors.ENDC}')
+        else:
+            sys.exit(f'{bcolors.FAIL}\tError! in executing PACKMOL'
+                     f'{bcolors.ENDC}')
 
 
 if __name__ == "__main__":
