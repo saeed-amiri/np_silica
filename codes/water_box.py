@@ -210,7 +210,7 @@ class RunPackMol:
                    ) -> None:
         """print infos"""
         if pack_flag == 0:
-            print(f'\n{bcolors.OKCYAN}{self.__class__.__name__}:'
+            print(f'{bcolors.OKCYAN}{self.__class__.__name__}:'
                   f' ({self.__module__})\n'
                   '\tPACKMOL executed successfully, output is: '
                   f'{stinfo.Hydration.OUT_FILE}'
