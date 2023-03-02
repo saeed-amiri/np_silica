@@ -55,7 +55,9 @@ class NumberMols:
                       radius: float  # Radius of the NP after silanization
                       ) -> None:
         """prepare the input file for the PACKMOL"""
-        self.number_mols = self.__get_mols_num(radius)
+        self.edge_cube: float  # Edge of the box that inscibed the NP
+        self.number_mols: float  # Number of the molecules in the box
+        self.number_mols, self.edge_cube = self.__get_mols_num(radius)
 
     def __get_mols_num(self,
                        radius: float  # Radius of the NP after silanization
@@ -63,9 +65,11 @@ class NumberMols:
         """get numbers of molecules based on the volume of the water
         box"""
         sphere_volume: float = self.__get_sphere_volume(radius)
-        box_volume: float = self.__get_box_volume(sphere_volume)
+        box_volume: float  # volume of the box
+        edge_cube: float  # Edge of the box that inscibed the NP
+        box_volume, edge_cube = self.__get_box_volume(sphere_volume)
         net_volume: float = self.__check_volumes(box_volume, sphere_volume)
-        return self.__calc_mols_num(net_volume)
+        return self.__calc_mols_num(net_volume), edge_cube
 
 
     def __calc_mols_num(self,
@@ -102,7 +106,7 @@ class NumberMols:
                      f'\tZero volume, there in problem in setting box '
                      f'limitaion, box_volume is "{box_volume:.3f}"'
                      f'{bcolors.ENDC}')
-        return box_volume
+        return box_volume, edge_cube
 
     def __get_sphere_volume(self,
                             radius: float  # Radius of the NP after silanizatio
@@ -138,7 +142,6 @@ class NumberMols:
               f'{bcolors.ENDC}')
 
 
-
 class InFile:
     """preparing input file for the"""
     def __init__(self,
@@ -162,4 +165,4 @@ class InFile:
 
 
 if __name__ == "__main__":
-    NumberMols = NumberMols(radius=50)
+    NumberMols = NumberMols(radius=10)
