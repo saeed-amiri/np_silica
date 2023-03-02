@@ -43,7 +43,7 @@ import static_info as stinfo
 from colors_text import TextColor as bcolors
 
 
-class InFile:
+class NumberMols:
     """preparing input file for the"""
     def __init__(self,
                  radius: float  # Radius of the NP after silanization
@@ -55,7 +55,7 @@ class InFile:
                       radius: float  # Radius of the NP after silanization
                       ) -> None:
         """prepare the input file for the PACKMOL"""
-        self.__get_mols_num(radius)
+        self.number_mols = self.__get_mols_num(radius)
 
     def __get_mols_num(self,
                        radius: float  # Radius of the NP after silanization
@@ -65,7 +65,21 @@ class InFile:
         box_volume: float = self.__get_box_volume()
         sphere_volume: float = self.__get_sphere_volume(radius)
         net_volume: float = self.__check_volumes(box_volume, sphere_volume)
-        print(net_volume)
+        return self.__calc_mols_num(net_volume)
+
+
+    def __calc_mols_num(self,
+                        volume: float  # Net volume of the water box
+                        ) -> int:
+        """return number of water molecules to get the density of 
+        water"""
+        lit_m3: float = 1e-24  # convert units
+        m_water: float  # Mass of the water in the volume
+        m_water = volume * stinfo.Hydration.WATER_DENSITY * lit_m3
+        num_moles: float
+        num_moles = int(m_water * stinfo.Hydration.AVOGADRO /
+                               stinfo.Hydration.WATER_MOLAR_MASS) + 1
+        return num_moles*10
 
     def __get_box_volume(self) -> float:
         """calculate the volume of the box including sphere's area"""
@@ -107,7 +121,11 @@ class InFile:
 
     def print_info(self) -> None:
         """print infos"""
-        print("TEST")
+        print(f'{bcolors.OKCYAN}{self.__class__.__name__}: ('
+              f'{self.__module__}):\n'
+              f'\tThe number of water molecules is set to '
+              f'"{self.number_mols}"'
+              f'{bcolors.ENDC}')
 
 if __name__ == "__main__":
-    infile = InFile(10)
+    NumberMols = NumberMols(10)
