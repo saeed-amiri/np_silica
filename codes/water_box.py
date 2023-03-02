@@ -83,7 +83,7 @@ class NumberMols:
         num_moles: float
         num_moles = int(m_water * stinfo.Hydration.AVOGADRO /
                                stinfo.Hydration.WATER_MOLAR_MASS) + 1
-        return num_moles*10
+        return int(num_moles*2.5)
 
     def __get_box_volume(self,
                          sphere_volume: float,  # Volume of the sphere
@@ -145,24 +145,50 @@ class NumberMols:
 class InFile:
     """preparing input file for the"""
     def __init__(self,
-                 num_mols: int  # Number of the molecules in the water volume
+                 radius: float,  # Radius of the NP
+                 num_mols: int,  # Number of the molecules in the water volume
+                 edge: float  # Edge of the inscribed cube
                  ) -> None:
-        self.write_file(num_mols)
+        self.inp_file: str  # Name of the PACKMOL input file
+        self.inp_file = self.write_file(radius, num_mols, edge)
         self.print_info()
 
     def write_file(self,
-                   num_mols: int  # Number of the molecules in the water volume
-                   ) -> None:
+                   radius: float,  # Radius of the NP
+                   num_mols: int,  # Number of the molecules in the water volum
+                   edge: float  # Edge of the inscribed cube
+                   ) -> str:
         """write the input file for the PACKMOL"""
+        tolerence: float = stinfo.Hydration.TOLERANCE
+        out_file: str = 'water_box.pdb'
+        with open(stinfo.Hydration.INP_FILE, 'w', encoding="utf8") as f_out:
+            f_out.write('# Input file for PACKMOL, Water box for a NP ')
+            f_out.write(f'with the radius of {radius}\n\n')
+            f_out.write(f'tolerance {stinfo.Hydration.TOLERANCE}\n\n')
+            f_out.write(f'structure {stinfo.Hydration.WATER_PDB}\n')
+            f_out.write(f'\tnumber {num_mols}\n')
+            f_out.write('\tinside box ')
+            f_out.write(f'{stinfo.Hydration.X_MIN - edge - tolerence: .2f} ')
+            f_out.write(f'{stinfo.Hydration.Y_MIN - edge - tolerence: .2f} ')
+            f_out.write(f'{stinfo.Hydration.Z_MIN - edge - tolerence: .2f} ')
+            f_out.write(f'{stinfo.Hydration.X_MAX + edge + tolerence: .2f} ')
+            f_out.write(f'{stinfo.Hydration.Y_MAX + edge + tolerence: .2f} ')
+            f_out.write(f'{stinfo.Hydration.Z_MAX + edge + tolerence: .2f}\n')
+            f_out.write(f'\t outside sphere 0. 0. 0. {radius: .2f}\n')
+            f_out.write('end structure\n\n')
+            f_out.write(f'output {out_file}\n\n')
+        return out_file
 
     def print_info(self) -> None:
         """print infos"""
-        print(f'{bcolors.OKCYAN}{self.__class__.__name__}: ('
-              f'{self.__module__}):\n'
-              f'\tThe number of water molecules is set to '
-              f'""'
+        print(f'{bcolors.OKCYAN}{self.__class__.__name__}: '
+              f'({self.__module__}):\n'
+              f'\tThe input file for PACKMOL is written in: {self.inp_file}\n'
               f'{bcolors.ENDC}')
 
 
 if __name__ == "__main__":
-    NumberMols = NumberMols(radius=10)
+    moles = NumberMols(radius=50)
+    in_file = InFile(radius=50,
+                     num_mols=moles.number_mols,
+                     edge=moles.edge_cube)
