@@ -139,5 +139,27 @@ class NumberMols:
 
 
 
+class InFile:
+    """preparing input file for the"""
+    def __init__(self,
+                 num_mols: int  # Number of the molecules in the water volume
+                 ) -> None:
+        self.write_file(num_mols)
+        self.print_info()
+
+    def write_file(self,
+                   num_mols: int  # Number of the molecules in the water volume
+                   ) -> None:
+        """write the input file for the PACKMOL"""
+
+    def print_info(self) -> None:
+        """print infos"""
+        print(f'{bcolors.OKCYAN}{self.__class__.__name__}: ('
+              f'{self.__module__}):\n'
+              f'\tThe number of water molecules is set to '
+              f'""'
+              f'{bcolors.ENDC}')
+
+
 if __name__ == "__main__":
     NumberMols = NumberMols(radius=50)
