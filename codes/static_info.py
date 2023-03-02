@@ -89,9 +89,14 @@ class Hydration:
     """set all the info for water box
     Limitation for the box are added to the maximum radius of the NP"""
     TOLERANCE: float = 2.0
+    # Box dimensions
     X_MIN: float = -10.0
     Y_MIN: float = -10.0
     Z_MIN: float = -10.0
-    X_max: float = 10.0
-    Y_max: float = 10.0
-    Z_max: float = 10.0
+    X_MAX: float = 10.0
+    Y_MAX: float = 10.0
+    Z_MAX: float = 10.0
+    # Constants
+    AVOGADRO: float = 6.0221408e+23  # 1/mol
+    WATER_MOLAR_MASS: float = 18.01528  # g/mol
+    WATER_DENSITY = 0.9998395 #  g/ml
