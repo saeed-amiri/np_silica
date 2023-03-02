@@ -64,7 +64,8 @@ class InFile:
         box"""
         box_volume: float = self.__get_box_volume()
         sphere_volume: float = self.__get_sphere_volume(radius)
-        print(box_volume,sphere_volume)
+        net_volume: float = self.__check_volumes(box_volume, sphere_volume)
+        print(net_volume)
 
     def __get_box_volume(self) -> float:
         """calculate the volume of the box including sphere's area"""
@@ -90,6 +91,19 @@ class InFile:
                      f'valume, it is "{sphere_volume:.3f}"'
                      f'{bcolors.ENDC}')
         return sphere_volume
+
+    def __check_volumes(self,
+                        box: float,  # Volume of the box
+                        sphere: float  # Volume of the sphere
+                        ) -> float:
+        """check wether the box volume is bigger then the sphere volume"""
+        if box - sphere <= 0:
+            sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}: '
+                     f'({self.__module__})\n'
+                     f'\tVolume of the Sphere is less or equal to the '
+                     f'Volume of the Box'
+                     f'{bcolors.ENDC}\n')
+        return box - sphere
 
     def print_info(self) -> None:
         """print infos"""
