@@ -38,6 +38,7 @@ the water box based on the limitations.
 """
 
 import sys
+import subprocess
 import numpy as np
 import static_info as stinfo
 from colors_text import TextColor as bcolors
@@ -56,12 +57,12 @@ class NumberMols:
                       ) -> None:
         """prepare the input file for the PACKMOL"""
         self.edge_cube: float  # Edge of the box that inscibed the NP
-        self.number_mols: float  # Number of the molecules in the box
+        self.number_mols: int  # Number of the molecules in the box
         self.number_mols, self.edge_cube = self.__get_mols_num(radius)
 
     def __get_mols_num(self,
                        radius: float  # Radius of the NP after silanization
-                      ) -> int:
+                       ) -> tuple[int, float]:
         """get numbers of molecules based on the volume of the water
         box"""
         sphere_volume: float = self.__get_sphere_volume(radius)
@@ -71,23 +72,22 @@ class NumberMols:
         net_volume: float = self.__check_volumes(box_volume, sphere_volume)
         return self.__calc_mols_num(net_volume), edge_cube
 
-
     def __calc_mols_num(self,
                         volume: float  # Net volume of the water box
                         ) -> int:
-        """return number of water molecules to get the density of 
+        """return number of water molecules to get the density of
         water"""
         lit_m3: float = 1e-24  # convert units
         m_water: float  # Mass of the water in the volume
         m_water = volume * stinfo.Hydration.WATER_DENSITY * lit_m3
         num_moles: float
         num_moles = int(m_water * stinfo.Hydration.AVOGADRO /
-                               stinfo.Hydration.WATER_MOLAR_MASS) + 1
+                        stinfo.Hydration.WATER_MOLAR_MASS) + 1
         return int(num_moles*2.5)
 
     def __get_box_volume(self,
                          sphere_volume: float,  # Volume of the sphere
-                         ) -> float:
+                         ) -> tuple[float, float]:
         """calculate the volume of the box including sphere's area
         For the largest possible sphere is inscribed in cube, the ratio
         of volumes is: V_sphere/V_cube = pi/6"""
@@ -149,15 +149,14 @@ class InFile:
                  num_mols: int,  # Number of the molecules in the water volume
                  edge: float  # Edge of the inscribed cube
                  ) -> None:
-        self.inp_file: str  # Name of the PACKMOL input file
-        self.inp_file = self.write_file(radius, num_mols, edge)
+        self.write_file(radius, num_mols, edge)
         self.print_info()
 
     def write_file(self,
                    radius: float,  # Radius of the NP
                    num_mols: int,  # Number of the molecules in the water volum
                    edge: float  # Edge of the inscribed cube
-                   ) -> str:
+                   ) -> None:
         """write the input file for the PACKMOL"""
         tolerence: float = stinfo.Hydration.TOLERANCE
         out_file: str = 'water_box.pdb'
@@ -177,13 +176,37 @@ class InFile:
             f_out.write(f'\t outside sphere 0. 0. 0. {radius: .2f}\n')
             f_out.write('end structure\n\n')
             f_out.write(f'output {out_file}\n\n')
-        return out_file
 
     def print_info(self) -> None:
         """print infos"""
         print(f'{bcolors.OKCYAN}{self.__class__.__name__}: '
               f'({self.__module__}):\n'
-              f'\tThe input file for PACKMOL is written in: {self.inp_file}\n'
+              '\tThe input file for PACKMOL is written in: '
+              f'"{stinfo.Hydration.INP_FILE}"\n'
+              f'{bcolors.ENDC}')
+
+
+class RunPackMol:
+    """call PACKMOL and run the input script prepared for it"""
+    def __init__(self) -> None:
+        """run the input with subprocess"""
+        pack_mol: str = stinfo.Hydration.PACKMOL  # Compiler of PACKMOL
+        inp_file: str = stinfo.Hydration.INP_FILE  # Input file for packmol
+        self.make_water(pack_mol, inp_file)
+        self.print_info()
+
+    def make_water(self,
+                   pack_mol: str,  # Compiler of PACKMOL
+                   inp_file: str  # Input file for packmol
+                   ) -> None:
+        """call the subprocess and run the input file"""
+        subprocess.call(f'{pack_mol} < {inp_file}', shell=True, cwd='./')
+
+    def print_info(self) -> None:
+        """print infos"""
+        print(f'{bcolors.OKCYAN}{self.__class__.__name__}: '
+              f'({self.__module__}):\n'
+              f'\tPACKMOL ran the input file: "{stinfo.Hydration.INP_FILE}"\n'
               f'{bcolors.ENDC}')
 
 
@@ -192,3 +215,4 @@ if __name__ == "__main__":
     in_file = InFile(radius=50,
                      num_mols=moles.number_mols,
                      edge=moles.edge_cube)
+    water_box = RunPackMol()
