@@ -44,7 +44,7 @@ from colors_text import TextColor as bcolors
 
 
 class NumberMols:
-    """preparing input file for the"""
+    """Getting the number of water molecules in the volume"""
     def __init__(self,
                  radius: float  # Radius of the NP after silanization
                  ) -> None:
@@ -62,8 +62,8 @@ class NumberMols:
                       ) -> int:
         """get numbers of molecules based on the volume of the water
         box"""
-        box_volume: float = self.__get_box_volume()
         sphere_volume: float = self.__get_sphere_volume(radius)
+        box_volume: float = self.__get_box_volume(sphere_volume)
         net_volume: float = self.__check_volumes(box_volume, sphere_volume)
         return self.__calc_mols_num(net_volume)
 
@@ -81,11 +81,21 @@ class NumberMols:
                                stinfo.Hydration.WATER_MOLAR_MASS) + 1
         return num_moles*10
 
-    def __get_box_volume(self) -> float:
-        """calculate the volume of the box including sphere's area"""
-        x_lim: float = stinfo.Hydration.X_MAX - stinfo.Hydration.X_MIN
-        y_lim: float = stinfo.Hydration.Y_MAX - stinfo.Hydration.Y_MIN
-        z_lim: float = stinfo.Hydration.Z_MAX - stinfo.Hydration.Z_MIN
+    def __get_box_volume(self,
+                         sphere_volume: float,  # Volume of the sphere
+                         ) -> float:
+        """calculate the volume of the box including sphere's area
+        For the largest possible sphere is inscribed in cube, the ratio
+        of volumes is: V_sphere/V_cube = pi/6"""
+        v_inscribed_box: float = 6*sphere_volume/np.pi
+        edge_cube: float  # Edge of the cube that inscribed the sphere
+        edge_cube = v_inscribed_box**(1/3)
+        x_lim: float = (stinfo.Hydration.X_MAX -
+                        stinfo.Hydration.X_MIN) + edge_cube
+        y_lim: float = (stinfo.Hydration.Y_MAX -
+                        stinfo.Hydration.Y_MIN) + edge_cube
+        z_lim: float = (stinfo.Hydration.Z_MAX -
+                        stinfo.Hydration.Z_MIN) + edge_cube
         box_volume: float = x_lim*y_lim*z_lim
         if box_volume <= 0:
             sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}:\n'
@@ -127,5 +137,7 @@ class NumberMols:
               f'"{self.number_mols}"'
               f'{bcolors.ENDC}')
 
+
+
 if __name__ == "__main__":
-    NumberMols = NumberMols(10)
+    NumberMols = NumberMols(radius=50)
