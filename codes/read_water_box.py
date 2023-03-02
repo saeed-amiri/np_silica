@@ -52,3 +52,31 @@ For CONECT:
 (ref: https://cdn.rcsb.org/wwpdb/docs/documentation/file-format/
       PDB_format_Dec_1996.pdf)
 """
+
+import static_info as stinfo
+
+
+class ReadWater:
+    """read the PDB file of the water box"""
+    def __init__(self) -> None:
+        water_pdb: str = stinfo.Hydration.OUT_FILE  # The file to read
+        self.read_pdb(water_pdb)
+
+    def read_pdb(self,
+                 water_pdb: str  # Name of the file to read
+                 ) -> None:
+        """read the pdb file line by line"""
+        with open(water_pdb, 'r', encoding="utf8") as f_w:
+            while True:
+                line: str = f_w.readline()
+                line_str: str = line.strip()
+                if line_str.startswith('ATOM'):
+                    # Pass to procces ATOM
+                    pass
+                elif line_str.startswith('CONECT'):
+                    # Pass to procces CONECT
+                    pass
+                else:
+                    print(line_str)
+                if not line_str:
+                    break
