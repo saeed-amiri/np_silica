@@ -63,10 +63,11 @@ class ReadWater:
     """read the PDB file of the water box"""
     def __init__(self) -> None:
         water_pdb: str = stinfo.Hydration.OUT_FILE  # The file to read
-        self.atoms_df: pd.DataFrame  # Water infos
-        self.bonds_df: pd.DataFrame  # Water infos
-        self.angles_df: pd.DataFrame  # Water infos
-        self.atoms_df, self.bonds_df, self.angles_df = self.read_pdb(water_pdb)
+        self.atoms_raw: pd.DataFrame  # Water infos with original atom id(raw)
+        self.bonds_raw: pd.DataFrame  # Water infos with original atom id(raw)
+        self.angles_raw: pd.DataFrame  # Water infos with original atom id(raw)
+        self.atoms_raw, self.bonds_raw, self.angles_raw = \
+            self.read_pdb(water_pdb)
         self.print_info(water_pdb)
 
     def read_pdb(self,
@@ -136,13 +137,14 @@ class ReadWater:
                        line: str  # lines which starts with ATOMS
                        ) -> list[typing.Any]:
         """process lines which are starts with ATOM record"""
+        print(line)
         atom_id = line[6:11].strip()
         atom_name: str = line[13:16].strip()
         residue_name: str = line[17:20].strip()
         chain_identifier: str = line[21:22]
         residue_number: str = line[22:27].strip()
-        x_i: float = float(line[30:39].strip())
-        y_i: float = float(line[39:47].strip())
+        x_i: float = float(line[30:38].strip())
+        y_i: float = float(line[39:46].strip())
         z_i: float = float(line[47:55].strip())
         return [atom_id,
                 atom_name,
@@ -172,3 +174,25 @@ class ReadWater:
               f'({self.__module__}):\n'
               f'\tReading water data file: {water_pdb}"'
               f'{bcolors.ENDC}')
+
+
+class SetAtomId(ReadWater):
+    """Update the atoms id in the all the read df, since some of them
+    are str"""
+    def __init__(self) -> None:
+        super().__init__()
+        self.update_ids()
+
+    def update_ids(self) -> None:
+        """update all the atoms id to an integer, keep the old id in
+        atoms dataframe"""
+        self.__update_atoms(self.atoms_raw.copy())
+
+    def __update_atoms(self,
+                       atoms: pd.DataFrame  # Atoms raw dataframe
+                       ) -> None:
+        """update atoms"""
+        atoms.index += 1
+        atoms['old_atom_id'] = atoms['atom_id']
+        atoms['atom_id'] = atoms.index
+        print(atoms)
