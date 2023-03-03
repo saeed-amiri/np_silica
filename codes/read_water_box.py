@@ -66,17 +66,39 @@ class ReadWater:
                  water_pdb: str  # Name of the file to read
                  ) -> None:
         """read the pdb file line by line"""
+        atoms_pos: list[list[str]] = []  # Save the atoms section
         with open(water_pdb, 'r', encoding="utf8") as f_w:
             while True:
                 line: str = f_w.readline()
                 line_str: str = line.strip()
                 if line_str.startswith('ATOM'):
                     # Pass to procces ATOM
-                    pass
+                    atoms_pos.append(self.__process_atom(line_str))
                 elif line_str.startswith('CONECT'):
                     # Pass to procces CONECT
                     pass
                 else:
-                    print(line_str)
+                    pass
                 if not line_str:
                     break
+
+    def __process_atom(self,
+                       line: str  # lines which starts with ATOMS
+                       ) -> list[str]:
+        """process lines which are starts with ATOM record"""
+        atom_id = line[6:11].strip()
+        atom_name: str = line[13:16].strip()
+        residue_name: str = line[17:20].strip()
+        chain_identifier: str = line[21:22]
+        residue_number: str = line[22:27].strip()
+        x_i: str = line[30:39].strip()
+        y_i: str = line[39:47].strip()
+        z_i: str = line[47:55].strip()
+        return [atom_id,
+                atom_name,
+                residue_name,
+                chain_identifier,
+                residue_number,
+                x_i,
+                y_i,
+                z_i]
