@@ -54,6 +54,7 @@ For CONECT:
 """
 
 import typing
+import numpy as np
 import pandas as pd
 import static_info as stinfo
 from colors_text import TextColor as bcolors
@@ -180,21 +181,21 @@ class SetAtomId(ReadWater):
     are str"""
     def __init__(self) -> None:
         super().__init__()
-        self.update_ids()
+        self.atoms_df: pd.DataFrame = self.update_ids()
 
-    def update_ids(self) -> None:
+    def update_ids(self) -> pd.DataFrame:
         """update all the atoms id to an integer, keep the old id in
         atoms dataframe"""
-        self.__update_atoms(self.atoms_raw.copy())
+        return self.__update_atoms(self.atoms_raw.copy())
 
     def __update_atoms(self,
                        atoms: pd.DataFrame  # Atoms raw dataframe
-                       ) -> None:
+                       ) -> pd.DataFrame:
         """update atoms"""
         atoms.index += 1
-        atoms['old_atom_id'] = atoms['atom_id']
+        atoms['old_atom_id'] = atoms['chain_identifier'] + atoms['atom_id']
         atoms['atom_id'] = atoms.index
-        self.__update_resid(atoms)
+        return self.__update_resid(atoms)
 
     def __update_resid(self,
                        atoms: pd.DataFrame  # Atoms df
@@ -203,7 +204,6 @@ class SetAtomId(ReadWater):
         residue_name: list[str]  # Name of the residue
         residue_name = [i+j for i, j in zip(atoms['chain_identifier'],
                                             atoms['residue_number'])]
-        atoms['residue_name'] = residue_name
         residue_dict: dict[str, int]  # To make new residue id
         residue_dict = {k: v+1 for v, k in
                         enumerate(self.drop_duplicate(residue_name))}
@@ -211,7 +211,7 @@ class SetAtomId(ReadWater):
         for item in residue_name:
             residue_id.append(residue_dict[item])
         atoms['residue_id'] = residue_id
-        atoms.to_csv('atoms.test', sep=' ')
+        return atoms
 
     def drop_duplicate(self,
                        l_to_set: list[typing.Any]
@@ -220,3 +220,64 @@ class SetAtomId(ReadWater):
         seen: set[str] = set()
         seen_add = seen.add
         return [x for x in l_to_set if not (x in seen or seen_add(x))]
+
+
+class GetWaterDf:
+    """make bonds and angles df based on the atoms dataframe
+    PDB data file (PDB) has some repeated atom ids and since they are
+    not distinguishable, the script makes bonds and angles for all the
+    residues in the box."""
+    def __init__(self) -> None:
+        atoms = SetAtomId()
+        self.make_df(atoms)
+
+    def make_df(self,
+                atoms: SetAtomId  # updated atoms
+                ) -> None:
+        """make bond and angles df"""
+        resid_max: int = np.max(atoms.atoms_df['residue_id'])
+        bonds: pd.DataFrame = self.__mk_bonds(resid_max)
+        # print(self.__one_angle_df())
+
+    def __mk_bonds(self,
+                   resid_max: int  # Number of the residues in the box
+                   ) -> pd.DataFrame:
+        """make bonds df"""
+        df_i: pd.DataFrame = self.__one_bond_df()  # df for one residue
+        df_list: list[pd.DataFrame] = []  # To append all the dfs
+        for i in range(resid_max):
+            id_rise: int = i*3  # 3: Number of atom in molecules
+            df_c: pd.DataFrame = df_i.copy()
+            df_c['ai'] += id_rise
+            df_c['aj'] += id_rise
+            df_list.append(df_c)
+            del df_c
+        return pd.concat(df_list)
+
+    def __one_bond_df(self) -> pd.DataFrame:
+        """set one bond df"""
+        a_i: list[int] = [1, 2]  # 1st atoms in the bonds
+        a_j: list[int] = [2, 3]  # 2nd atoms in the bonds
+        names: list[str] = ['H-O', 'H-O']
+        columns: list[str] = ['ai', 'aj', 'name']  # Name of the columns in df
+        df_b_one: pd.DataFrame = pd.DataFrame(columns=columns)
+        df_b_one['ai'] = a_i
+        df_b_one['aj'] = a_j
+        df_b_one['name'] = names
+        return df_b_one
+
+    def __one_angle_df(self) -> pd.DataFrame:
+        """set one angle df"""
+        a_i: list[int] = [3]  # 1st atoms in the angles
+        a_j: list[int] = [1]  # 2nd atoms in the angles
+        a_k: list[int] = [2]  # 3rd atoms in the angles
+        names: list[str] = ['H-O-H']
+        columns: list[str] = ['ai', 'aj', 'ak', 'name']  # Columns in df
+        df_a_one: pd.DataFrame = pd.DataFrame(columns=columns)
+        df_a_one['ai'] = a_i
+        df_a_one['aj'] = a_j
+        df_a_one['ak'] = a_k
+        df_a_one['name'] = names
+        return df_a_one
+
+# CONECT    3    1    2
