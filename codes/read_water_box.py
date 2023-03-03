@@ -65,23 +65,32 @@ class ReadWater:
 
     def read_pdb(self,
                  water_pdb: str  # Name of the file to read
-                 ) -> None:
+                 ) -> tuple[list[list[typing.Any]],
+                            list[list[str]],
+                            list[list[str]]]:
         """read the pdb file line by line"""
-        atoms_pos: list[list[typing.Any]] = []  # Save the atoms section
+        atoms: list[list[typing.Any]] = []  # Save the atoms section
+        bonds: list[list[str]] = []  # Save the bonds
+        angles: list[list[str]] = []  # Save the angles
         with open(water_pdb, 'r', encoding="utf8") as f_w:
             while True:
                 line: str = f_w.readline()
                 line_str: str = line.strip()
                 if line_str.startswith('ATOM'):
                     # Pass to procces ATOM
-                    atoms_pos.append(self.__process_atom(line_str))
+                    atoms.append(self.__process_atom(line_str))
                 elif line_str.startswith('CONECT'):
                     # Pass to procces CONECT
-                    print(self.__process_connect(line_str))
+                    conect: list[str] = self.__process_connect(line_str)
+                    if len(conect) == 2:
+                        bonds.append(conect)
+                    else:
+                        angles.append(conect)
                 else:
                     pass
                 if not line_str:
                     break
+        return atoms, bonds, angles
 
     def __process_atom(self,
                        line: str  # lines which starts with ATOMS
