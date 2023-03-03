@@ -228,16 +228,22 @@ class GetWaterDf:
     not distinguishable, the script makes bonds and angles for all the
     residues in the box."""
     def __init__(self) -> None:
-        atoms = SetAtomId()
-        self.make_df(atoms)
+        atoms: pd.DataFrame = SetAtomId()
+        self.atoms: pd.DataFrame = atoms
+        self.bonds: pd.DataFrame  # updated df
+        self.angles: pd.DataFrame  # updated df
+        self.bonds, self.angles = self.make_df(atoms)
 
     def make_df(self,
                 atoms: SetAtomId  # updated atoms
-                ) -> None:
+                ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """make bond and angles df"""
         resid_max: int = np.max(atoms.atoms_df['residue_id'])
         bonds: pd.DataFrame = self.__mk_bonds(resid_max)
-        # print(self.__one_angle_df())
+        bonds.index += 1
+        angles: pd.DataFrame = self.__mk_angles(resid_max)
+        angles.index += 1
+        return bonds, angles
 
     def __mk_bonds(self,
                    resid_max: int  # Number of the residues in the box
@@ -252,7 +258,23 @@ class GetWaterDf:
             df_c['aj'] += id_rise
             df_list.append(df_c)
             del df_c
-        return pd.concat(df_list)
+        return pd.concat(df_list, ignore_index=True)
+
+    def __mk_angles(self,
+                    resid_max: int  # Number of the residues in the box
+                    ) -> pd.DataFrame:
+        """make angles df"""
+        df_i: pd.DataFrame = self.__one_angle_df()  # df for one residue
+        df_list: list[pd.DataFrame] = []  # To append all the dfs
+        for i in range(resid_max):
+            id_rise: int = i*3  # 3: Number of atom in molecules
+            df_c: pd.DataFrame = df_i.copy()
+            df_c['ai'] += id_rise
+            df_c['aj'] += id_rise
+            df_c['ak'] += id_rise
+            df_list.append(df_c)
+            del df_c
+        return pd.concat(df_list, ignore_index=True)
 
     def __one_bond_df(self) -> pd.DataFrame:
         """set one bond df"""
@@ -280,4 +302,3 @@ class GetWaterDf:
         df_a_one['name'] = names
         return df_a_one
 
-# CONECT    3    1    2
