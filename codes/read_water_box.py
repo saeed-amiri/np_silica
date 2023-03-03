@@ -53,6 +53,7 @@ For CONECT:
       PDB_format_Dec_1996.pdf)
 """
 
+import typing
 import static_info as stinfo
 
 
@@ -66,7 +67,7 @@ class ReadWater:
                  water_pdb: str  # Name of the file to read
                  ) -> None:
         """read the pdb file line by line"""
-        atoms_pos: list[list[str]] = []  # Save the atoms section
+        atoms_pos: list[list[typing.Any]] = []  # Save the atoms section
         with open(water_pdb, 'r', encoding="utf8") as f_w:
             while True:
                 line: str = f_w.readline()
@@ -84,16 +85,16 @@ class ReadWater:
 
     def __process_atom(self,
                        line: str  # lines which starts with ATOMS
-                       ) -> list[str]:
+                       ) -> list[typing.Any]:
         """process lines which are starts with ATOM record"""
         atom_id = line[6:11].strip()
         atom_name: str = line[13:16].strip()
         residue_name: str = line[17:20].strip()
         chain_identifier: str = line[21:22]
         residue_number: str = line[22:27].strip()
-        x_i: str = line[30:39].strip()
-        y_i: str = line[39:47].strip()
-        z_i: str = line[47:55].strip()
+        x_i: float = float(line[30:39].strip())
+        y_i: float = float(line[39:47].strip())
+        z_i: float = float(line[47:55].strip())
         return [atom_id,
                 atom_name,
                 residue_name,
