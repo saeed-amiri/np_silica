@@ -65,10 +65,18 @@ class ReadWater:
 
     def read_pdb(self,
                  water_pdb: str  # Name of the file to read
-                 ) -> tuple[list[list[typing.Any]],
-                            list[list[str]],
-                            list[list[str]]]:
+                 ) -> None:
         """read the pdb file line by line"""
+        atoms: list[list[typing.Any]] = []  # atoms info
+        bonds: list[list[str]] = []  # Bonds info
+        angles: list[list[str]] = []  # Angles info
+        atoms, bonds, angles = self.__get_infos(water_pdb)
+
+    def __get_infos(self,
+                    water_pdb: str  # Name of the file to read
+                    ) -> tuple[list[list[typing.Any]],
+                               list[list[str]],
+                               list[list[str]]]:
         atoms: list[list[typing.Any]] = []  # Save the atoms section
         bonds: list[list[str]] = []  # Save the bonds
         angles: list[list[str]] = []  # Save the angles
