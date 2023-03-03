@@ -77,7 +77,7 @@ class ReadWater:
                     atoms_pos.append(self.__process_atom(line_str))
                 elif line_str.startswith('CONECT'):
                     # Pass to procces CONECT
-                    pass
+                    print(self.__process_connect(line_str))
                 else:
                     pass
                 if not line_str:
@@ -103,3 +103,14 @@ class ReadWater:
                 x_i,
                 y_i,
                 z_i]
+
+    def __process_connect(self,
+                          line: str  # lines which starts with CONECT
+                          ) -> list[str]:
+        """"process line which starts with CONECT"""
+        a_i: str = line[6:11]
+        a_j: str = line[11:16]
+        if len(line) > 16:
+            a_k: str = line[16:26]
+            return [a_i, a_j, a_k]
+        return [a_i, a_j]
