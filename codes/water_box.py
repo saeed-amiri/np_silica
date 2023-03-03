@@ -213,7 +213,7 @@ class RunPackMol:
             print(f'{bcolors.OKCYAN}{self.__class__.__name__}:'
                   f' ({self.__module__})\n'
                   '\tPACKMOL executed successfully, output is: '
-                  f'{stinfo.Hydration.OUT_FILE}'
+                  f'"{stinfo.Hydration.OUT_FILE}"'
                   f'{bcolors.ENDC}')
         else:
             sys.exit(f'{bcolors.FAIL}\tError! in executing PACKMOL'
