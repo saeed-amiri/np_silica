@@ -137,7 +137,6 @@ class ReadWater:
                        line: str  # lines which starts with ATOMS
                        ) -> list[typing.Any]:
         """process lines which are starts with ATOM record"""
-        print(line)
         atom_id = line[6:11].strip()
         atom_name: str = line[13:16].strip()
         residue_name: str = line[17:20].strip()
@@ -195,4 +194,29 @@ class SetAtomId(ReadWater):
         atoms.index += 1
         atoms['old_atom_id'] = atoms['atom_id']
         atoms['atom_id'] = atoms.index
-        print(atoms)
+        self.__update_resid(atoms)
+
+    def __update_resid(self,
+                       atoms: pd.DataFrame  # Atoms df
+                       ) -> pd.DataFrame:
+        """update the residue id to an integer and keep the old one"""
+        residue_name: list[str]  # Name of the residue
+        residue_name = [i+j for i, j in zip(atoms['chain_identifier'],
+                                            atoms['residue_number'])]
+        atoms['residue_name'] = residue_name
+        residue_dict: dict[str, int]  # To make new residue id
+        residue_dict = {k: v+1 for v, k in
+                        enumerate(self.drop_duplicate(residue_name))}
+        residue_id: list[int] = []  # To get residue for all the atoms
+        for item in residue_name:
+            residue_id.append(residue_dict[item])
+        atoms['residue_id'] = residue_id
+        atoms.to_csv('atoms.test', sep=' ')
+
+    def drop_duplicate(self,
+                       l_to_set: list[typing.Any]
+                       ) -> list[typing.Any]:
+        """drop duplicated item with keeping order"""
+        seen: set[str] = set()
+        seen_add = seen.add
+        return [x for x in l_to_set if not (x in seen or seen_add(x))]
