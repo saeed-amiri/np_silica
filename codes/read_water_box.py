@@ -229,21 +229,53 @@ class GetWaterDf:
     residues in the box."""
     def __init__(self) -> None:
         atoms: pd.DataFrame = SetAtomId()
-        self.atoms: pd.DataFrame = atoms
+        self.atoms: pd.DataFrame  # In lammps version
         self.bonds: pd.DataFrame  # updated df
         self.angles: pd.DataFrame  # updated df
-        self.bonds, self.angles = self.make_df(atoms)
+        self.atoms, self.bonds, self.angles = self.make_df(atoms)
 
     def make_df(self,
                 atoms: SetAtomId  # updated atoms
-                ) -> tuple[pd.DataFrame, pd.DataFrame]:
+                ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         """make bond and angles df"""
         resid_max: int = np.max(atoms.atoms_df['residue_id'])
+        atoms_lmp: pd.DataFrame = self.__lmp_atoms(atoms.atoms_df)
         bonds: pd.DataFrame = self.__mk_bonds(resid_max)
         bonds.index += 1
         angles: pd.DataFrame = self.__mk_angles(resid_max)
         angles.index += 1
-        return bonds, angles
+        return atoms_lmp, bonds, angles
+
+    def __lmp_atoms(self,
+                    atoms: pd.DataFrame  # Atoms df
+                    ) -> pd.DataFrame:
+        """convert data to lammps full atoms format, with extera info"""
+        columns: list[str]  # Columns in LAMMPS version
+        columns = ['atom_id', 'mol', 'typ', 'charge', 'x', 'y', 'z',
+                   'nx', 'ny', 'nz', 'cmt', 'name', 'old_atom_id']
+        df_lmp: pd.DataFrame  # ATOMS in lammps format
+        df_lmp = pd.DataFrame(columns=columns)
+        for col in ['atom_id', 'x', 'y', 'z', 'old_atom_id']:
+            df_lmp[col] = atoms[col]
+        zero_col: list[int] = [0 for _ in atoms.index]
+        for col in ['charge', 'nx', 'ny', 'nz']:
+            df_lmp[col] = zero_col
+        df_lmp['mol'] = atoms['residue_id']
+        df_lmp['typ'] = self.__get_atom_type(atoms)
+        df_lmp['cmt'] = ['#' for _ in atoms.index]
+        df_lmp['name'] = atoms['atom_name']
+        return df_lmp
+
+    def __get_atom_type(self,
+                        atoms: pd.DataFrame  # Atoms df
+                        ) -> list[int]:
+        """make a list of atoms type, since there are only two atoms
+        type, just using 1 for H and 2 for O"""
+        atom_type_dict: dict[str, int] = {'H': 1, 'O': 2}
+        atom_type: list[int] = []  # Type of the atoms
+        for item in atoms['atom_name']:
+            atom_type.append(atom_type_dict[item])
+        return atom_type
 
     def __mk_bonds(self,
                    resid_max: int  # Number of the residues in the box
