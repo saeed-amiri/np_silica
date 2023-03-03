@@ -172,7 +172,7 @@ class ReadWater:
         """print infos"""
         print(f'{bcolors.OKCYAN}{self.__class__.__name__}: '
               f'({self.__module__}):\n'
-              f'\tReading water data file: {water_pdb}"'
+              f'\tReading water data file: "{water_pdb}"'
               f'{bcolors.ENDC}')
 
 
@@ -233,6 +233,7 @@ class GetWaterDf:
         self.bonds: pd.DataFrame  # updated df
         self.angles: pd.DataFrame  # updated df
         self.atoms, self.bonds, self.angles = self.make_df(atoms)
+        self.print_info()
 
     def make_df(self,
                 atoms: SetAtomId  # updated atoms
@@ -242,8 +243,10 @@ class GetWaterDf:
         atoms_lmp: pd.DataFrame = self.__lmp_atoms(atoms.atoms_df)
         bonds: pd.DataFrame = self.__mk_bonds(resid_max)
         bonds.index += 1
+        bonds['typ'] = [1 for _ in bonds.index]  # Only one bonds' type
         angles: pd.DataFrame = self.__mk_angles(resid_max)
         angles.index += 1
+        angles['typ'] = [1 for _ in angles.index]  # Only one angles' type
         return atoms_lmp, bonds, angles
 
     def __lmp_atoms(self,
