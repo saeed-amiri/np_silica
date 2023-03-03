@@ -54,23 +54,55 @@ For CONECT:
 """
 
 import typing
+import pandas as pd
 import static_info as stinfo
+from colors_text import TextColor as bcolors
 
 
 class ReadWater:
     """read the PDB file of the water box"""
     def __init__(self) -> None:
         water_pdb: str = stinfo.Hydration.OUT_FILE  # The file to read
-        self.read_pdb(water_pdb)
+        self.atoms_df: pd.DataFrame  # Water infos
+        self.bonds_df: pd.DataFrame  # Water infos
+        self.angles_df: pd.DataFrame  # Water infos
+        self.atoms_df, self.bonds_df, self.angles_df = self.read_pdb(water_pdb)
+        self.print_info(water_pdb)
 
     def read_pdb(self,
                  water_pdb: str  # Name of the file to read
-                 ) -> None:
+                 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         """read the pdb file line by line"""
         atoms: list[list[typing.Any]] = []  # atoms info
         bonds: list[list[str]] = []  # Bonds info
         angles: list[list[str]] = []  # Angles info
         atoms, bonds, angles = self.__get_infos(water_pdb)
+        atoms_df: pd.DataFrame = self.__mk_df(atoms, 'atoms')
+        bonds_df: pd.DataFrame = self.__mk_df(bonds, 'bonds')
+        angles_df: pd.DataFrame = self.__mk_df(angles, 'angles')
+        return atoms_df, bonds_df, angles_df
+
+    def __mk_df(self,
+                data: list[typing.Any],  # Data to mk df, atoms|bonds|angles
+                d_type: str  # Name of the data section,  atoms|bonds|angles
+                ) -> pd.DataFrame:
+        """convert data to df and return"""
+        columns: list[str]  # Names of the columns of the df
+        if d_type == 'atoms':
+            columns = ['atom_id',
+                       'atom_name',
+                       'residue_name',
+                       'chain_identifier',
+                       'residue_number',
+                       'x',
+                       'y',
+                       'z']
+        elif d_type == 'bonds':
+            columns = ['a_i', 'a_j']
+        elif d_type == 'angles':
+            columns = ['a_i', 'a_j', 'a_k']
+        df_data: pd.DataFrame = pd.DataFrame(data, columns=columns)
+        return df_data
 
     def __get_infos(self,
                     water_pdb: str  # Name of the file to read
@@ -131,3 +163,12 @@ class ReadWater:
             a_k: str = line[16:26]
             return [a_i, a_j, a_k]
         return [a_i, a_j]
+
+    def print_info(self,
+                   water_pdb: str  # Name of the file to read
+                   ) -> None:
+        """print infos"""
+        print(f'{bcolors.OKCYAN}{self.__class__.__name__}: '
+              f'({self.__module__}):\n'
+              f'\tReading water data file: {water_pdb}"'
+              f'{bcolors.ENDC}')
