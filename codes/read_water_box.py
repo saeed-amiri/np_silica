@@ -302,3 +302,8 @@ class GetWaterDf:
         df_a_one['name'] = names
         return df_a_one
 
+    def print_info(self) -> None:
+        """print infos"""
+        print(f'{bcolors.OKCYAN}{self.__class__.__name__}: '
+              f'({self.__module__}):\n'
+              f'\tAtoms, Bonds and, Angles are created {bcolors.ENDC}')
