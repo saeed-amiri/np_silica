@@ -20,7 +20,7 @@ class MergeAll:
     def merge_all(self,
                   water_box,  # Water box all data in LAMMPS full atoms
                   nano_p  # Nano particles all data in LAMMPS full atoms
-                  ) -> None:
+                  ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         """update the typs, then merge them together"""
         # First update types
         water_atoms: pd.DataFrame  # Water atoms with updated atom type
@@ -28,9 +28,21 @@ class MergeAll:
         water_angles: pd.DataFrame  # Water angles with updated angle type
         water_atoms, water_bonds, water_angles = self.__update_types(water_box,
                                                                      nano_p)
-        self.__combine_df(nano_p.Atoms_df, water_atoms, 'atoms')
-        self.__combine_df(nano_p.Bonds_df, water_bonds, 'bonds')
-        self.__combine_df(nano_p.Angles_df, water_angles, 'angles')
+        # Update atoms id
+        level_up: int = np.max(nano_p.Atoms_df['atom_id'])
+        water_atoms = self.__update_atoms_id(level_up, water_atoms, 'atoms')
+        water_bonds = self.__update_atoms_id(level_up, water_bonds, 'bonds')
+        water_angles = self.__update_atoms_id(level_up, water_angles, 'angles')
+        # Combine them
+        merge_atoms: pd.DataFrame  # Merged df of water and nanoparticles
+        merge_bonds: pd.DataFrame  # Merged df of water and nanoparticles
+        merge_angles: pd.DataFrame  # Merged df of water and nanoparticles
+        merge_atoms = self.__combine_df(nano_p.Atoms_df, water_atoms, 'atoms')
+        merge_bonds = self.__combine_df(nano_p.Bonds_df, water_bonds, 'bonds')
+        merge_angles = self.__combine_df(nano_p.Angles_df,
+                                         water_angles,
+                                         'angles')
+        return merge_atoms, merge_bonds, merge_angles
 
     def __combine_df(self,
                      nano_p_df: pd.DataFrame,  # df of the nanoparticle
@@ -49,6 +61,25 @@ class MergeAll:
         w_df: pd.DataFrame = water_df[columns].copy()
         np_df: pd.DataFrame = nano_p_df[columns].copy()
         return pd.concat([np_df, w_df])
+
+    def __update_atoms_id(self,
+                          level_up: int,  # Maximum of atom_id in the atoms_df
+                          water_df: pd.DataFrame,  # df of the water
+                          target: str  # Atoms, Bonds, Angles
+                          ) -> pd.DataFrame:
+        """updating atom id of water_box by adding maximum atom id of
+        nanoparticle to each atom id"""
+        df_c: pd.DataFrame = water_df.copy()
+        if target == 'atoms':
+            df_c['atom_id'] += level_up
+        elif target == 'bonds':
+            df_c['ai'] += level_up
+            df_c['aj'] += level_up
+        elif target == 'angles':
+            df_c['ai'] += level_up
+            df_c['aj'] += level_up
+            df_c['ak'] += level_up
+        return df_c
 
     def __update_types(self,
                        water_box,  # Water box all data in LAMMPS full atoms
