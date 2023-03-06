@@ -15,7 +15,12 @@ class MergeAll:
                  water_box,  # Water box all data in LAMMPS full atoms
                  nano_p  # Nano particles all data in LAMMPS full atoms
                  ) -> None:
-        self.merge_all(water_box, nano_p)
+        self.Atoms_df: pd.DataFrame  # Merged df of water and nanoparticles
+        self.Bonds_df: pd.DataFrame  # Merged df of water and nanoparticles
+        self.Angles_df: pd.DataFrame  # Merged df of water and nanoparticles
+        self.Atoms_df, self.Bonds_df, self.Angles_df = \
+            self.merge_all(water_box, nano_p)
+        self.print_info()
 
     def merge_all(self,
                   water_box,  # Water box all data in LAMMPS full atoms
@@ -109,3 +114,10 @@ class MergeAll:
         df_c: pd.DataFrame = water_df.copy()
         df_c['typ'] += level_up
         return df_c
+
+    def print_info(self) -> None:
+        """print infos"""
+        print(f'{bcolors.OKCYAN}{self.__class__.__name__}: '
+              f'({self.__module__}):\n'
+              '\tNanoparticle and the water_box are merged together'
+              f'{bcolors.ENDC}')
