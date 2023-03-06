@@ -144,8 +144,8 @@ class ReadWater:
         chain_identifier: str = line[21:22]
         residue_number: str = line[22:27].strip()
         x_i: float = float(line[30:38].strip())
-        y_i: float = float(line[39:46].strip())
-        z_i: float = float(line[47:55].strip())
+        y_i: float = float(line[38:46].strip())
+        z_i: float = float(line[46:55].strip())
         return [atom_id,
                 atom_name,
                 residue_name,
