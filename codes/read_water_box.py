@@ -229,10 +229,10 @@ class GetWaterDf:
     residues in the box."""
     def __init__(self) -> None:
         atoms: pd.DataFrame = SetAtomId()
-        self.atoms: pd.DataFrame  # In lammps version
-        self.bonds: pd.DataFrame  # updated df
-        self.angles: pd.DataFrame  # updated df
-        self.atoms, self.bonds, self.angles = self.make_df(atoms)
+        self.Atoms_df: pd.DataFrame  # In lammps version
+        self.Bonds_df: pd.DataFrame  # updated df
+        self.Angles_df: pd.DataFrame  # updated df
+        self.Atoms_df, self.Bonds_df, self.Angles_df = self.make_df(atoms)
         self.print_info()
 
     def make_df(self,
