@@ -243,9 +243,11 @@ class GetWaterDf:
         atoms_lmp: pd.DataFrame = self.__lmp_atoms(atoms.atoms_df)
         bonds: pd.DataFrame = self.__mk_bonds(resid_max)
         bonds.index += 1
+        bonds['cmt'] = ['#' for _ in bonds.index]
         bonds['typ'] = [1 for _ in bonds.index]  # Only one bonds' type
         angles: pd.DataFrame = self.__mk_angles(resid_max)
         angles.index += 1
+        angles['cmt'] = ['#' for _ in angles.index]
         angles['typ'] = [1 for _ in angles.index]  # Only one angles' type
         return atoms_lmp, bonds, angles
 
