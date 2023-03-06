@@ -230,10 +230,11 @@ class GetWaterDf:
     def __init__(self) -> None:
         atoms: pd.DataFrame = SetAtomId()
         self.Atoms_df: pd.DataFrame  # In lammps version
-        self.Bonds_df: pd.DataFrame  # updated df
-        self.Angles_df: pd.DataFrame  # updated df
+        self.Bonds_df: pd.DataFrame  # Updated df
+        self.Angles_df: pd.DataFrame  # Updated df
+        self.Masses_df: pd.DataFrame  # Masses df
         self.Atoms_df, self.Bonds_df, self.Angles_df = self.make_df(atoms)
-        self.__mk_masses_df()
+        self.Masses_df = self.__mk_masses_df()
         self.print_info()
 
     def make_df(self,
