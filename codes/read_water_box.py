@@ -233,6 +233,7 @@ class GetWaterDf:
         self.Bonds_df: pd.DataFrame  # updated df
         self.Angles_df: pd.DataFrame  # updated df
         self.Atoms_df, self.Bonds_df, self.Angles_df = self.make_df(atoms)
+        self.__mk_masses_df()
         self.print_info()
 
     def make_df(self,
@@ -338,6 +339,29 @@ class GetWaterDf:
         df_a_one['ak'] = a_k
         df_a_one['name'] = names
         return df_a_one
+
+    def __mk_masses_df(self) -> pd.DataFrame:
+        """make a df for masses in LAMMPS format"""
+        h_type: int  # Type of hydrogen in the df
+        o_type: int  # Type of oxygen in the df
+        h_type = list(set(
+                          self.Atoms_df[self.Atoms_df['name'] == 'H']['typ'])
+                      )[0]
+        o_type = list(set(
+                          self.Atoms_df[self.Atoms_df['name'] == 'O']['typ'])
+                      )[0]
+        h_row: dict[str, typing.Any] = {'mass': stinfo.Hydration.MASSES['H'],
+                                        'typ': h_type,
+                                        'cmt': '#',
+                                        'name': 'H',
+                                        'b_name': 'H'}
+        o_row: dict[str, typing.Any] = {'mass': stinfo.Hydration.MASSES['O'],
+                                        'typ': o_type,
+                                        'cmt': '#',
+                                        'name': 'O',
+                                        'b_name': 'O'}
+        df_m = pd.DataFrame([h_row, o_row])
+        return df_m
 
     def print_info(self) -> None:
         """print infos"""
