@@ -192,8 +192,8 @@ class SetAtomId(ReadWater):
                        atoms: pd.DataFrame  # Atoms raw dataframe
                        ) -> pd.DataFrame:
         """update atoms"""
-        atoms.index += 1
         atoms['old_atom_id'] = atoms['chain_identifier'] + atoms['atom_id']
+        atoms.index += 1
         atoms['atom_id'] = atoms.index
         return self.__update_resid(atoms)
 
@@ -266,6 +266,7 @@ class GetWaterDf:
         y_cm: float = np.average(atoms_df['y'])
         z_cm: float = np.average(atoms_df['z'])
         df_c: pd.DataFrame = atoms_df.copy()
+        print(x_cm, y_cm, z_cm)
         df_c['x'] -= x_cm
         df_c['y'] -= y_cm
         df_c['z'] -= z_cm
@@ -336,7 +337,7 @@ class GetWaterDf:
     def __one_bond_df(self) -> pd.DataFrame:
         """set one bond df"""
         a_i: list[int] = [1, 2]  # 1st atoms in the bonds
-        a_j: list[int] = [2, 3]  # 2nd atoms in the bonds
+        a_j: list[int] = [3, 3]  # 2nd atoms in the bonds
         names: list[str] = ['H-O', 'H-O']
         columns: list[str] = ['ai', 'aj', 'name']  # Name of the columns in df
         df_b_one: pd.DataFrame = pd.DataFrame(columns=columns)
@@ -347,9 +348,9 @@ class GetWaterDf:
 
     def __one_angle_df(self) -> pd.DataFrame:
         """set one angle df"""
-        a_i: list[int] = [3]  # 1st atoms in the angles
-        a_j: list[int] = [1]  # 2nd atoms in the angles
-        a_k: list[int] = [2]  # 3rd atoms in the angles
+        a_i: list[int] = [1]  # 1st atoms in the angles H
+        a_j: list[int] = [3]  # 2nd atoms in the angles O
+        a_k: list[int] = [2]  # 3rd atoms in the angles H
         names: list[str] = ['H-O-H']
         columns: list[str] = ['ai', 'aj', 'ak', 'name']  # Columns in df
         df_a_one: pd.DataFrame = pd.DataFrame(columns=columns)
