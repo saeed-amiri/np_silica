@@ -344,11 +344,11 @@ class GetWaterDf:
         """make a df for masses in LAMMPS format"""
         h_type: int  # Type of hydrogen in the df
         o_type: int  # Type of oxygen in the df
-        h_type = list(set(
-                          self.Atoms_df[self.Atoms_df['name'] == 'H']['typ'])
+        h_type = list(
+                      set(self.Atoms_df[self.Atoms_df['name'] == 'H']['typ'])
                       )[0]
-        o_type = list(set(
-                          self.Atoms_df[self.Atoms_df['name'] == 'O']['typ'])
+        o_type = list(
+                      set(self.Atoms_df[self.Atoms_df['name'] == 'O']['typ'])
                       )[0]
         h_row: dict[str, typing.Any] = {'mass': stinfo.Hydration.MASSES['H'],
                                         'typ': h_type,
