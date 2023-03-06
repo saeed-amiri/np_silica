@@ -18,21 +18,26 @@ class MergeAll:
         self.Atoms_df: pd.DataFrame  # Merged df of water and nanoparticles
         self.Bonds_df: pd.DataFrame  # Merged df of water and nanoparticles
         self.Angles_df: pd.DataFrame  # Merged df of water and nanoparticles
-        self.Atoms_df, self.Bonds_df, self.Angles_df = \
+        self.Masses_Df: pd.DataFrame  # Merged df of water and nanoparticles
+        self.Atoms_df, self.Bonds_df, self.Angles_df, self.Masses_Df = \
             self.merge_all(water_box, nano_p)
         self.print_info()
 
     def merge_all(self,
                   water_box,  # Water box all data in LAMMPS full atoms
                   nano_p  # Nano particles all data in LAMMPS full atoms
-                  ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+                  ) -> tuple[pd.DataFrame,
+                             pd.DataFrame,
+                             pd.DataFrame,
+                             pd.DataFrame]:
         """update the typs, then merge them together"""
         # First update types
         water_atoms: pd.DataFrame  # Water atoms with updated atom type
         water_bonds: pd.DataFrame  # Water bonds with updated bond type
         water_angles: pd.DataFrame  # Water angles with updated angle type
-        water_atoms, water_bonds, water_angles = self.__update_types(water_box,
-                                                                     nano_p)
+        water_masses: pd.DataFrame  # Water masses with updated angle type
+        water_atoms, water_bonds, water_angles, water_masses = \
+            self.__update_types(water_box, nano_p)
         # Update atoms id
         level_up: int = np.max(nano_p.Atoms_df['atom_id'])
         water_atoms = self.__update_atoms_id(level_up, water_atoms, 'atoms')
@@ -47,7 +52,7 @@ class MergeAll:
         merge_angles = self.__combine_df(nano_p.Angles_df,
                                          water_angles,
                                          'angles')
-        return merge_atoms, merge_bonds, merge_angles
+        return merge_atoms, merge_bonds, merge_angles, water_masses
 
     def __combine_df(self,
                      nano_p_df: pd.DataFrame,  # df of the nanoparticle
@@ -89,21 +94,29 @@ class MergeAll:
     def __update_types(self,
                        water_box,  # Water box all data in LAMMPS full atoms
                        nano_p  # Nano particles all data in LAMMPS full atoms
-                       ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+                       ) -> tuple[pd.DataFrame,
+                                  pd.DataFrame,
+                                  pd.DataFrame,
+                                  pd.DataFrame]:
         """update atoms, bonds, and angles types of the water_box"""
         # Update atoms type
         water_atoms: pd.DataFrame  # Water atoms with updated atom type
+        water_bonds: pd.DataFrame  # Water bonds with updated atom type
+        water_angles: pd.DataFrame  # Water angles with updated atom type
+        water_masses: pd.DataFrame  # Water masses with updated atom type
         water_atoms = self.__update_all_types(water_box.Atoms_df,
                                               nano_p.Atoms_df)
         water_bonds = self.__update_all_types(water_box.Bonds_df,
                                               nano_p.Bonds_df)
         water_angles = self.__update_all_types(water_box.Angles_df,
                                                nano_p.Angles_df)
+        water_masses = self.__update_masses_df(water_atoms,
+                                               water_box.Masses_df)
         print(f'{bcolors.OKCYAN}{self.__class__.__name__}: '
               f'({self.__module__})\n'
               '\tUpdate all the types in Atoms, Bonds, and Angles of '
               f'"water_box"{bcolors.ENDC}')
-        return water_atoms, water_bonds, water_angles
+        return water_atoms, water_bonds, water_angles, water_masses
 
     def __update_all_types(self,
                            water_df: pd.DataFrame,  # Atoms of water
@@ -115,9 +128,25 @@ class MergeAll:
         df_c['typ'] += level_up
         return df_c
 
+    def __update_masses_df(self,
+                           water_atoms: pd.DataFrame,  # Atoms with updated typ
+                           water_masses: pd.DataFrame  # Masses df of water
+                           ) -> pd.DataFrame:
+        """update the masses for water box based on the updated types"""
+        h_type: int  # Type of hydrogen in the df
+        o_type: int  # Type of oxygen in the df
+        h_type = list(
+                      set(water_atoms[water_atoms['name'] == 'H']['typ'])
+                      )[0]
+        o_type = list(
+                      set(water_atoms[water_atoms['name'] == 'O']['typ'])
+                      )[0]
+        df_c: pd.DataFrame = water_masses.copy()
+        df_c.at[df_c[df_c['name'] == 'H'].index[0], 'typ'] = h_type
+        df_c.at[df_c[df_c['name'] == 'O'].index[0], 'typ'] = o_type
+        return df_c
+
     def print_info(self) -> None:
         """print infos"""
-        print(f'{bcolors.OKCYAN}{self.__class__.__name__}: '
-              f'({self.__module__}):\n'
-              '\tNanoparticle and the water_box are merged together'
-              f'{bcolors.ENDC}')
+        print(f'{bcolors.OKCYAN}\tNanoparticle and the water_box are '
+              f'merged together{bcolors.ENDC}')
