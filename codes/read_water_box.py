@@ -266,7 +266,6 @@ class GetWaterDf:
         y_cm: float = np.average(atoms_df['y'])
         z_cm: float = np.average(atoms_df['z'])
         df_c: pd.DataFrame = atoms_df.copy()
-        print(x_cm, y_cm, z_cm)
         df_c['x'] -= x_cm
         df_c['y'] -= y_cm
         df_c['z'] -= z_cm
