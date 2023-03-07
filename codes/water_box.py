@@ -49,7 +49,6 @@ class NumberMols:
     def __init__(self,
                  radius: float  # Radius of the NP after silanization
                  ) -> None:
-        print(radius)
         self.prepare_input(radius)
         self.print_info()
 
