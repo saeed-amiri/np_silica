@@ -90,19 +90,24 @@ class Hydration:
     Limitation for the box are added to the maximum radius of the NP"""
     TOLERANCE: float = 2.0
     # Box dimensions
-    X_MIN: float = 5.0
-    Y_MIN: float = 5.0
-    Z_MIN: float = 5.0
-    X_MAX: float = 5.0
-    Y_MAX: float = 5.0
-    Z_MAX: float = 5.0
+    # x
+    X_MIN: float = -20.0
+    X_MAX: float = 20.0
+    # y
+    Y_MIN: float = -20.0
+    Y_MAX: float = 20.0
+    # z
+    Z_MIN: float = -20.0
+    Z_MAX: float = -56.09
     # Constants
     AVOGADRO: float = 6.0221408e+23  # 1/mol
     WATER_MOLAR_MASS: float = 18.01528  # g/mol
     WATER_DENSITY = 0.9998395 #  g/ml
-    # PACKMOL file
+    MASSES: dict[str, float] = {'H': 1.0080, 'O': 15.9994}
+    # PACKMOL files
     WATER_PDB: str = '/scratch/saeed/MyScripts/np_silica/data/water.pdb'
     INP_FILE: str = 'water_box.inp'
     OUT_FILE: str = 'water_box.pdb'
     # PACKMOL lib
     PACKMOL: str = '/home/saeed/Downloads/packmol/packmol'
+
