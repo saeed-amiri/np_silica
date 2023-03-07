@@ -228,27 +228,30 @@ class GetWaterDf:
     PDB data file (PDB) has some repeated atom ids and since they are
     not distinguishable, the script makes bonds and angles for all the
     residues in the box."""
-    def __init__(self) -> None:
+    def __init__(self,
+                 water_moles: int  # Number of water molecules
+                 ) -> None:
         atoms: pd.DataFrame = SetAtomId()
         self.Atoms_df: pd.DataFrame  # In lammps version
         self.Bonds_df: pd.DataFrame  # Updated df
         self.Angles_df: pd.DataFrame  # Updated df
         self.Masses_df: pd.DataFrame  # Masses df
-        self.Atoms_df, self.Bonds_df, self.Angles_df = self.make_df(atoms)
+        self.Atoms_df, self.Bonds_df, self.Angles_df = \
+            self.make_df(atoms, water_moles)
         self.Masses_df = self.__mk_masses_df()
         self.print_info()
 
     def make_df(self,
-                atoms: SetAtomId  # updated atoms
+                atoms: SetAtomId,  # updated atoms
+                water_resid: int  # Number of water molecules in the box
                 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         """make bond and angles df"""
-        resid_max: int = np.max(atoms.atoms_df['residue_id'])
         atoms_lmp: pd.DataFrame = self.__lmp_atoms(atoms.atoms_df)
-        bonds: pd.DataFrame = self.__mk_bonds(resid_max)
+        bonds: pd.DataFrame = self.__mk_bonds(water_resid)
         bonds.index += 1
         bonds['cmt'] = ['#' for _ in bonds.index]
         bonds['typ'] = [1 for _ in bonds.index]  # Only one bonds' type
-        angles: pd.DataFrame = self.__mk_angles(resid_max)
+        angles: pd.DataFrame = self.__mk_angles(water_resid)
         angles.index += 1
         angles['cmt'] = ['#' for _ in angles.index]
         angles['typ'] = [1 for _ in angles.index]  # Only one angles' type
@@ -345,25 +348,21 @@ class GetWaterDf:
 
     def __mk_masses_df(self) -> pd.DataFrame:
         """make a df for masses in LAMMPS format"""
-        h_type: int  # Type of hydrogen in the df
-        o_type: int  # Type of oxygen in the df
-        h_type = list(
-                      set(self.Atoms_df[self.Atoms_df['name'] == 'H']['typ'])
+        atom_names: list[str] = my_tools.drop_duplicate(self.Atoms_df['name'])
+        i_type: int  # Type of atom in the df
+        i_row: dict[str, typing.Any]  # Row per atom type
+        row_list: list[dict[str, typing.Any]] = []  # All the row to convert
+        for item in atom_names:
+            i_type = list(
+                      set(self.Atoms_df[self.Atoms_df['name'] == item]['typ'])
                       )[0]
-        o_type = list(
-                      set(self.Atoms_df[self.Atoms_df['name'] == 'O']['typ'])
-                      )[0]
-        h_row: dict[str, typing.Any] = {'mass': stinfo.Hydration.MASSES['H'],
-                                        'typ': h_type,
-                                        'cmt': '#',
-                                        'name': 'H',
-                                        'b_name': 'H'}
-        o_row: dict[str, typing.Any] = {'mass': stinfo.Hydration.MASSES['O'],
-                                        'typ': o_type,
-                                        'cmt': '#',
-                                        'name': 'O',
-                                        'b_name': 'O'}
-        df_m = pd.DataFrame([h_row, o_row])
+            i_row = {'mass': stinfo.Hydration.MASSES[item],
+                     'typ': i_type,
+                     'cmt': '#',
+                     'name': item,
+                     'b_name': item}
+            row_list.append(i_row)
+        df_m = pd.DataFrame(row_list)
         return df_m
 
     def print_info(self) -> None:
