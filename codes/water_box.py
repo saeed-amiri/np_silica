@@ -138,7 +138,7 @@ class NumberMols:
         """print infos"""
         print(f'{bcolors.OKCYAN}{self.__class__.__name__}: ('
               f'{self.__module__}):\n'
-              f'\tThe number of water molecules is set to '
+              f'\tThe number of water molecules before adding ions is '
               f'"{self.number_mols}"'
               f'{bcolors.ENDC}')
 
@@ -148,23 +148,40 @@ class InFile:
     def __init__(self,
                  radius: float,  # Radius of the NP
                  num_mols: int,  # Number of the molecules in the water volume
-                 edge: float  # Edge of the inscribed cube
+                 edge: float,  # Edge of the inscribed cube
+                 net_charge: float  # Net charge of the NP
                  ) -> None:
         self.edge: float = edge
-        self.write_file(radius, num_mols)
+        self.write_file(radius, num_mols, net_charge)
         self.print_info()
 
     def write_file(self,
                    radius: float,  # Radius of the NP
-                   num_mols: int  # Number of the molecules in the water volum
+                   num_mols: int,  # Number of the molecules in the water volum
+                   net_charge: float  # Net charge of the NP
                    ) -> None:
         """write the input file for the PACKMOL"""
+        self.__get_num_ions(net_charge)
         out_file: str = 'water_box.pdb'
         with open(stinfo.Hydration.INP_FILE, 'w', encoding="utf8") as f_out:
             f_out.write('# Input file for PACKMOL, Water box for a NP ')
             f_out.write(f'with the radius of {radius}\n\n')
             f_out.write(f'tolerance {stinfo.Hydration.TOLERANCE}\n\n')
             self.__write_water(f_out, num_mols, out_file, radius)
+
+    def __get_num_ions(self,
+                       net_charge: float  # Net charge of the NP
+                       ) -> int:
+        """return the number of ions, with sign"""
+        charge_floor: float = np.floor(np.abs(net_charge))
+        num_ions: int = int(np.sign(net_charge)*charge_floor)
+        if charge_floor != np.abs(net_charge):
+            print(f'{bcolors.CAUTION}{self.__class__.__name__}" '
+                  f'({self.__module__}):\n'
+                  f'\tNet charge is not a complete number! {net_charge}\n'
+                  f'\tThe number of ions is set to {num_ions}'
+                  f'{bcolors.ENDC}')
+        return num_ions
 
     def __write_water(self,
                       f_out: typing.IO,  # The file to write into it
@@ -233,5 +250,6 @@ if __name__ == "__main__":
     moles = NumberMols(radius=50)
     in_file = InFile(radius=50,
                      num_mols=moles.number_mols,
-                     edge=moles.edge_cube)
+                     edge=moles.edge_cube,
+                     net_charge=0)
     water_box = RunPackMol()
