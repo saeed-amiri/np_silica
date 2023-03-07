@@ -186,9 +186,9 @@ class InFile:
             pass
         else:
             if ion_mols > 0:
-                f_out.write(f'structure {stinfo.Hydration.NA_PDB}\n')
-            else:
                 f_out.write(f'structure {stinfo.Hydration.CL_PDB}\n')
+            else:
+                f_out.write(f'structure {stinfo.Hydration.NA_PDB}\n')
             f_out.write(f'\tnumber {int(np.abs(ion_mols))}\n')
             f_out.write('\tinside box ')
             f_out.write(f'{-self.edge/2 + stinfo.Hydration.X_MIN - tlr: .2f} ')
