@@ -49,6 +49,7 @@ class NumberMols:
     def __init__(self,
                  radius: float  # Radius of the NP after silanization
                  ) -> None:
+        print(radius)
         self.prepare_input(radius)
         self.print_info()
 
@@ -83,7 +84,7 @@ class NumberMols:
         num_moles: float
         num_moles = int(m_water * stinfo.Hydration.AVOGADRO /
                         stinfo.Hydration.WATER_MOLAR_MASS) + 1
-        return int(num_moles*2.5)
+        return num_moles
 
     def __get_box_volume(self,
                          sphere_volume: float,  # Volume of the sphere
@@ -128,8 +129,8 @@ class NumberMols:
         if box - sphere <= 0:
             sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}: '
                      f'({self.__module__})\n'
-                     f'\tVolume of the Sphere is less or equal to the '
-                     f'Volume of the Box'
+                     '\tVolume of the Sphere is less or equal to the '
+                     'Volume of the Box'
                      f'{bcolors.ENDC}\n')
         return box - sphere
 
@@ -158,7 +159,7 @@ class InFile:
                    edge: float  # Edge of the inscribed cube
                    ) -> None:
         """write the input file for the PACKMOL"""
-        tolerence: float = stinfo.Hydration.TOLERANCE
+        toler: float = stinfo.Hydration.TOLERANCE
         out_file: str = 'water_box.pdb'
         with open(stinfo.Hydration.INP_FILE, 'w', encoding="utf8") as f_out:
             f_out.write('# Input file for PACKMOL, Water box for a NP ')
@@ -167,12 +168,12 @@ class InFile:
             f_out.write(f'structure {stinfo.Hydration.WATER_PDB}\n')
             f_out.write(f'\tnumber {num_mols}\n')
             f_out.write('\tinside box ')
-            f_out.write(f'{stinfo.Hydration.X_MIN - edge - tolerence: .2f} ')
-            f_out.write(f'{stinfo.Hydration.Y_MIN - edge - tolerence: .2f} ')
-            f_out.write(f'{stinfo.Hydration.Z_MIN - edge - tolerence: .2f} ')
-            f_out.write(f'{stinfo.Hydration.X_MAX + edge + tolerence: .2f} ')
-            f_out.write(f'{stinfo.Hydration.Y_MAX + edge + tolerence: .2f} ')
-            f_out.write(f'{stinfo.Hydration.Z_MAX + edge + tolerence: .2f}\n')
+            f_out.write(f'{(stinfo.Hydration.X_MIN - edge)/2 - toler: .2f} ')
+            f_out.write(f'{(stinfo.Hydration.Y_MIN - edge)/2 - toler: .2f} ')
+            f_out.write(f'{(stinfo.Hydration.Z_MIN - edge)/2 - toler: .2f} ')
+            f_out.write(f'{(stinfo.Hydration.X_MAX + edge)/2 + toler: .2f} ')
+            f_out.write(f'{(stinfo.Hydration.Y_MAX + edge)/2 + toler: .2f} ')
+            f_out.write(f'{(stinfo.Hydration.Z_MAX + edge)/2 + toler: .2f}\n')
             f_out.write(f'\t outside sphere 0. 0. 0. {radius: .2f}\n')
             f_out.write('end structure\n\n')
             f_out.write(f'output {out_file}\n\n')
