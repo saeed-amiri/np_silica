@@ -38,6 +38,7 @@ the water box based on the limitations.
 """
 
 import sys
+import typing
 import subprocess
 import numpy as np
 import static_info as stinfo
@@ -149,33 +150,41 @@ class InFile:
                  num_mols: int,  # Number of the molecules in the water volume
                  edge: float  # Edge of the inscribed cube
                  ) -> None:
-        self.write_file(radius, num_mols, edge)
+        self.edge: float = edge
+        self.write_file(radius, num_mols)
         self.print_info()
 
     def write_file(self,
                    radius: float,  # Radius of the NP
-                   num_mols: int,  # Number of the molecules in the water volum
-                   edge: float  # Edge of the inscribed cube
+                   num_mols: int  # Number of the molecules in the water volum
                    ) -> None:
         """write the input file for the PACKMOL"""
-        toler: float = stinfo.Hydration.TOLERANCE
         out_file: str = 'water_box.pdb'
         with open(stinfo.Hydration.INP_FILE, 'w', encoding="utf8") as f_out:
             f_out.write('# Input file for PACKMOL, Water box for a NP ')
             f_out.write(f'with the radius of {radius}\n\n')
             f_out.write(f'tolerance {stinfo.Hydration.TOLERANCE}\n\n')
-            f_out.write(f'structure {stinfo.Hydration.WATER_PDB}\n')
-            f_out.write(f'\tnumber {num_mols}\n')
-            f_out.write('\tinside box ')
-            f_out.write(f'{-edge/2 + stinfo.Hydration.X_MIN - toler: .2f} ')
-            f_out.write(f'{-edge/2 + stinfo.Hydration.Y_MIN - toler: .2f} ')
-            f_out.write(f'{-edge/2 + stinfo.Hydration.Z_MIN - toler: .2f} ')
-            f_out.write(f'{edge/2 + stinfo.Hydration.X_MAX + toler: .2f} ')
-            f_out.write(f'{edge/2 + stinfo.Hydration.Y_MAX + toler: .2f} ')
-            f_out.write(f'{edge/2 + stinfo.Hydration.Z_MAX + toler: .2f}\n')
-            f_out.write(f'\t outside sphere 0. 0. 0. {radius: .2f}\n')
-            f_out.write('end structure\n\n')
-            f_out.write(f'output {out_file}\n\n')
+            self.__write_water(f_out, num_mols, out_file, radius)
+
+    def __write_water(self,
+                      f_out: typing.IO,  # The file to write into it
+                      num_mols: int,  # Number of the moles in the water volum
+                      out_file: str,  # Name of the output file
+                      radius: float  # Radius of the nanoparticle
+                      ) -> None:
+        toler: float = stinfo.Hydration.TOLERANCE
+        f_out.write(f'structure {stinfo.Hydration.WATER_PDB}\n')
+        f_out.write(f'\tnumber {num_mols}\n')
+        f_out.write('\tinside box ')
+        f_out.write(f'{-self.edge/2 + stinfo.Hydration.X_MIN - toler: .2f} ')
+        f_out.write(f'{-self.edge/2 + stinfo.Hydration.Y_MIN - toler: .2f} ')
+        f_out.write(f'{-self.edge/2 + stinfo.Hydration.Z_MIN - toler: .2f} ')
+        f_out.write(f'{self.edge/2 + stinfo.Hydration.X_MAX + toler: .2f} ')
+        f_out.write(f'{self.edge/2 + stinfo.Hydration.Y_MAX + toler: .2f} ')
+        f_out.write(f'{self.edge/2 + stinfo.Hydration.Z_MAX + toler: .2f}\n')
+        f_out.write(f'\t outside sphere 0. 0. 0. {radius: .2f}\n')
+        f_out.write('end structure\n\n')
+        f_out.write(f'output {out_file}\n\n')
 
     def print_info(self) -> None:
         """print infos"""
