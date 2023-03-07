@@ -243,7 +243,6 @@ class GetWaterDf:
         """make bond and angles df"""
         resid_max: int = np.max(atoms.atoms_df['residue_id'])
         atoms_lmp: pd.DataFrame = self.__lmp_atoms(atoms.atoms_df)
-        atoms_lmp = self.__com_to_zero(atoms_lmp)
         bonds: pd.DataFrame = self.__mk_bonds(resid_max)
         bonds.index += 1
         bonds['cmt'] = ['#' for _ in bonds.index]
@@ -253,23 +252,6 @@ class GetWaterDf:
         angles['cmt'] = ['#' for _ in angles.index]
         angles['typ'] = [1 for _ in angles.index]  # Only one angles' type
         return atoms_lmp, bonds, angles
-
-    def __com_to_zero(self,
-                      atoms_df: pd.DataFrame  # Atoms df water molecules
-                      ) -> pd.DataFrame:
-        """set the center of mass to zero"""
-        print(f'\n{bcolors.OKCYAN}{self.__class__.__name__}: '
-              f'({self.__module__})\n'
-              '\tMove the center of mass to zero'
-              f'{bcolors.ENDC}')
-        x_cm: float = np.average(atoms_df['x'])
-        y_cm: float = np.average(atoms_df['y'])
-        z_cm: float = np.average(atoms_df['z'])
-        df_c: pd.DataFrame = atoms_df.copy()
-        df_c['x'] -= x_cm
-        df_c['y'] -= y_cm
-        df_c['z'] -= z_cm
-        return df_c
 
     def __lmp_atoms(self,
                     atoms: pd.DataFrame  # Atoms df
