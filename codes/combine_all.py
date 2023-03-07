@@ -3,6 +3,7 @@ It combines water_box with the nanoparticle, putting their origin at
 zero, for both thier origin must already be at zero.
 """
 
+import my_tools
 import numpy as np
 import pandas as pd
 from colors_text import TextColor as bcolors
@@ -144,17 +145,14 @@ class MergeAll:
                            water_masses: pd.DataFrame  # Masses df of water
                            ) -> pd.DataFrame:
         """update the masses for water box based on the updated types"""
-        h_type: int  # Type of hydrogen in the df
-        o_type: int  # Type of oxygen in the df
-        h_type = list(
-                      set(water_atoms[water_atoms['name'] == 'H']['typ'])
-                      )[0]
-        o_type = list(
-                      set(water_atoms[water_atoms['name'] == 'O']['typ'])
-                      )[0]
+        atom_names: list[str] = my_tools.drop_duplicate(water_atoms['name'])
+        i_type: int  # Type of atom in the df
         df_c: pd.DataFrame = water_masses.copy()
-        df_c.at[df_c[df_c['name'] == 'H'].index[0], 'typ'] = h_type
-        df_c.at[df_c[df_c['name'] == 'O'].index[0], 'typ'] = o_type
+        for item in atom_names:
+            i_type = list(
+                      set(water_atoms[water_atoms['name'] == item]['typ'])
+                      )[0]
+            df_c.at[df_c[df_c['name'] == item].index[0], 'typ'] = i_type
         return df_c
 
     def print_info(self) -> None:
