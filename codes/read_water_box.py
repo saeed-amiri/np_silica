@@ -54,6 +54,7 @@ For CONECT:
 """
 
 import typing
+import my_tools
 import numpy as np
 import pandas as pd
 import static_info as stinfo
@@ -278,8 +279,9 @@ class GetWaterDf:
                         ) -> list[int]:
         """make a list of atoms type, since there are only two atoms
         type, just using 1 for H and 2 for O"""
-        atom_type_dict: dict[str, int] = {'H': 1, 'O': 2}
         atom_type: list[int] = []  # Type of the atoms
+        atom_names: list[str] = my_tools.drop_duplicate(atoms['atom_name'])
+        atom_type_dict = {k: v+1 for v, k in enumerate(atom_names)}
         for item in atoms['atom_name']:
             atom_type.append(atom_type_dict[item])
         return atom_type
