@@ -20,13 +20,15 @@ import read_water_box as rbox
 if __name__ == '__main__':
     fname: str = sys.argv[1]
     nano_p = rdlmp.ReadData(fname)
+    print(nano_p.Net_charge)
     radius: float = my_tools.get_radius(nano_p.Atoms_df)
     moles = wbox.NumberMols(radius=radius)
     in_file = wbox.InFile(radius=radius,
                           num_mols=moles.number_mols,
-                          edge=moles.edge_cube)
+                          edge=moles.edge_cube,
+                          net_charge=nano_p.Net_charge)
     water_box = wbox.RunPackMol()
-    read_box = rbox.GetWaterDf()
+    read_box = rbox.GetWaterDf(in_file.num_water)
     combined_box = merge.MergeAll(read_box, nano_p)
     fout: str  # Name of the output file
     fout = f'boxed_{fname}'
