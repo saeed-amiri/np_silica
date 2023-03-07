@@ -355,6 +355,7 @@ class Body(Header):
             self.Dihedrals_df = pd.DataFrame.from_dict(self.Dihedrals).T
             self.Velocities_df = pd.DataFrame.from_dict(self.Velocities).T
             self.Masses_df = self.set_masses()
+            self.Net_charge = float(f'{self.Atoms_df["charge"].sum(): .3f}')
             del self.Atoms, self.Bonds, self.Angles, self.Dihedrals
 
     def get_atoms(self, line) -> None:
