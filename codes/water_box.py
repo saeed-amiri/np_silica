@@ -160,32 +160,22 @@ class InFile:
                    num_mols: int,  # Number of the molecules in the water volum
                    net_charge: float  # Net charge of the NP
                    ) -> None:
-        """write the input file for the PACKMOL"""
-        self.__get_num_ions(net_charge)
+        """write the input file for the PACKMOL, Subtract the number of
+        water atoms so can fit the number of ions into box"""
+        num_ions: int  # Number of required ions
+        water_moles: int  # Number of water molecules after adding ions
+        num_ions, water_moles = self.__get_num_ions(net_charge, num_mols)
         out_file: str = 'water_box.pdb'
         with open(stinfo.Hydration.INP_FILE, 'w', encoding="utf8") as f_out:
             f_out.write('# Input file for PACKMOL, Water box for a NP ')
             f_out.write(f'with the radius of {radius}\n\n')
             f_out.write(f'tolerance {stinfo.Hydration.TOLERANCE}\n\n')
-            self.__write_water(f_out, num_mols, out_file, radius)
-
-    def __get_num_ions(self,
-                       net_charge: float  # Net charge of the NP
-                       ) -> int:
-        """return the number of ions, with sign"""
-        charge_floor: float = np.floor(np.abs(net_charge))
-        num_ions: int = int(np.sign(net_charge)*charge_floor)
-        if charge_floor != np.abs(net_charge):
-            print(f'{bcolors.CAUTION}{self.__class__.__name__}" '
-                  f'({self.__module__}):\n'
-                  f'\tNet charge is not a complete number! {net_charge}\n'
-                  f'\tThe number of ions is set to {num_ions}'
-                  f'{bcolors.ENDC}')
-        return num_ions
+            self.__write_water(f_out, num_mols-num_ions, out_file, radius)
+            # self.__write_ions(f_out, )
 
     def __write_water(self,
                       f_out: typing.IO,  # The file to write into it
-                      num_mols: int,  # Number of the moles in the water volum
+                      num_mols: int,  # Number of the moles in the water volume
                       out_file: str,  # Name of the output file
                       radius: float  # Radius of the nanoparticle
                       ) -> None:
@@ -202,6 +192,25 @@ class InFile:
         f_out.write(f'\t outside sphere 0. 0. 0. {radius: .2f}\n')
         f_out.write('end structure\n\n')
         f_out.write(f'output {out_file}\n\n')
+
+    def __get_num_ions(self,
+                       net_charge: float,  # Net charge of the NP
+                       num_mols: int  # Number of water molecules before ions
+                       ) -> tuple[int, int]:
+        """return the number of ions, with sign"""
+        charge_floor: float = np.floor(np.abs(net_charge))
+        num_ions: int = int(np.sign(net_charge)*charge_floor)
+        if charge_floor != np.abs(net_charge):
+            print(f'{bcolors.CAUTION}{self.__class__.__name__}" '
+                  f'({self.__module__}):\n'
+                  f'\tNet charge is not a complete number! "{net_charge}"\n'
+                  f'\tThe number of ions is set to "{num_ions}"'
+                  f'{bcolors.ENDC}')
+        water_moles: int = num_mols - num_ions
+        print(f'{bcolors.OKCYAN}\tThe number water molecules is now set'
+              f' to "{water_moles}", and number of counter ions is '
+              f'"{num_ions}"{bcolors.ENDC}')
+        return num_ions, water_moles
 
     def print_info(self) -> None:
         """print infos"""
