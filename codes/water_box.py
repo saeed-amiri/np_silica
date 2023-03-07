@@ -152,14 +152,14 @@ class InFile:
                  net_charge: float  # Net charge of the NP
                  ) -> None:
         self.edge: float = edge
-        self.write_file(radius, num_mols, net_charge)
+        self.num_water: int = self.write_file(radius, num_mols, net_charge)
         self.print_info()
 
     def write_file(self,
                    radius: float,  # Radius of the NP
                    num_mols: int,  # Number of the molecules in the water volum
                    net_charge: float  # Net charge of the NP
-                   ) -> None:
+                   ) -> int:
         """write the input file for the PACKMOL, Subtract the number of
         water atoms so can fit the number of ions into box"""
         num_ions: int  # Number of required ions
@@ -170,28 +170,54 @@ class InFile:
             f_out.write('# Input file for PACKMOL, Water box for a NP ')
             f_out.write(f'with the radius of {radius}\n\n')
             f_out.write(f'tolerance {stinfo.Hydration.TOLERANCE}\n\n')
-            self.__write_water(f_out, num_mols-num_ions, out_file, radius)
-            # self.__write_ions(f_out, )
+            self.__write_water(f_out, water_moles, radius)
+            self.__write_ions(f_out, num_ions, radius)
+            f_out.write(f'output {out_file}\n\n')
+        return water_moles
+
+    def __write_ions(self,
+                     f_out: typing.IO,  # The file to write into it
+                     ion_mols: int,  # Number of the moles in the volume
+                     radius: float  # Radius of the nanoparticle
+                     ) -> None:
+        """write the ions section in the box"""
+        tlr: float = stinfo.Hydration.TOLERANCE
+        if ion_mols == 0:
+            pass
+        else:
+            if ion_mols > 0:
+                f_out.write(f'structure {stinfo.Hydration.NA_PDB}\n')
+            else:
+                f_out.write(f'structure {stinfo.Hydration.CL_PDB}\n')
+            f_out.write(f'\tnumber {int(np.abs(ion_mols))}\n')
+            f_out.write('\tinside box ')
+            f_out.write(f'{-self.edge/2 + stinfo.Hydration.X_MIN - tlr: .2f} ')
+            f_out.write(f'{-self.edge/2 + stinfo.Hydration.Y_MIN - tlr: .2f} ')
+            f_out.write(f'{-self.edge/2 + stinfo.Hydration.Z_MIN - tlr: .2f} ')
+            f_out.write(f'{self.edge/2 + stinfo.Hydration.X_MAX + tlr: .2f} ')
+            f_out.write(f'{self.edge/2 + stinfo.Hydration.Y_MAX + tlr: .2f} ')
+            f_out.write(f'{self.edge/2 + stinfo.Hydration.Z_MAX + tlr: .2f}\n')
+            f_out.write(f'\toutside sphere 0. 0. 0. {radius: .2f}\n')
+            f_out.write('end structure\n\n')
 
     def __write_water(self,
                       f_out: typing.IO,  # The file to write into it
-                      num_mols: int,  # Number of the moles in the water volume
-                      out_file: str,  # Name of the output file
+                      water_mols: int,  # Number of the moles in the volume
                       radius: float  # Radius of the nanoparticle
                       ) -> None:
-        toler: float = stinfo.Hydration.TOLERANCE
+        """write the water box section in the packmol inputfile"""
+        tlr: float = stinfo.Hydration.TOLERANCE
         f_out.write(f'structure {stinfo.Hydration.WATER_PDB}\n')
-        f_out.write(f'\tnumber {num_mols}\n')
+        f_out.write(f'\tnumber {water_mols}\n')
         f_out.write('\tinside box ')
-        f_out.write(f'{-self.edge/2 + stinfo.Hydration.X_MIN - toler: .2f} ')
-        f_out.write(f'{-self.edge/2 + stinfo.Hydration.Y_MIN - toler: .2f} ')
-        f_out.write(f'{-self.edge/2 + stinfo.Hydration.Z_MIN - toler: .2f} ')
-        f_out.write(f'{self.edge/2 + stinfo.Hydration.X_MAX + toler: .2f} ')
-        f_out.write(f'{self.edge/2 + stinfo.Hydration.Y_MAX + toler: .2f} ')
-        f_out.write(f'{self.edge/2 + stinfo.Hydration.Z_MAX + toler: .2f}\n')
-        f_out.write(f'\t outside sphere 0. 0. 0. {radius: .2f}\n')
+        f_out.write(f'{-self.edge/2 + stinfo.Hydration.X_MIN - tlr: .2f} ')
+        f_out.write(f'{-self.edge/2 + stinfo.Hydration.Y_MIN - tlr: .2f} ')
+        f_out.write(f'{-self.edge/2 + stinfo.Hydration.Z_MIN - tlr: .2f} ')
+        f_out.write(f'{self.edge/2 + stinfo.Hydration.X_MAX + tlr: .2f} ')
+        f_out.write(f'{self.edge/2 + stinfo.Hydration.Y_MAX + tlr: .2f} ')
+        f_out.write(f'{self.edge/2 + stinfo.Hydration.Z_MAX + tlr: .2f}\n')
+        f_out.write(f'\toutside sphere 0. 0. 0. {radius: .2f}\n')
         f_out.write('end structure\n\n')
-        f_out.write(f'output {out_file}\n\n')
 
     def __get_num_ions(self,
                        net_charge: float,  # Net charge of the NP
@@ -210,7 +236,7 @@ class InFile:
         print(f'{bcolors.OKCYAN}\tThe number water molecules is now set'
               f' to "{water_moles}", and number of counter ions is '
               f'"{num_ions}"{bcolors.ENDC}')
-        return num_ions, water_moles
+        return np.sign(net_charge)*num_ions, water_moles
 
     def print_info(self) -> None:
         """print infos"""
