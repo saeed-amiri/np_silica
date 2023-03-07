@@ -20,7 +20,6 @@ import read_water_box as rbox
 if __name__ == '__main__':
     fname: str = sys.argv[1]
     nano_p = rdlmp.ReadData(fname)
-    print(nano_p.Net_charge)
     radius: float = my_tools.get_radius(nano_p.Atoms_df)
     moles = wbox.NumberMols(radius=radius)
     in_file = wbox.InFile(radius=radius,
