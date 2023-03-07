@@ -28,7 +28,7 @@ if __name__ == '__main__':
     water_box = wbox.RunPackMol()
     read_box = rbox.GetWaterDf()
     combined_box = merge.MergeAll(read_box, nano_p)
-    fout: str  # Name of the outout file
+    fout: str  # Name of the output file
     fout = f'boxed_{fname}'
     write_lmp = wrlmp.WriteLmp(combined_box, output=fout)
     write_lmp.write_lmp()
