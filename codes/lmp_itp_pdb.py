@@ -110,18 +110,19 @@ class WriteItp:
         moles: set[str]  # Names of each mol to make files
         moles = set(itp.atoms['resname'])
         fout: str  # Name of the input file
-        for mol in moles:
-            fout = rename_file(mol, 'itp')
-            print(f'{bcolors.OKBLUE}{self.__class__.__name__}:\n'
-                  f'\tITP file is `{fout}`{bcolors.ENDC}\n')
-            with open(fout, 'w', encoding="utf8") as f_w:
-                f_w.write('; input pdb SMILES:\n')
-                f_w.write('\n')
-                self.write_molecule(f_w, mol)
-                self.write_atoms(f_w, itp.atoms)
-                self.write_bonds(f_w, itp.bonds)
-                self.write_angles(f_w, itp.angles)
-                self.write_dihedrals(f_w, itp.dihedrals)
+        # for mol in moles:
+        itp_mols: str = '_'.join(moles)
+        fout = rename_file(itp_mols, 'itp')
+        print(f'{bcolors.OKBLUE}{self.__class__.__name__}:\n'
+                f'\tITP file is `{fout}`{bcolors.ENDC}\n')
+        with open(fout, 'w', encoding="utf8") as f_w:
+            f_w.write('; input pdb SMILES:\n')
+            f_w.write('\n')
+            self.write_molecule(f_w, itp_mols)
+            self.write_atoms(f_w, itp.atoms)
+            self.write_bonds(f_w, itp.bonds)
+            self.write_angles(f_w, itp.angles)
+            self.write_dihedrals(f_w, itp.dihedrals)
 
     def write_molecule(self,
                        f_w: typing.Any,  # The out put file
