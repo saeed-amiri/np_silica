@@ -53,6 +53,7 @@ For CONECT:
       PDB_format_Dec_1996.pdf)
 """
 
+import re
 import typing
 import my_tools
 import numpy as np
@@ -353,15 +354,17 @@ class GetWaterDf:
         i_row: dict[str, typing.Any]  # Row per atom type
         row_list: list[dict[str, typing.Any]] = []  # All the row to convert
         for item in atom_names:
-            i_type = list(
-                      set(self.Atoms_df[self.Atoms_df['name'] == item]['typ'])
-                      )[0]
-            i_row = {'mass': stinfo.Hydration.MASSES[item],
-                     'typ': i_type,
-                     'cmt': '#',
-                     'name': item,
-                     'b_name': item}
-            row_list.append(i_row)
+            name = re.sub('[1-9]', '', item)
+            if name not in row_list:
+                i_type = list(
+                          set(self.Atoms_df[self.Atoms_df['name'] == item]['typ'])
+                          )[0]
+                i_row = {'mass': stinfo.Hydration.MASSES[name],
+                         'typ': i_type,
+                         'cmt': '#',
+                         'name': item,
+                         'b_name': item}
+                row_list.append(i_row)
         df_m = pd.DataFrame(row_list)
         return df_m
 
