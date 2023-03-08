@@ -82,6 +82,7 @@ class WritePdb:
     def print_info(self) -> None:
         """Just to subpress the pylint error"""
 
+
 def rename_file(fname: str,  # Input file name
                 extension: str  # The extension of the output file
                 ) -> str:  # Out put file name
@@ -106,10 +107,10 @@ class WriteItp:
                   itp: lmpitp.Itp  # Data frames restructerd from LAMMPS
                   ) -> None:
         """write itp file for all the residues"""
-        moles: list[str]  # Names of each mol to make files
+        moles: set[str]  # Names of each mol to make files
         moles = set(itp.atoms['resname'])
+        fout: str  # Name of the input file
         for mol in moles:
-            fout: str  # Name of the input file
             fout = rename_file(mol, 'itp')
             print(f'{bcolors.OKBLUE}{self.__class__.__name__}:\n'
                   f'\tITP file is `{fout}`{bcolors.ENDC}\n')
@@ -146,16 +147,16 @@ class WriteItp:
                             for nr in df1['atomnr']}
         atomnr: list[int] = [self.__atoms_one[item] for item in df1['atomnr']]
         df_f = pd.DataFrame({'atomnr': atomnr,
-                           'atomtype': df1['atomtype'],
-                           'resnr': df1['resnr'],
-                           'resname': df1['resname'],
-                           'atomname': df1['atomname'],
-                           'chargegrp': df1['chargegrp'],
-                           'charge': df1['charge'],
-                           'mass': df1['mass'],
-                           ' ': df1[' '],
-                           'element': df1['element']
-                           })
+                             'atomtype': df1['atomtype'],
+                             'resnr': df1['resnr'],
+                             'resname': df1['resname'],
+                             'atomname': df1['atomname'],
+                             'chargegrp': df1['chargegrp'],
+                             'charge': df1['charge'],
+                             'mass': df1['mass'],
+                             ' ': df1[' '],
+                             'element': df1['element']
+                             })
         for row in df_f.iterrows():
             line: list[str]  # line with length of 85 spaces to fix output
             line = [' '*85]
