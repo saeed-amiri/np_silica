@@ -55,8 +55,8 @@ class MergeAll:
         merge_angles = self.__combine_df(nano_p.Angles_df,
                                          water_angles,
                                          'angles')
-        merge_masses = self.__combine_df(nano_p.Masses_df,
-                                         water_masses,
+        merge_masses = self.__combine_df(nano_p.Masses_df.copy(),
+                                         water_masses.copy(),
                                          'masses')
         return merge_atoms, merge_bonds, merge_angles, merge_masses
 
@@ -78,6 +78,10 @@ class MergeAll:
             columns = ['typ', 'ai', 'aj', 'ak']
         elif target == 'masses':
             columns = ['mass', 'typ', 'cmt', 'name', 'b_name']
+            # In case of using both hydration and to pdb_itp conversion
+            if 'b_name' not in nano_p_df.columns:
+                nano_p_df['b_name'] = nano_p_df['names']
+                nano_p_df['name'] = nano_p_df['names']
         w_df: pd.DataFrame = water_df[columns].copy()
         np_df: pd.DataFrame = nano_p_df[columns].copy()
         index_raise = np.max(nano_p_df.index)
