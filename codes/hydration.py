@@ -12,9 +12,11 @@ import sys
 import my_tools
 import water_box as wbox
 import write_lmp as wrlmp
+import combine_pdb as cpdb
 import combine_all as merge
 import read_lmp_data as rdlmp
 import read_water_box as rbox
+import lmp_itp_pdb as itpdb
 
 
 if __name__ == '__main__':
@@ -33,3 +35,6 @@ if __name__ == '__main__':
     fout = f'boxed_{fname}'
     write_lmp = wrlmp.WriteLmp(combined_box, output=fout)
     write_lmp.write_lmp()
+    silica_pdb = itpdb.Call(fname=fname)
+    write_pdb = cpdb.InFile(silaniz_pdb=silica_pdb.pdb_file)
+    cpdb.RunPackMol()
