@@ -103,8 +103,9 @@ class Itp:
             df_i['  '] = lmp.Bonds_df['name']
         except KeyError:
             df_i.drop(columns=[' '])
-            print(f'{bcolors.WARNING}{self.__class__.__name__}:\n'
-                  f'\t There is no bonds` names in LAMMPS read data\n'
+            print(f'{bcolors.WARNING}{self.__class__.__name__}: '
+                  f'({self.__module__})\n'
+                  f'\tThere is no bonds` names in LAMMPS read data'
                   f'{bcolors.ENDC}')
         df_i['resname'], df_i['resnr'] = self.__get_bonds_res(lmp, df_i)
         return df_i
@@ -132,9 +133,10 @@ class Itp:
                            lmp.Atoms_df['atom_id'] == a_j]['mol'][a_j]
             if mol_i != mol_j or mol_iid != mol_jid:
                 if not flag_war:
-                    print(f'{bcolors.WARNING}{self.__class__.__name__}:\n'
+                    print(f'{bcolors.WARNING}{self.__class__.__name__}: '
+                          f'({self.__module__})\n'
                           '\tBond between atoms with different residues '
-                          f'types\n{bcolors.ENDC}')
+                          f'types{bcolors.ENDC}')
                     flag_war = True
             resnr.append(mol_iid)
             resname.append(mol_i)
@@ -166,8 +168,9 @@ class Itp:
         try:
             df_i['angle_name'] = lmp.Angles_df['name']
         except KeyError:
-            print(f'{bcolors.WARNING}{self.__class__.__name__}:\n'
-                  f'\t There is no angles` names in LAMMPS read data\n'
+            print(f'{bcolors.WARNING}{self.__class__.__name__}: '
+                  f'({self.__module__})\n'
+                  f'\tThere is no angles` names in LAMMPS read data'
                   f'{bcolors.ENDC}')
         df_i['resname'], df_i['resnr'] = self.__get_angles_res(lmp, df_i)
         return df_i
@@ -203,9 +206,10 @@ class Itp:
             check_list_id = set([mol_iid, mol_jid, mol_kid])
             if len(check_list_name) != 1 or len(check_list_id) != 1:
                 if not flag_war:
-                    print(f'{bcolors.WARNING}{self.__class__.__name__}:\n'
-                          f'\tangles between atoms with different residues '
-                          f'types\n{bcolors.ENDC}')
+                    print(f'{bcolors.WARNING}{self.__class__.__name__}: '
+                          f'({self.__module__})\n'
+                          f'\tAngles between atoms with different residues '
+                          f'types{bcolors.ENDC}')
                 flag_war = True
             resnr.append(mol_iid)
             resname.append(mol_i)
@@ -242,8 +246,9 @@ class Itp:
         try:
             df_i['dihedral_name'] = lmp.Dihedrals_df['name']
         except KeyError:
-            print(f'{bcolors.WARNING}{self.__class__.__name__}:\n'
-                  f'\t There is no dihedralss` names in LAMMPS read data\n'
+            print(f'{bcolors.WARNING}{self.__class__.__name__}: '
+                  f'({self.__module__})\n'
+                  '\tThere is no dihedralss` names in LAMMPS read data'
                   f'{bcolors.ENDC}')
         df_i['resname'], df_i['resnr'] = self.__get_dihedrals_res(lmp, df_i)
         return df_i
@@ -288,9 +293,10 @@ class Itp:
             check_list_id = set([mol_iid, mol_jid, mol_kid, mol_hid])
             if len(check_list_name) != 1 or len(check_list_id) != 1:
                 if not flag_war:
-                    print(f'{bcolors.WARNING}{self.__class__.__name__}:\n'
-                          f'\tdihedrals between atoms with different residues '
-                          f'types\n{bcolors.ENDC}')
+                    print(f'{bcolors.WARNING}{self.__class__.__name__}: '
+                          f'({self.__module__})\n'
+                          f'\tDihedrals between atoms with different residues '
+                          f'types{bcolors.ENDC}')
                     flag_war = True
 
             resnr.append(mol_iid)
