@@ -39,13 +39,13 @@ class WritePdb:
                  pdb_df: pd.DataFrame,  # df in pdb format
                  fname: str  # Input file name of LAMMPS data
                  ) -> None:
-        self.write_pdb(pdb_df, fname)
+        self.pdb_file: str = self.write_pdb(pdb_df, fname)
         self.print_info()
 
     def write_pdb(self,
                   pdb_df: pd.DataFrame,  # df in pdb format
                   fname: str  # Input file name of LAMMPS data
-                  ) -> None:
+                  ) -> str:
         """write the dataframe into a file"""
         fout: str  # Name of the output file
         fout = rename_file(fname, extension='pdb')
@@ -78,6 +78,7 @@ class WritePdb:
                 f_w.write(''.join(line))
                 f_w.write('\n')
             f_w.write('END\n')
+        return fout
 
     def print_info(self) -> None:
         """Just to subpress the pylint error"""
@@ -289,6 +290,19 @@ class WriteItp:
             df_f.to_csv(f_w, header=None, sep='\t', index=False)
             f_w.write('\n')
 
+
+class Call:
+    """call the module from outside"""
+    def __init__(self,
+                 fname: str  # Name of the data file in LAMMPS full atom format
+                 ) -> None:
+        self.pdb_file: str  # Name of the output pdb file
+        lmp: relmp.ReadData = relmp.ReadData(fname)  # All data in input file
+        pdb = lmpdb.Pdb(lmp.Masses_df, lmp.Atoms_df)
+        w_pdb = WritePdb(pdb.pdb_df, fname)
+        self.pdb_file = w_pdb.pdb_file
+        itp = lmpitp.Itp(lmp, pdb.pdb_df)
+        WriteItp(itp)
 
 if __name__ == '__main__':
     lmpf_name: str = sys.argv[1]  # Input file name
