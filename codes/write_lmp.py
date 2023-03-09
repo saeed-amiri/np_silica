@@ -1,5 +1,5 @@
-import json
 import sys
+import json
 import typing
 import numpy as np
 import pandas as pd
@@ -163,7 +163,13 @@ class WriteLmp(GetData):
         f.write(f"\n")
         f.write(f"Masses\n")
         f.write(f"\n")
-        df.to_csv(f, sep=' ', index=False, columns=columns, header=None)
+        df.to_csv(f,
+                  sep=' ',
+                  index=False,
+                  columns=columns,
+                  header=None,
+                  quoting=3,
+                  escapechar=" ")
         f.write(f"\n")
 
     def write_box(self, f: typing.TextIO) -> None:
