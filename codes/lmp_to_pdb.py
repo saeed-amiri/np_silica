@@ -285,9 +285,12 @@ class Pdb:
             if len(name) > 4:
                 print(f'{bcolors.WARNING}\tWarning:\n'
                       f'\t\tLenght of item {i}: {name} '
-                      f'is longer than 4, consider renaming the atoms\n')
+                      'is longer than 4, consider renaming the atoms'
+                      f'{bcolors.ENDC}')
         if len(names) != len(set(name_id)):
-            sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}:\n\tERROR! '
+            sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}: '
+                     f'({self.__module__})\n'
+                     'ERROR! '
                      f'There is similar name in a same molecule! Nr.: {mol}'
                      f'{bcolors.ENDC}\n')
         return name_id
