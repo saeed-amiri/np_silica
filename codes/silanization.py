@@ -1,3 +1,6 @@
+"""silanization of the nanoparticles"""
+
+
 import re
 import sys
 import numpy as np
@@ -16,13 +19,22 @@ class ConcatAll:
                  silica: upcord.UpdateCoords,  # Silica updated
                  aminos: mkchin.PrepareAmino  # Update aminos
                  ) -> None:
-        self.__concate_all(silica, aminos)
-        self.__write_infos()
+        self.Nmols: int  # Number in the data file
+        self.NAtoms: int  # Number in the data file
+        self.NBonds: int  # Number in the data file
+        self.NAngles: int  # Number in the data file
+        self.NDihedrals: int  # Number in the data file
+        self.NAtomTyp: int  # Number in the data file
+        self.NBondTyp: int  # Number in the data file
+        self.NAngleTyp: int  # Number in the data file
+        self.NDihedralTyp: int  # Number in the data file
+        self.concate_all(silica, aminos)
+        self.print_infos()
 
-    def __concate_all(self,
-                      silica: upcord.UpdateCoords,  # Silica updated
-                      aminos: mkchin.PrepareAmino  # Update aminos
-                      ) -> None:
+    def concate_all(self,
+                    silica: upcord.UpdateCoords,  # Silica updated
+                    aminos: mkchin.PrepareAmino  # Update aminos
+                    ) -> None:
         """concate the all atoms, bonds, angles, diedrlas"""
         self.Atoms_df: pd.DataFrame  # DF in write_lmp format
         self.Atoms_df = self.__concate_atoms(silica.Atoms_df,
@@ -57,12 +69,12 @@ class ConcatAll:
         for col in columns:
             si_df[col] = silica_atoms[col]
             amino_df[col] = aminos_atoms[col]
-        df: pd.DataFrame  # All atoms dataframe
-        df = pd.concat([si_df, amino_df], ignore_index=True)
-        df.index += 1
+        df_i: pd.DataFrame  # All atoms dataframe
+        df_i = pd.concat([si_df, amino_df], ignore_index=True)
+        df_i.index += 1
         del si_df
         del amino_df
-        return df
+        return df_i
 
     def __concate_bonds(self,
                         silica_bonds: pd.DataFrame,  # Silica bonds
@@ -76,12 +88,12 @@ class ConcatAll:
         for col in columns:
             si_df[col] = silica_bonds[col]
             amino_df[col] = aminos_bonds[col]
-        df: pd.DataFrame  # All atoms dataframe
-        df = pd.concat([si_df, amino_df], ignore_index=True)
-        df.index += 1
+        df_i: pd.DataFrame  # All atoms dataframe
+        df_i = pd.concat([si_df, amino_df], ignore_index=True)
+        df_i.index += 1
         del si_df
         del amino_df
-        return df
+        return df_i
 
     def __concate_angles(self,
                          silica_angles: pd.DataFrame,  # Silica bonds
@@ -95,12 +107,12 @@ class ConcatAll:
         for col in columns:
             si_df[col] = silica_angles[col]
             amino_df[col] = aminos_angles[col]
-        df: pd.DataFrame  # All atoms dataframe
-        df = pd.concat([si_df, amino_df], ignore_index=True)
-        df.index += 1
+        df_i: pd.DataFrame  # All atoms dataframe
+        df_i = pd.concat([si_df, amino_df], ignore_index=True)
+        df_i.index += 1
         del si_df
         del amino_df
-        return df
+        return df_i
 
     def __concate_dihedrals(self,
                             silica_dihedrals: pd.DataFrame,  # Silica bonds
@@ -114,12 +126,12 @@ class ConcatAll:
         for col in columns:
             si_df[col] = silica_dihedrals[col]
             amino_df[col] = aminos_dihedrals[col]
-        df: pd.DataFrame  # All atoms dataframe
-        df = pd.concat([si_df, amino_df], ignore_index=True)
-        df.index += 1
+        df_i: pd.DataFrame  # All atoms dataframe
+        df_i = pd.concat([si_df, amino_df], ignore_index=True)
+        df_i.index += 1
         del si_df
         del amino_df
-        return df
+        return df_i
 
     def __concate_masses(self,
                          silica_masses: pd.DataFrame,  # Silica masses
@@ -133,9 +145,9 @@ class ConcatAll:
             df_silica[col] = silica_masses[col]
             df_amino[col] = amino_masses[col]
 
-        df = pd.DataFrame(columns=columns)
-        df = pd.concat([df_silica, df_amino])
-        return df
+        df_c = pd.DataFrame(columns=columns)
+        df_c = pd.concat([df_silica, df_amino])
+        return df_c
 
     def __get_max_radius(self) -> float:
         """find the maximum radius of the NP
@@ -143,25 +155,26 @@ class ConcatAll:
         values in each direction and return the maximum one."""
         axis: list[str] = ['x', 'y', 'z']
         max_list: list[float] = []  # All the max along each direction
-        for ax in axis:
-            i_max: float = np.max([np.abs(np.max(self.Atoms_df[ax])),
-                                   np.abs(np.min(self.Atoms_df[ax]))])
+        for a_x in axis:
+            i_max: float = np.max([np.abs(np.max(self.Atoms_df[a_x])),
+                                   np.abs(np.min(self.Atoms_df[a_x]))])
             max_list.append(i_max)
         return np.max(max_list)
 
     def __set_attrs(self) -> None:
         """set attributes to object(self)"""
-        self.Nmols: int = np.max(self.Atoms_df['mol'])
-        self.NAtoms: int = len(self.Atoms_df)
-        self.NBonds: int = len(self.Bonds_df)
-        self.NAngles: int = len(self.Angles_df)
-        self.NDihedrals: int = len(self.Dihedrals_df)
-        self.NAtomTyp: int = np.max(self.Masses_df['typ'])
-        self.NBondTyp: int = np.max(self.Bonds_df['typ'])
-        self.NAngleTyp: int = np.max(self.Angles_df['typ'])
-        self.NDihedralTyp: int = np.max(self.Dihedrals_df['typ'])
+        self.Nmols = np.max(self.Atoms_df['mol'])
+        self.NAtoms = len(self.Atoms_df)
+        self.NBonds = len(self.Bonds_df)
+        self.NAngles = len(self.Angles_df)
+        self.NDihedrals = len(self.Dihedrals_df)
+        self.NAtomTyp = np.max(self.Masses_df['typ'])
+        self.NBondTyp = np.max(self.Bonds_df['typ'])
+        self.NAngleTyp = np.max(self.Angles_df['typ'])
+        self.NDihedralTyp = np.max(self.Dihedrals_df['typ'])
 
-    def __write_infos(self) -> None:
+    def print_infos(self) -> None:
+        """print info on the stderr"""
         print(f'{bcolors.OKGREEN}\tData Summary after silanization:\n'
               f'\t\t# Atoms: {self.NAtoms}, # Atom`s types: {self.NAtomTyp}\n'
               f'\t\t# Bonds: {self.NBonds}, # Bond`s types: {self.NBondTyp}\n'
@@ -177,14 +190,15 @@ class ConcatAll:
 
 
 if __name__ == '__main__':
-    fname = sys.argv[1]
-    update = upcord.UpdateCoords(fname)  # Updated data for silica
+    F_NAME = sys.argv[1]
+    update = upcord.UpdateCoords(F_NAME)  # Updated data for silica
     amino = mkchin.GetAmino()
     up_aminos = mkchin.PrepareAmino(update, amino)
     silanized_data = ConcatAll(update, up_aminos)
-    # if need to check the bonds:
-    # bc = bchek.CheckBond(silanized_data)
-    np_size: int = int(re.findall(r'\d+', fname)[0])
+    CHECK_BOND: bool = False  # To check the bonds
+    if CHECK_BOND:
+        bchek.CheckBond(silanized_data)
+    np_size: int = int(re.findall(r'\d+', F_NAME)[0])
     fout: str = f'silanized_{np_size}nm_g{stinfo.Constants.Coverage}.data'
     wrt = wrlmp.WriteLmp(obj=silanized_data, output=fout)
     wrt.write_lmp()
