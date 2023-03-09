@@ -219,7 +219,6 @@ class Pdb:
         pdb_df['residue_name'] = residues
         pdb_df['records'] = records
         pdb_df['chain_id'] = empty_data
-        # atom_id = [int(item)+32 for item in Atoms_df['atom_id']]
         pdb_df['atom_id'] = Atoms_df['atom_id']
         pdb_df['x'] = Atoms_df['x']
         pdb_df['y'] = Atoms_df['y']
