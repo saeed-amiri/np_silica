@@ -1,3 +1,5 @@
+"""read LAMMPS data file"""
+
 import os
 import re
 import sys
@@ -7,11 +9,8 @@ import pandas as pd
 from colors_text import TextColor as bcolors
 
 
-class FileErr:
-    """
-    there is problem in the header of the INFILE,
-    maybe a long header!\n
-    """
+FILEERROE = """there is problem in the header of the INFILE,
+    maybe a long header!\n"""
 
 
 class Header:
@@ -39,8 +38,12 @@ class Header:
               f'({self.__module__})\n'
               f'\tReading: `{self.infile}`{bcolors.ENDC}')
         self.atomsLine: int
+        self.diameter: float  # Diameter of the NP if its on the filename
+        self.GROMACS_flag: bool  # If to convert to GROMACS pdb and itp
         self.file_exist(infile)
         self.atomsLine = self.check_file()
+        self.set_attrs()
+        self.set_attr_zero()
         self.read_header()
 
     def file_exist(self,
@@ -48,8 +51,8 @@ class Header:
                    ) -> None:
         """check if the file is exist"""
         if not os.path.exists(fname):
-            exit(f'\t{bcolors.FAIL}Error! `{fname}` does not exist!'
-                 f'{bcolors.ENDC}\n')
+            sys.exit(f'\t{bcolors.FAIL}Error! `{fname}` does not exist!'
+                     f'{bcolors.ENDC}\n')
 
     def check_file(self) -> int:
         """ Check header
@@ -70,11 +73,10 @@ class Header:
                     atomsLine = linecount
                     break
                 if linecount > MAXHEADER:
-                    err = FileErr()
-                    exit(err.__doc__)
+                    sys.exit(FILEERROE)
                 if not line:
-                    exit(f'{bcolors.FAIL}{self.__class__.__name__}'
-                         f'wrong data file{bcolors.ENDC}\n')
+                    sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}'
+                             f'wrong data file{bcolors.ENDC}\n')
         return atomsLine
 
     def read_header(self) -> None:
@@ -82,15 +84,14 @@ class Header:
         Read header now and get the data
         """
         # Setting dictionaries to save data of each block in the header
-        self.set_attrs()
-        self.set_attr_zero()
+
         self.set_diameter()
         # Setting flags to save data correctly
         Masses, PairCoeff, BondCoeff, AngleCoeff, DihedralCoeff, Atoms\
             = False, False, False, False, False, False
         # Track the number of lines
         linecount: int = 0
-        with open(self.infile, 'r') as f:
+        with open(self.infile, 'r', encoding="utf8") as f:
             while True:
                 linecount += 1
                 if linecount > self.atomsLine:
@@ -171,13 +172,14 @@ class Header:
                     break
 
     def set_attrs(self) -> None:
-        self.Names: dict[int, str] = dict()
-        self.Masses: dict[int, float] = dict()
-        self.PairCoeff: dict[int, typing.Any] = dict()
-        self.BondCoeff: dict[int, typing.Any] = dict()
-        self.AngleCoeff: dict[int, typing.Any] = dict()
-        self.Bonds_Names: dict[int, str] = dict()
-        self.DihedralCoeff: dict[int, typing.Any] = dict()
+        """set the dictionaries for all the infos in the system"""
+        self.Names: dict[int, str] = {}
+        self.Masses: dict[int, float] = {}
+        self.PairCoeff: dict[int, typing.Any] = {}
+        self.BondCoeff: dict[int, typing.Any] = {}
+        self.AngleCoeff: dict[int, typing.Any] = {}
+        self.Bonds_Names: dict[int, str] = {}
+        self.DihedralCoeff: dict[int, typing.Any] = {}
 
     def set_attr_zero(self) -> None:
         """set the intial values to zero"""
@@ -192,6 +194,7 @@ class Header:
         self.diameter: int = 0
 
     def get_axis_lim(self, lim: typing.Any) -> list:
+        """get x limit of the data"""
         try:
             lim = lim.split(' ')
             lim = [float(item) for item in lim if item]
@@ -203,9 +206,8 @@ class Header:
         return lim
 
     def get_masses(self, line: str, check: str) -> None:
-        # stting the nth row of the dictionary
+        """stting the nth row of the dictionary"""
         if check not in line:
-            self.GROMACS_flag: bool  # If to convert to GROMACS pdb and itp
             self.GROMACS_flag = False
             typ = int(line.split(' ')[0])
             mass = float(line.split(' ')[1])
@@ -231,9 +233,9 @@ class Header:
                     atom_name = line.split('#')[1].strip()
                     bond_name = atom_name
             except IndexError:
-                exit(f'{bcolors.FAIL}\tAtoms name in the `Masses` '
-                     f'section is not defined; Ex.:\n\t\t'
-                     f'Masses\n\t\t1 1 # X{bcolors.ENDC}')
+                sys.exit(f'{bcolors.FAIL}\tAtoms name in the `Masses` '
+                         f'section is not defined; Ex.:\n\t\t'
+                         f'Masses\n\t\t1 1 # X{bcolors.ENDC}')
             self.Masses[typ] = mass
             self.Names[typ] = atom_name
             if not self.GROMACS_flag:
@@ -242,55 +244,47 @@ class Header:
                 self.Bonds_Names[typ] = 'Nan'
 
     def get_pair_coeff(self, line, check) -> None:
-        # stting the nth row of the dictionary
+        """stting the nth row of the dictionary"""
         if check not in line:
             line = line.split(' ')
             typ = int(line[0])
             i_style = line[1]
             i_coeff = line[2:]
-            self.PairCoeff[typ] = dict(
-                                        style=i_style,
-                                        coeff=i_coeff
-                                       )
+            self.PairCoeff[typ] = {"style": i_style,
+                                   "coeff": i_coeff}
 
     def get_bond_coeff(self, line, check) -> None:
-        # stting the nth row of the dictionary
+        """stting the nth row of the dictionary"""
         if check not in line:
             line = line.split(' ')
             typ = int(line[0])
             i_style = line[1]
             i_coeff = line[2:]
-            self.BondCoeff[typ] = dict(
-                                        style=i_style,
-                                        coeff=i_coeff
-                                       )
+            self.BondCoeff[typ] = {"style": i_style,
+                                   "coeff": i_coeff}
 
     def get_angle_coeff(self, line, check) -> None:
-        # stting the nth row of the dictionary
+        """stting the nth row of the dictionary"""
         if check not in line:
             line = line.split(' ')
             typ = int(line[0])
             i_style = line[1]
             i_coeff = line[2:]
-            self.AngleCoeff[typ] = dict(
-                                        style=i_style,
-                                        coeff=i_coeff
-                                       )
+            self.AngleCoeff[typ] = {"style": i_style,
+                                    "coeff": i_coeff}
 
     def get_dihedral_coeff(self, line, check) -> None:
-        # stting the nth row of the dictionary
+        """stting the nth row of the dictionary"""
         if check not in line:
             line = line.split(' ')
             typ = int(line[0])
             i_style = line[1]
             i_coeff = line[2:]
-            self.DihedralCoeff[typ] = dict(
-                                            style=i_style,
-                                            coeff=i_coeff
-                                           )
+            self.DihedralCoeff[typ] = {"style": i_style,
+                                       "coeff": i_coeff}
 
     def set_diameter(self) -> None:
-        # Set the radius if nanoparticle
+        """Set the radius if nanoparticle"""
         try:
             self.diameter = float(re.findall(r'\d+', self.infile)[0])
         except IndexError:
@@ -309,13 +303,14 @@ class Body(Header):
         self.read_body()
 
     def read_body(self):
+        """read body of the data file"""
         self.Atoms, self.Velocities, self.Bonds, self.Angles, self.Dihedrals\
-            = dict(), dict(), dict(), dict(), dict()
+            = {}, {}, {}, {}, {}
         Atoms, Velocities, Bonds, Angles, Dihedrals\
             = False, False, False, False, False
         self.q_flag: bool = False  # if there are charges in columns
 
-        with open(self.infile, 'r') as f:
+        with open(self.infile, 'r', encoding="utf8") as f:
             while True:
                 line = f.readline()
                 if line.strip().startswith('Atoms'):
@@ -359,7 +354,7 @@ class Body(Header):
             del self.Atoms, self.Bonds, self.Angles, self.Dihedrals
 
     def get_atoms(self, line) -> None:
-        # stting the nth row of the dictionary
+        """stting the nth row of the dictionary"""
         if 'Atoms' not in line:
             line = line.split()
             line = [item for item in line if item]
@@ -384,41 +379,41 @@ class Body(Header):
                 i_nx = int(line[i_col + 4])
                 i_ny = int(line[i_col + 5])
                 i_nz = int(line[i_col + 6])
-            except (ValueError, IndexError) as e:
+            except (ValueError, IndexError) as _:
                 i_nx = 0
                 i_ny = 0
                 i_nz = 0
             if self.q_flag:
-                self.Atoms[atom_id] = dict(
-                                           atom_id=atom_id,
-                                           mol=i_mol,
-                                           typ=i_typ,
-                                           charge=i_charge,
-                                           x=i_x,
-                                           y=i_y,
-                                           z=i_z,
-                                           nx=i_nx,
-                                           ny=i_ny,
-                                           nz=i_nz,
-                                           cmt='#',
-                                           name=i_name,
-                                           b_name=i_bond_name
-                                          )
+                self.Atoms[atom_id] = {
+                                       "atom_id": atom_id,
+                                       "mol": i_mol,
+                                       "typ": i_typ,
+                                       "charge": i_charge,
+                                       "x": i_x,
+                                       "y": i_y,
+                                       "z": i_z,
+                                       "nx": i_nx,
+                                       "ny": i_ny,
+                                       "nz": i_nz,
+                                       "cmt": '#',
+                                       "name": i_name,
+                                       "b_name": i_bond_name
+                                       }
             else:
-                self.Atoms[atom_id] = dict(
-                                           atom_id=atom_id,
-                                           mol=i_mol,
-                                           typ=i_typ,
-                                           x=i_x,
-                                           y=i_y,
-                                           z=i_z,
-                                           nx=i_nx,
-                                           ny=i_ny,
-                                           nz=i_nz,
-                                           cmt='#',
-                                           name=i_name,
-                                           b_name=i_bond_name
-                                          )
+                self.Atoms[atom_id] = {
+                                       "atom_id": atom_id,
+                                       "mol": i_mol,
+                                       "typ": i_typ,
+                                       "x": i_x,
+                                       "y": i_y,
+                                       "z": i_z,
+                                       "nx": i_nx,
+                                       "ny": i_ny,
+                                       "nz": i_nz,
+                                       "cmt": '#',
+                                       "name": i_name,
+                                       "b_name": i_bond_name
+                                       }
 
     def com_to_zero(self,
                     Atoms: pd.DataFrame  # Atoms dataframe from read from data
@@ -453,7 +448,7 @@ class Body(Header):
         return return_check
 
     def get_velocities(self, line) -> None:
-        # stting the nth row of the dictionary
+        """stting the nth row of the dictionary"""
         if 'Velocities' not in line:
             line = line.split()
             line = [item for item in line if item]
@@ -461,14 +456,14 @@ class Body(Header):
             i_vx = float(line[1])
             i_vy = float(line[2])
             i_vz = float(line[3])
-            self.Velocities[atom_id] = dict(
-                                             vx=i_vx,
-                                             vy=i_vy,
-                                             vz=i_vz
-                                            )
+            self.Velocities[atom_id] = {
+                                        "vx": i_vx,
+                                        "vy": i_vy,
+                                        "vz": i_vz
+                                        }
 
     def get_bonds(self, line) -> None:
-        # stting the nth row of the dictionary
+        """stting the nth row of the dictionary"""
         cmt_flag: bool = False
         if 'Bonds' not in line:
             if '#' in line:
@@ -484,22 +479,22 @@ class Body(Header):
             if cmt_flag:
                 i_cmt = line[4]
                 i_name = line[5]
-                self.Bonds[bond_id] = dict(
-                                           typ=i_typ,
-                                           ai=i_ai,
-                                           aj=i_aj,
-                                           cmt=i_cmt,
-                                           name=i_name
-                                          )
+                self.Bonds[bond_id] = {
+                                       "typ": i_typ,
+                                       "ai": i_ai,
+                                       "aj": i_aj,
+                                       "cmt": i_cmt,
+                                       "name": i_name
+                                       }
             else:
-                self.Bonds[bond_id] = dict(
-                                           typ=i_typ,
-                                           ai=i_ai,
-                                           aj=i_aj
-                                           )
+                self.Bonds[bond_id] = {
+                                       "typ": i_typ,
+                                       "ai": i_ai,
+                                       "aj": i_aj
+                                       }
 
     def get_angles(self, line) -> None:
-        # stting the nth row of the dictionary
+        """stting the nth row of the dictionary"""
         if "Angles" not in line:
             if '#' in line:
                 line = line.split('#')[0]
@@ -510,15 +505,15 @@ class Body(Header):
             i_ai = int(line[2])
             i_aj = int(line[3])
             i_ak = int(line[4])
-            self.Angles[angle_id] = dict(
-                                         typ=i_typ,
-                                         ai=i_ai,
-                                         aj=i_aj,
-                                         ak=i_ak
-                                        )
+            self.Angles[angle_id] = {
+                                     "typ": i_typ,
+                                     "ai": i_ai,
+                                     "aj": i_aj,
+                                     "ak": i_ak
+                                     }
 
     def get_dihedrals(self, line) -> None:
-        # stting the nth row of the dictionary
+        """stting the nth row of the dictionary"""
         if "Dihedrals" not in line:
             if '#' in line:
                 line = line.split('#')[0]
@@ -530,13 +525,13 @@ class Body(Header):
             i_aj = int(line[3])
             i_ak = int(line[4])
             i_ah = int(line[5])
-            self.Dihedrals[dihedrals_id] = dict(
-                                                 typ=i_typ,
-                                                 ai=i_ai,
-                                                 aj=i_aj,
-                                                 ak=i_ak,
-                                                 ah=i_ah
-                                                )
+            self.Dihedrals[dihedrals_id] = {
+                                            "typ":i_typ,
+                                            "ai":i_ai,
+                                            "aj":i_aj,
+                                            "ak":i_ak,
+                                            "ah":i_ah
+                                            }
 
     def set_masses(self) -> pd.DataFrame:
         names_list: list[str] = []  # list to store all the names
@@ -546,7 +541,7 @@ class Body(Header):
         Masses_df = pd.DataFrame.from_dict(self.Masses,
                                            orient='index', columns=columns)
         Masses_df['typ'] = Masses_df.index
-        for k, v in self.Masses.items():
+        for k, _ in self.Masses.items():
             names_list.append(self.Names[k])
             b_names_list.append(self.Bonds_Names[k])
             cmt_list.append('#')
