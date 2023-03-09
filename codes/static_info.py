@@ -1,5 +1,7 @@
 """All the constant values use in the silanization"""
 
+import typing
+
 
 class AtomMass:
     """atmoic masses of the particles"""
@@ -98,16 +100,115 @@ class Hydration:
     Y_MAX: float = 20.0
     # z
     Z_MIN: float = -20.0
-    Z_MAX: float = -56.09
+    Z_MAX: float = 20.0
     # Constants
+    WATER_DENSITY = 0.9998395 #  g/ml
     AVOGADRO: float = 6.0221408e+23  # 1/mol
     WATER_MOLAR_MASS: float = 18.01528  # g/mol
-    WATER_DENSITY = 0.9998395 #  g/ml
-    MASSES: dict[str, float] = {'H': 1.0080, 'O': 15.9994}
+    MASSES: dict[str, float] = {'HW': 1.0080,
+                                'OW': 15.9994,
+                                'Cl': 35.453,
+                                'Na': 22.989769}
     # PACKMOL files
     WATER_PDB: str = '/scratch/saeed/MyScripts/np_silica/data/water.pdb'
+    NA_PDB: str = '/scratch/saeed/MyScripts/np_silica/data/Na.pdb'
+    CL_PDB: str = '/scratch/saeed/MyScripts/np_silica/data/Cl.pdb'
     INP_FILE: str = 'water_box.inp'
     OUT_FILE: str = 'water_box.pdb'
+    WS_INP: str = 'water_silica.inp'  # Input for final water & silanized file
+    GRO_PDB: str = 'silica_water.pdb'  # File for GROMACS input
     # PACKMOL lib
     PACKMOL: str = '/home/saeed/Downloads/packmol/packmol'
 
+
+class PdbMass:
+    """information for the masses section in the output file of the
+    silanization"""
+    silica_residue: str = 'SIL'  # Name of the residue for the silica NP
+    aptes_residue: str = 'APT'  # Name of the residue for the APTES
+    HO: dict[str, typing.Any]
+    HO = {'Atoms_names': 'HO',
+          'Residue': silica_residue,
+          'Element_symbol': 'H',
+          'RECORD': 'ATOM',
+          'ff_type': 'oplsaa_xx'
+          }
+    OB = {'Atoms_names': 'OB',
+          'Residue': silica_residue,
+          'Element_symbol': 'O',
+          'RECORD': 'ATOM',
+          'ff_type': 'oplsaa_xx'
+          }
+    OH = {'Atoms_names': 'OH',
+          'Residue': silica_residue,
+          'Element_symbol': 'O',
+          'RECORD': 'ATOM',
+          'ff_type': 'oplsaa_xx'
+          }
+    OM = {'Atoms_names': 'OM',
+          'Residue': silica_residue,
+          'Element_symbol': 'O',
+          'RECORD': 'ATOM',
+          'ff_type': 'oplsaa_xx'
+          }
+    OMH = {'Atoms_names': 'OMH',
+          'Residue':silica_residue,
+          'Element_symbol': 'O',
+          'RECORD': 'ATOM',
+          'ff_type': 'oplsaa_xx'
+          }
+    OD = {'Atoms_names': 'OD',
+          'Residue': silica_residue,
+          'Element_symbol': 'O',
+          'RECORD': 'ATOM',
+          'ff_type': 'oplsaa_xx'
+          }
+    SI = {'Atoms_names': 'SI',
+          'Residue':  silica_residue,
+          'Element_symbol': 'SI',
+          'RECORD': 'ATOM',
+          'ff_type':  'oplsaa_xx'
+          }
+    SU = {'Atoms_names': 'SU',
+          'Residue':  silica_residue,
+          'Element_symbol': 'SI',
+          'RECORD': 'ATOM',
+          'ff_type':  'oplsaa_xx'
+          }
+    SD = {'Atoms_names': 'SD',
+          'Residue':  silica_residue,
+          'Element_symbol': 'SI',
+          'RECORD': 'ATOM',
+          'ff_type':  'oplsaa_xx'
+          }
+    N = {'Atoms_names': 'N',
+          'Residue': aptes_residue,
+          'Element_symbol': 'N',
+          'RECORD': 'ATOM',
+          'ff_type': 'oplsaa_xx'
+          }
+    CH = {'Atoms_names': 'CH',
+          'Residue': aptes_residue,
+          'Element_symbol': 'C',
+          'RECORD': 'ATOM',
+          'ff_type': 'oplsaa_xx'
+          }
+    HC = {'Atoms_names': 'HC',
+          'Residue': aptes_residue,
+          'Element_symbol': 'H',
+          'RECORD': 'ATOM',
+          'ff_type': 'oplsaa_xx'
+          }
+    ATOMS = {'HO': HO,
+             'OB': OB,
+             'OH': OH,
+             'OM': OM,
+             'OMH': OMH,
+             'OD': OD,
+             'SI': SI,
+             'SU': SU,
+             'SD': SD,
+             'N': N,
+             'CH': CH,
+             'HC': HC,
+             }
