@@ -128,7 +128,7 @@ class MergeAll:
                                                nano_p.Angles_df)
         water_masses = self.__update_masses_df(water_atoms,
                                                water_box.Masses_df)
-        print(f'{bcolors.OKCYAN}{self.__class__.__name__}: '
+        print(f'\n{bcolors.OKCYAN}{self.__class__.__name__}: '
               f'({self.__module__})\n'
               '\tUpdate all the types in Atoms, Bonds, and Angles of '
               f'"water_box"{bcolors.ENDC}')

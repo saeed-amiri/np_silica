@@ -172,7 +172,7 @@ class ReadWater:
                    water_pdb: str  # Name of the file to read
                    ) -> None:
         """print infos"""
-        print(f'{bcolors.OKCYAN}{self.__class__.__name__}: '
+        print(f'\n  {bcolors.OKCYAN}{self.__class__.__name__}: '
               f'({self.__module__}):\n'
               f'\tReading water data file: "{water_pdb}"'
               f'{bcolors.ENDC}')
@@ -370,6 +370,6 @@ class GetWaterDf:
 
     def print_info(self) -> None:
         """print infos"""
-        print(f'{bcolors.OKCYAN}{self.__class__.__name__}: '
+        print(f'\n{bcolors.OKCYAN}{self.__class__.__name__}: '
               f'({self.__module__}):\n'
               f'\tAtoms, Bonds and, Angles are created {bcolors.ENDC}')

@@ -37,7 +37,7 @@ class SetMasses:
 
     def print_info(self) -> None:
         """print some info"""
-        print(f'{bcolors.OKCYAN}{self.__class__.__name__}: '
+        print(f'\n{bcolors.OKCYAN}{self.__class__.__name__}: '
               f'({self.__module__})\n'
               '\tUpdateing the Masses section in the silanized output file'
               f'{bcolors.ENDC}\n')
