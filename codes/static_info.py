@@ -126,89 +126,88 @@ class PdbMass:
     silanization"""
     silica_residue: str = 'SIL'  # Name of the residue for the silica NP
     aptes_residue: str = 'APT'  # Name of the residue for the APTES
-    HO: dict[str, typing.Any]
-    HO = {'Atoms_names': 'HO',
-          'Residue': silica_residue,
-          'Element_symbol': 'H',
-          'RECORD': 'ATOM',
-          'ff_type': 'oplsaa_xx'
-          }
-    OB = {'Atoms_names': 'OB',
-          'Residue': silica_residue,
-          'Element_symbol': 'O',
-          'RECORD': 'ATOM',
-          'ff_type': 'oplsaa_xx'
-          }
-    OH = {'Atoms_names': 'OH',
-          'Residue': silica_residue,
-          'Element_symbol': 'O',
-          'RECORD': 'ATOM',
-          'ff_type': 'oplsaa_xx'
-          }
-    OM = {'Atoms_names': 'OM',
-          'Residue': silica_residue,
-          'Element_symbol': 'O',
-          'RECORD': 'ATOM',
-          'ff_type': 'oplsaa_xx'
-          }
-    OMH = {'Atoms_names': 'OMH',
-          'Residue':silica_residue,
-          'Element_symbol': 'O',
-          'RECORD': 'ATOM',
-          'ff_type': 'oplsaa_xx'
-          }
-    OD = {'Atoms_names': 'OD',
-          'Residue': silica_residue,
-          'Element_symbol': 'O',
-          'RECORD': 'ATOM',
-          'ff_type': 'oplsaa_xx'
-          }
-    SI = {'Atoms_names': 'SI',
-          'Residue':  silica_residue,
-          'Element_symbol': 'SI',
-          'RECORD': 'ATOM',
-          'ff_type':  'oplsaa_xx'
-          }
-    SU = {'Atoms_names': 'SU',
-          'Residue':  silica_residue,
-          'Element_symbol': 'SI',
-          'RECORD': 'ATOM',
-          'ff_type':  'oplsaa_xx'
-          }
-    SD = {'Atoms_names': 'SD',
-          'Residue':  silica_residue,
-          'Element_symbol': 'SI',
-          'RECORD': 'ATOM',
-          'ff_type':  'oplsaa_xx'
-          }
-    N = {'Atoms_names': 'N',
-          'Residue': aptes_residue,
-          'Element_symbol': 'N',
-          'RECORD': 'ATOM',
-          'ff_type': 'oplsaa_xx'
-          }
-    CH = {'Atoms_names': 'CH',
-          'Residue': aptes_residue,
-          'Element_symbol': 'C',
-          'RECORD': 'ATOM',
-          'ff_type': 'oplsaa_xx'
-          }
-    HC = {'Atoms_names': 'HC',
-          'Residue': aptes_residue,
-          'Element_symbol': 'H',
-          'RECORD': 'ATOM',
-          'ff_type': 'oplsaa_xx'
-          }
-    ATOMS = {'HO': HO,
-             'OB': OB,
-             'OH': OH,
-             'OM': OM,
-             'OMH': OMH,
-             'OD': OD,
-             'SI': SI,
-             'SU': SU,
-             'SD': SD,
-             'N': N,
-             'CH': CH,
-             'HC': HC,
-             }
+    HO: dict[str, typing.Any] = {'Atoms_names': 'HO',
+                                 'Residue': silica_residue,
+                                 'Element_symbol': 'H',
+                                 'RECORD': 'ATOM',
+                                 'ff_type': 'oplsaa_xx'
+                                 }
+    OB: dict[str, typing.Any] = {'Atoms_names': 'OB',
+                                 'Residue': silica_residue,
+                                 'Element_symbol': 'O',
+                                 'RECORD': 'ATOM',
+                                 'ff_type': 'oplsaa_xx'
+                                 }
+    OH: dict[str, typing.Any] = {'Atoms_names': 'OH',
+                                 'Residue': silica_residue,
+                                 'Element_symbol': 'O',
+                                 'RECORD': 'ATOM',
+                                 'ff_type': 'oplsaa_xx'
+                                 }
+    OM: dict[str, typing.Any] = {'Atoms_names': 'OM',
+                                 'Residue': silica_residue,
+                                 'Element_symbol': 'O',
+                                 'RECORD': 'ATOM',
+                                 'ff_type': 'oplsaa_xx'
+                                 }
+    OMH: dict[str, typing.Any] = {'Atoms_names': 'OMH',
+                                 'Residue':silica_residue,
+                                 'Element_symbol': 'O',
+                                 'RECORD': 'ATOM',
+                                 'ff_type': 'oplsaa_xx'
+                                 }
+    OD: dict[str, typing.Any] = {'Atoms_names': 'OD',
+                                 'Residue': silica_residue,
+                                 'Element_symbol': 'O',
+                                 'RECORD': 'ATOM',
+                                 'ff_type': 'oplsaa_xx'
+                                 }
+    SI: dict[str, typing.Any] = {'Atoms_names': 'SI',
+                                 'Residue':  silica_residue,
+                                 'Element_symbol': 'SI',
+                                 'RECORD': 'ATOM',
+                                 'ff_type':  'oplsaa_xx'
+                                 }
+    SU: dict[str, typing.Any] = {'Atoms_names': 'SU',
+                                 'Residue':  silica_residue,
+                                 'Element_symbol': 'SI',
+                                 'RECORD': 'ATOM',
+                                 'ff_type':  'oplsaa_xx'
+                                 }
+    SD: dict[str, typing.Any] = {'Atoms_names': 'SD',
+                                 'Residue':  silica_residue,
+                                 'Element_symbol': 'SI',
+                                 'RECORD': 'ATOM',
+                                 'ff_type':  'oplsaa_xx'
+                                 }
+    N: dict[str, typing.Any] = {'Atoms_names': 'N',
+                                 'Residue': aptes_residue,
+                                 'Element_symbol': 'N',
+                                 'RECORD': 'ATOM',
+                                 'ff_type': 'oplsaa_xx'
+                                 }
+    CH: dict[str, typing.Any] = {'Atoms_names': 'CH',
+                                 'Residue': aptes_residue,
+                                 'Element_symbol': 'C',
+                                 'RECORD': 'ATOM',
+                                 'ff_type': 'oplsaa_xx'
+                                 }
+    HC: dict[str, typing.Any] = {'Atoms_names': 'HC',
+                                 'Residue': aptes_residue,
+                                 'Element_symbol': 'H',
+                                 'RECORD': 'ATOM',
+                                 'ff_type': 'oplsaa_xx'
+                                 }
+    ATOMS: dict[str, : dict[str, typing.Any]] = {'HO': HO,
+                                                 'OB': OB,
+                                                 'OH': OH,
+                                                 'OM': OM,
+                                                 'OMH': OMH,
+                                                 'OD': OD,
+                                                 'SI': SI,
+                                                 'SU': SU,
+                                                 'SD': SD,
+                                                 'N': N,
+                                                 'CH': CH,
+                                                 'HC': HC,
+                                                 }
