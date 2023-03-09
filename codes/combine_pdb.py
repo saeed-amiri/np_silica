@@ -119,3 +119,4 @@ class RunPackMol:
 if __name__ == "__main__":
     in_file = InFile(silaniz_pdb=sys.argv[1])
     water_box = RunPackMol()
+    RunPackMol()
