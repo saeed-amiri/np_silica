@@ -29,6 +29,11 @@ import pandas as pd
 import read_lmp_data as relmp
 from colors_text import TextColor as bcolors
 
+# Check the residues names to see if there is bo/an/di between
+# different residues, which is not needed here; but for the sake of
+# simplicity, I keep the functions inside modules
+CHECK_RES: bool = False
+
 
 class Itp:
     """get data from main"""
@@ -107,7 +112,8 @@ class Itp:
                   f'({self.__module__})\n'
                   f'\tThere is no bonds` names in LAMMPS read data'
                   f'{bcolors.ENDC}')
-        df_i['resname'], df_i['resnr'] = self.__get_bonds_res(lmp, df_i)
+        if CHECK_RES:
+            df_i['resname'], df_i['resnr'] = self.__get_bonds_res(lmp, df_i)
         return df_i
 
     def __get_bonds_res(self,
@@ -172,7 +178,8 @@ class Itp:
                   f'({self.__module__})\n'
                   f'\tThere is no angles` names in LAMMPS read data'
                   f'{bcolors.ENDC}')
-        df_i['resname'], df_i['resnr'] = self.__get_angles_res(lmp, df_i)
+        if CHECK_RES:
+            df_i['resname'], df_i['resnr'] = self.__get_angles_res(lmp, df_i)
         return df_i
 
     def __get_angles_res(self,
@@ -248,9 +255,11 @@ class Itp:
         except KeyError:
             print(f'{bcolors.WARNING}{self.__class__.__name__}: '
                   f'({self.__module__})\n'
-                  '\tThere is no dihedralss` names in LAMMPS read data'
+                  '\tThere is no dihedrals` names in LAMMPS read data'
                   f'{bcolors.ENDC}')
-        df_i['resname'], df_i['resnr'] = self.__get_dihedrals_res(lmp, df_i)
+        if CHECK_RES:
+            df_i['resname'], df_i['resnr'] = self.__get_dihedrals_res(lmp,
+                                                                      df_i)
         return df_i
 
     def __get_dihedrals_res(self,
