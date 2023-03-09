@@ -526,11 +526,11 @@ class Body(Header):
             i_ak = int(line[4])
             i_ah = int(line[5])
             self.Dihedrals[dihedrals_id] = {
-                                            "typ":i_typ,
-                                            "ai":i_ai,
-                                            "aj":i_aj,
-                                            "ak":i_ak,
-                                            "ah":i_ah
+                                            "typ": i_typ,
+                                            "ai": i_ai,
+                                            "aj": i_aj,
+                                            "ak": i_ak,
+                                            "ah": i_ah
                                             }
 
     def set_masses(self) -> pd.DataFrame:
