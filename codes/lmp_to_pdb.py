@@ -190,14 +190,25 @@ class Pdb:
         ff_type: list[str] = []  # Type of the atom in the FF, e.g., opls_XXX
         atoms_masses: list[float] = []  # Masses of the atoms
         # set columns of the df
-        for item in Atoms_df['typ']:
-            df_row = Masses[Masses['typ'] == item]
-            names.append(df_row['names'][item])
-            elements.append(df_row['elements'][item])
-            residues.append(df_row['residues'][item])
-            records.append(df_row['records'][item])
-            ff_type.append(df_row['ff_type'][item])
-            atoms_masses.append(df_row['mass'][item])
+        try:
+            for item in Atoms_df['typ']:
+                df_row = Masses[Masses['typ'] == item]
+                names.append(df_row['names'][item])
+                elements.append(df_row['elements'][item])
+                residues.append(df_row['residues'][item])
+                records.append(df_row['records'][item])
+                ff_type.append(df_row['ff_type'][item])
+                atoms_masses.append(df_row['mass'][item])
+        except KeyError:
+            sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}: '
+                     f'({self.__module__})\n'
+                     '\tERROR!\n'
+                     '\tThe atoms in the masses section of the input file must\n'
+                     '\thave the follwoing order:\n'
+                     '\tid mass # Atom_names Residue Element_symbol(CAP) '
+                     'RECORD ff_type\n'
+                     f'{bcolors.ENDC}'
+                     )
         names = self.__fix_atom_names(names,
                                       Atoms_df['mol'],
                                       Atoms_df['atom_id'])
