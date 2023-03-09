@@ -5,6 +5,7 @@ import re
 import sys
 import numpy as np
 import pandas as pd
+import set_masses_name
 import write_lmp as wrlmp
 import bond_check as bchek
 import static_info as stinfo
@@ -147,6 +148,7 @@ class ConcatAll:
 
         df_c = pd.DataFrame(columns=columns)
         df_c = pd.concat([df_silica, df_amino])
+        df_c = set_masses_name.SetMasses(df_c).df_masses
         return df_c
 
     def __get_max_radius(self) -> float:
