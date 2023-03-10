@@ -49,7 +49,8 @@ class WritePdb:
         """write the dataframe into a file"""
         fout: str  # Name of the output file
         fout = rename_file(fname, extension='pdb')
-        print(f'{bcolors.OKBLUE}{self.__class__.__name__}:\n'
+        print(f'{bcolors.OKBLUE}{self.__class__.__name__}: '
+              f'({self.__module__})\n'
               f'\tPDB file is `{fout}`{bcolors.ENDC}\n')
         with open(fout, 'w', encoding="utf8") as f_w:
             f_w.write('HEADER\n')
@@ -114,8 +115,9 @@ class WriteItp:
         # for mol in moles:
         itp_mols: str = '_'.join(moles)
         fout = rename_file(itp_mols, 'itp')
-        print(f'{bcolors.OKBLUE}{self.__class__.__name__}:\n'
-                f'\tITP file is `{fout}`{bcolors.ENDC}\n')
+        print(f'{bcolors.OKBLUE}{self.__class__.__name__}: '
+              f'({self.__module__})\n'
+              f'\tITP file is `{fout}`{bcolors.ENDC}\n')
         with open(fout, 'w', encoding="utf8") as f_w:
             f_w.write('; input pdb SMILES:\n')
             f_w.write('\n')
@@ -297,6 +299,13 @@ class Call:
                  fname: str  # Name of the data file in LAMMPS full atom format
                  ) -> None:
         self.pdb_file: str  # Name of the output pdb file
+        self.write_itpdb(fname)
+        self.print_info()
+
+    def write_itpdb(self,
+                    fname: str  # Name of the data file,LAMMPS full atom format
+                    ) -> None:
+        """call other classes in the module to get data"""
         lmp: relmp.ReadData = relmp.ReadData(fname)  # All data in input file
         pdb = lmpdb.Pdb(lmp.Masses_df, lmp.Atoms_df)
         w_pdb = WritePdb(pdb.pdb_df, fname)
@@ -304,10 +313,14 @@ class Call:
         itp = lmpitp.Itp(lmp, pdb.pdb_df)
         WriteItp(itp)
 
+    def print_info(self) -> None:
+        """to subpress pylint"""
+
+
 if __name__ == '__main__':
     lmpf_name: str = sys.argv[1]  # Input file name
-    lmp: relmp.ReadData = relmp.ReadData(lmpf_name)  # All data in input file
-    pdb = lmpdb.Pdb(lmp.Masses_df, lmp.Atoms_df)
-    pdb_w = WritePdb(pdb.pdb_df, lmpf_name)
-    itp_i = lmpitp.Itp(lmp, pdb.pdb_df)
+    lmp_out: relmp.ReadData = relmp.ReadData(lmpf_name)  # All data in input
+    pdb_out = lmpdb.Pdb(lmp_out.Masses_df, lmp_out.Atoms_df)
+    pdb_w = WritePdb(pdb_out.pdb_df, lmpf_name)
+    itp_i = lmpitp.Itp(lmp_out, pdb_out.pdb_df)
     itp_w = WriteItp(itp_i)
