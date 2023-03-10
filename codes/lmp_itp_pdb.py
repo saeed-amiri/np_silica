@@ -113,7 +113,7 @@ class WriteItp:
         moles = set(itp.atoms['resname'])
         fout: str  # Name of the input file
         # for mol in moles:
-        itp_mols: str = '_'.join(moles)
+        itp_mols: str = '_'.join(sorted(moles))
         fout = rename_file(itp_mols, 'itp')
         print(f'{bcolors.OKBLUE}{self.__class__.__name__}: '
               f'({self.__module__})\n'
