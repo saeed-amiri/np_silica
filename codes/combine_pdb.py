@@ -6,6 +6,8 @@ previous tools such as silanization.py and hydration.py
 """
 
 
+import os
+import os.path
 import sys
 import typing
 import subprocess
@@ -30,9 +32,9 @@ class InFile:
         with open(stinfo.Hydration.WS_INP, 'w', encoding="utf8") as f_out:
             f_out.write('# Input file for PACKMOL, Silanized and '
                         'Water box for a NP\n\n')
-            f_out.write('filetype pdb\n\n')
+            f_out.write('filetype pdb\n')
             f_out.write(f'tolerance {stinfo.Hydration.TOLERANCE}\n')
-            f_out.write(f'output {out_file}\n')
+            f_out.write(f'output {out_file}\n\n')
             self.__write_water(f_out)
             self.__write_nano_p(f_out, silaniz_pdb)
 
@@ -49,7 +51,7 @@ class InFile:
         g_o: float = 0.0  # Angle for rotation in radians
         f_out.write(f'structure {silaniz_pdb}\n')
         f_out.write('\tnumber 1\n')
-        f_out.write('\tcenter ')
+        f_out.write('\tcenter\n')
         f_out.write('\tfixed ')
         f_out.write(f'{x_o} {y_o} {z_o} {a_o} {b_o} {g_o}\n')
         f_out.write('end structure\n\n')
@@ -66,9 +68,7 @@ class InFile:
         g_o: float = 0.0  # Angle for rotation in radians
         f_out.write(f'structure {stinfo.Hydration.OUT_FILE}\n')
         f_out.write('\tnumber 1\n')
-        f_out.write('\tinside box ')
-        f_out.write('\tnumber 1\n')
-        f_out.write('\tcenter ')
+        f_out.write('\tcenter\n')
         f_out.write('\tfixed ')
         f_out.write(f'{x_o} {y_o} {z_o} {a_o} {b_o} {g_o}\n')
         f_out.write('end structure\n\n')
@@ -97,8 +97,29 @@ class RunPackMol:
                    inp_file: str  # Input file for packmol
                    ) -> int:
         """call the subprocess and run the input file"""
-        pack_flag: int = subprocess.call(f'{pack_mol} < {inp_file}>/dev/null',
-                                         shell=True, cwd='./')
+        self.__check_file(delete=True)
+        pack_flag: int  # Check if PACKMOL executed successfully
+        subprocess.call(f'{pack_mol} < {inp_file}>/dev/null',
+                        shell=True, cwd='./')
+        pack_flag = self.__check_file(delete=False)
+        return pack_flag
+
+    def __check_file(self,
+                     delete: bool = False  # Keep the file or not
+                     ) -> int:
+        """check if water box exist, if delete"""
+        pack_flag: int = -1  # Check if PACKMOL executed successfully
+        silica_water: str = stinfo.Hydration.GRO_PDB
+        if delete:
+            if os.path.isfile(silica_water):
+                print(f'{bcolors.CAUTION}{self.__class__.__name__} '
+                      f'({self.__module__})\n'
+                      f'\tAn old "{silica_water}" exists, it will be deleted'
+                      f'{bcolors.ENDC}')
+                os.remove(silica_water)
+        else:
+            if os.path.isfile(silica_water):
+                pack_flag = 0
         return pack_flag
 
     def print_info(self,
@@ -106,13 +127,15 @@ class RunPackMol:
                    ) -> None:
         """print infos"""
         if pack_flag == 0:
-            print(f'{bcolors.OKCYAN}{self.__class__.__name__}:'
-                  f' ({self.__module__})\n'
+            print(f'{bcolors.OKCYAN}{self.__class__.__name__}: '
+                  f'({self.__module__})\n'
                   '\tPACKMOL executed successfully, output is: '
                   f'"{stinfo.Hydration.GRO_PDB}"'
                   f'{bcolors.ENDC}')
         else:
-            sys.exit(f'{bcolors.FAIL}\tError! in executing PACKMOL'
+            sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}: '
+                     f'({self.__module__})\n'
+                     f'\tError! in executing PACKMOL\n'
                      f'{bcolors.ENDC}')
 
 
