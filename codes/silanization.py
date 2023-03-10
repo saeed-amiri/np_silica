@@ -147,7 +147,8 @@ class ConcatAll:
             df_amino[col] = amino_masses[col]
 
         df_c = pd.DataFrame(columns=columns)
-        df_c = pd.concat([df_silica, df_amino])
+        df_c = pd.concat([df_silica, df_amino], ignore_index=True)
+        df_c.index += 1
         df_c = set_masses_name.SetMasses(df_c).df_masses
         return df_c
 
