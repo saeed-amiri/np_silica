@@ -190,7 +190,7 @@ class WriteItp:
                     f_w: typing.Any,  # The out put file
                     bonds: pd.DataFrame  # bonds information
                     ) -> None:
-        """write section of the itp file"""
+        """write bonds section of the itp file"""
         df_raw: pd.DataFrame  # Copy of the df with mol selected info
         df_raw = bonds.copy()
         resides_ids = set(df_raw['resnr'])
