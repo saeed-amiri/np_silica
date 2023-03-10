@@ -30,9 +30,8 @@ import read_lmp_data as relmp
 from colors_text import TextColor as bcolors
 
 # Check the residues names to see if there is bo/an/di between
-# different residues, which is not needed here; but for the sake of
-# simplicity, I keep the functions inside modules
-CHECK_RES: bool = False
+# different residues, which is needed here; 
+CHECK_RES: bool = True
 
 
 class Itp:
@@ -231,7 +230,7 @@ class Itp:
                    'aj',  # 2nd atom in dihedrals
                    'ak',  # 3rd atom in dihedrals
                    'ah',  # 4th atom in dihedrals
-                   'funct',  # not sure what is this, just set to 1, or empty!
+                   'funct',  # not sure what is this, just set to 3, or empty!
                    'C0',  # Dihedrals parameters
                    'C1',  # Dihedrals parameters
                    'C2',  # Dihedrals parameters
