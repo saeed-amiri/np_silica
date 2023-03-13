@@ -233,7 +233,7 @@ class WriteLmp(GetData):
                     df['name'] = self.mk_boandi_name(df, ['ai', 'aj'])
                     df['cmt'] = ['#' for _ in df.index]
                 df.to_csv(f, sep=' ', index=True, columns=columns, header=None)
-            f.write(f'\n')
+            f.write('\n')
             self.write_BoAnDi_infos(df, 'bonds')
         else:
             print(f'{bcolors.WARNING}'
@@ -387,7 +387,7 @@ class WriteLmp(GetData):
             df1['k4'] = ''
             self.Dihedrals_param: dict[typing.Any, list[typing.Any]]
             self.Dihedrals_param = df1.to_dict(orient='records')
-        with open(self.jfile, 'a') as f:
+        with open(self.jfile, 'a', encoding="utf8") as f:
             f.write(f'#{char} {"info":<30}\n')
             f.write(f'#{"id type name":<30}\n')
             df1.to_csv(f, sep='\t', index=False)
