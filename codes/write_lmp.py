@@ -1,6 +1,8 @@
 import sys
 import json
 import typing
+import os
+import os.path
 import numpy as np
 import pandas as pd
 from colors_text import TextColor as bcolors
@@ -87,15 +89,24 @@ class WriteLmp(GetData):
         super().__init__(obj)
         self.obj = obj
         self.fname = output  # Data file's name
+        self.jfile: str = self.check_jfile()  # Name of the output json file
         print(f'\n{bcolors.OKCYAN}{self.__class__.__name__}:\n'
               f'\tWriting: `{self.fname}`{bcolors.ENDC}')
+
+    def check_jfile(self) -> str:
+        """return the name for json file, to delete in case its exsit"""
+        jfile: str = f'{self.fname.split(".")[0]}.json'  # Output name
+        if os.path.exists(jfile):
+            print(jfile)
+            os.remove(jfile)
+        return jfile
 
     def write_lmp(self) -> None:
         """call all the function"""
         with open(self.fname, 'w') as f:
             self.write_header(f)
             self.write_body(f)
-        # self.write_comb_json()  # write json of combination
+        self.write_comb_json()  # write json of combination
 
     def write_header(self, f: typing.TextIO) -> None:
         """write header of the file, including:
@@ -316,10 +327,9 @@ class WriteLmp(GetData):
         df['r_cut'] = ''
         df['charge'] = ''
         df.index += 1
-        jfile: str = f'{self.fname.split(".")[0]}.json'  # Output name
         df_dict: dict[typing.Any, list[typing.Any]]
         df_dict = df.to_dict(orient='records')
-        with open(jfile, 'w') as f:
+        with open(self.jfile, 'a') as f:
             f.write(f'{{\n')
             f.write(f'\t"files": [\n')
             f.write(f'\t{{\n')
@@ -344,7 +354,6 @@ class WriteLmp(GetData):
                            char: str  # Name of the section
                            ) -> None:
         """wrtie info about Bonds, Angles, Dihedrals"""
-        jfile: str = f'{self.fname.split(".")[0]}.json'  # Output name
         columns: list[str]  # columns to keep
         columns = ['typ', 'name']
         df1: pd.DataFrame  # df to get data to write into file
@@ -379,7 +388,7 @@ class WriteLmp(GetData):
             df1['k4'] = ''
             self.Dihedrals_param: dict[typing.Any, list[typing.Any]]
             self.Dihedrals_param = df1.to_dict(orient='records')
-        with open(jfile, 'a') as f:
+        with open(self.jfile, 'a') as f:
             f.write(f'#{char} {"info":<30}\n')
             f.write(f'#{"id type name":<30}\n')
             df1.to_csv(f, sep='\t', index=False)
