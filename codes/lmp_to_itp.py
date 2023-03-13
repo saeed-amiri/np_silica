@@ -173,9 +173,12 @@ class Itp:
         try:
             df_i['angle_name'] = lmp.Angles_df['name']
         except KeyError:
+            df_i['angle_name'] = self.__mk_boandi_name(df_i,
+                                                       ['ai', 'aj', 'ak'],
+                                                       lmp.Atoms_df)
             print(f'{bcolors.WARNING}{self.__class__.__name__}: '
                   f'({self.__module__})\n'
-                  f'\tThere is no angles` names in LAMMPS read data'
+                  f'\tGetting names for the angles ...'
                   f'{bcolors.ENDC}')
         if CHECK_RES:
             df_i['resname'], df_i['resnr'] = self.__get_angles_res(lmp, df_i)
@@ -252,9 +255,13 @@ class Itp:
         try:
             df_i['dihedral_name'] = lmp.Dihedrals_df['name']
         except KeyError:
+            df_i['dihedral_name'] = \
+                self.__mk_boandi_name(df_i,
+                                      ['ai', 'aj', 'ak', 'ah'],
+                                      lmp.Atoms_df)
             print(f'{bcolors.WARNING}{self.__class__.__name__}: '
                   f'({self.__module__})\n'
-                  '\tThere is no dihedrals` names in LAMMPS read data'
+                  '\tGetting names for the bonds ...'
                   f'{bcolors.ENDC}')
         if CHECK_RES:
             df_i['resname'], df_i['resnr'] = self.__get_dihedrals_res(lmp,
@@ -310,6 +317,23 @@ class Itp:
             resnr.append(mol_iid)
             resname.append(mol_i)
         return resname, resnr
+
+    def __mk_boandi_name(self,
+                       df: pd.DataFrame,  # The dataframe
+                       a_list: list[str],  # All the atoms involved, e.g., ai..
+                       atoms_df: pd.DataFrame  # All atom info
+                       ) -> list[str]:
+        """make a name column for the bonds"""
+        atom_name: dict[int, str]  # id and name of the atoms
+        atom_name = dict(zip(atoms_df['atom_id'],
+                         atoms_df['name']))
+        name_list: list[str] = []  # Name of the bo/an/di
+        for _, row in df.iterrows():
+            names = []
+            for a in a_list:
+                names.append(atom_name[row[a]])
+            name_list.append('_'.join(names))
+        return name_list
 
     def print_info(self) -> None:
         """Just to subpress the pylint error"""
