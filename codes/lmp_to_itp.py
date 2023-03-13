@@ -30,7 +30,7 @@ import read_lmp_data as relmp
 from colors_text import TextColor as bcolors
 
 # Check the residues names to see if there is bo/an/di between
-# different residues, which is needed here; 
+# different residues, which is needed here;324
 CHECK_RES: bool = True
 
 
@@ -321,19 +321,18 @@ class Itp:
         return resname, resnr
 
     def __mk_boandi_name(self,
-                       df: pd.DataFrame,  # The dataframe
-                       a_list: list[str],  # All the atoms involved, e.g., ai..
-                       atoms_df: pd.DataFrame  # All atom info
-                       ) -> list[str]:
+                         df_i: pd.DataFrame,  # The dataframe
+                         a_list: list[str],  # Atoms involved, e.g. ['ai','aj',
+                         atoms_df: pd.DataFrame  # All atom info
+                         ) -> list[str]:
         """make a name column for the bonds"""
         atom_name: dict[int, str]  # id and name of the atoms
-        atom_name = dict(zip(atoms_df['atom_id'],
-                         atoms_df['name']))
+        atom_name = dict(zip(atoms_df['atom_id'], atoms_df['name']))
         name_list: list[str] = []  # Name of the bo/an/di
-        for _, row in df.iterrows():
+        for _, row in df_i.iterrows():
             names = []
-            for a in a_list:
-                names.append(atom_name[row[a]])
+            for atom in a_list:
+                names.append(atom_name[row[atom]])
             name_list.append('_'.join(names))
         return name_list
 
