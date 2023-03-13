@@ -1,3 +1,12 @@
+"""write LAMMPS data file in 'full' atom style
+Input:
+    class object with DataFrame of Atoms, Bonds, Angles, Dihedrals.
+    Other number, will be find by this module itself.
+Output:
+    LAMMPS data file
+ """
+
+
 import sys
 import json
 import typing
@@ -6,16 +15,6 @@ import os.path
 import numpy as np
 import pandas as pd
 from colors_text import TextColor as bcolors
-
-
-class Doc:
-    """write LAMMPS data file in 'full' atom style
-    Input:
-        class object with DataFrame of Atoms, Bonds, Angles, Dihedrals.
-        Other number, will be find by this module itself.
-    Output:
-        LAMMPS data file
-     """
 
 
 class GetData:
@@ -91,19 +90,19 @@ class WriteLmp(GetData):
         self.fname = output  # Data file's name
         self.jfile: str = self.check_jfile()  # Name of the output json file
         print(f'\n{bcolors.OKCYAN}{self.__class__.__name__}:\n'
-              f'\tWriting: `{self.fname}`{bcolors.ENDC}')
+              f'\tWriting: `{self.fname}`, the JSON file is: `{self.jfile}`'
+              f'{bcolors.ENDC}')
 
     def check_jfile(self) -> str:
         """return the name for json file, to delete in case its exsit"""
         jfile: str = f'{self.fname.split(".")[0]}.json'  # Output name
         if os.path.exists(jfile):
-            print(jfile)
             os.remove(jfile)
         return jfile
 
     def write_lmp(self) -> None:
         """call all the function"""
-        with open(self.fname, 'w') as f:
+        with open(self.fname, 'w', encoding="utf8") as f:
             self.write_header(f)
             self.write_body(f)
         self.write_comb_json()  # write json of combination
@@ -145,7 +144,7 @@ class WriteLmp(GetData):
     def write_comments(self, f: typing.TextIO) -> None:
         """write comments on the top of the file"""
         f.write(f'# LAMMPS data file from: {sys.argv[1]} by {sys.argv[0]}\n')
-        f.write(f'\n')
+        f.write('\n')
 
     def write_numbers(self, f: typing.TextIO) -> None:
         """write numbers of atoms, ..."""
@@ -166,14 +165,14 @@ class WriteLmp(GetData):
             f.write(f'{self.Ndihedral_types} dihedral types\n')
         except AttributeError:
             pass
-        f.write(f'\n')
+        f.write('\n')
 
     def write_masses(self, df: pd.DataFrame, f: typing.TextIO) -> None:
         """write mass section"""
         columns: list[str] = ['typ', 'mass', 'cmt', 'name']
-        f.write(f"\n")
-        f.write(f"Masses\n")
-        f.write(f"\n")
+        f.write("\n")
+        f.write("Masses\n")
+        f.write("\n")
         df.to_csv(f,
                   sep=' ',
                   index=False,
@@ -181,41 +180,41 @@ class WriteLmp(GetData):
                   header=None,
                   quoting=3,
                   escapechar=" ")
-        f.write(f"\n")
+        f.write("\n")
 
     def write_box(self, f: typing.TextIO) -> None:
         """write box limits"""
         f.write(f'{self.xlo: 8.3f} {self.xhi+2: 8.3f} xlo xhi\n')
         f.write(f'{self.ylo: 8.3f} {self.yhi+2: 8.3f} ylo yhi\n')
         f.write(f'{self.zlo: 8.3f} {self.zhi+2: 8.3f} zlo zhi\n')
-        f.write(f'\n')
+        f.write('\n')
 
     def write_atoms(self, df: pd.DataFrame, f: typing.TextIO) -> None:
         """write Atoms # full section"""
         if not df.empty:
             columns = ['atom_id', 'mol', 'typ', 'charge', 'x', 'y', 'z',
                        'nx', 'ny', 'nz', 'cmt', 'name']
-            f.write(f'Atoms # full\n')
-            f.write(f'\n')
+            f.write('Atoms # full\n')
+            f.write('\n')
             df.sort_values(by=['atom_id'], axis=0, inplace=True)
             df = df.astype({'x': float, 'y':  float, 'z': float})
             df.to_csv(f, sep=' ', index=False, columns=columns, header=None,
                       float_format='%.8f')
-            f.write(f'\n')
+            f.write('\n')
         else:
-            exit(f'{bcolors.FAIL}{self.__class__.__name__}\n'
-                 f'\tError: Atoms section is empty{bcolors.ENDC}\n')
+            sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}\n'
+                     f'\tError: Atoms section is empty{bcolors.ENDC}\n')
 
     def write_velocity(self, df: pd.DataFrame, f: typing.TextIO) -> None:
         """write Velcocity section"""
         if not df.empty:
             columns = ['vx', 'vy', 'vz']
-            f.write(f'Velocities\n')
-            f.write(f'\n')
+            f.write('Velocities\n')
+            f.write('\n')
             df = df.astype({'vx': float, 'vy':  float, 'vz': float})
             df.to_csv(f, sep=' ', index=True, columns=columns, header=None,
                       float_format='%.8f')
-            f.write(f'\n')
+            f.write('\n')
         else:
             print(f'\t{bcolors.WARNING}Warning! No Velocity section'
                   f'{bcolors.ENDC}\n')
@@ -223,8 +222,8 @@ class WriteLmp(GetData):
     def write_bonds(self, df: pd.DataFrame, f: typing.TextIO) -> None:
         """write bonds section"""
         if not df.empty:
-            f.write(f'Bonds\n')
-            f.write(f'\n')
+            f.write('Bonds\n')
+            f.write('\n')
             try:
                 columns = ['typ', 'ai', 'aj', 'cmt', 'name', 'type_name']
                 df.to_csv(f, sep=' ', index=True, columns=columns, header=None)
@@ -243,8 +242,8 @@ class WriteLmp(GetData):
     def write_angles(self, df: pd.DataFrame, f: typing.TextIO) -> None:
         """write angles section"""
         if not df.empty:
-            f.write(f'Angles\n')
-            f.write(f'\n')
+            f.write('Angles\n')
+            f.write('\n')
             try:
                 columns = ['typ', 'ai', 'aj', 'ak', 'cmt', 'name', 'type_name']
                 df.to_csv(f, sep=' ', index=True, columns=columns, header=None)
@@ -262,7 +261,7 @@ class WriteLmp(GetData):
                     print(f'{bcolors.CAUTION}Caution:\n'
                           f'\t There is problem in the angles datafram'
                           f'{bcolors.ENDC}')
-            f.write(f'\n')
+            f.write('\n')
             self.write_BoAnDi_infos(df, 'angles')
         else:
             print(f'{bcolors.WARNING}'
@@ -271,8 +270,8 @@ class WriteLmp(GetData):
     def write_dihedrals(self, df: pd.DataFrame, f: typing.TextIO) -> None:
         """write dihedrals section"""
         if not df.empty:
-            f.write(f'Dihedrals\n')
-            f.write(f'\n')
+            f.write('Dihedrals\n')
+            f.write('\n')
             try:
                 columns = ['typ', 'ai', 'aj', 'ak', 'ah', 'cmt', 'name',
                            'type_name']
@@ -294,7 +293,7 @@ class WriteLmp(GetData):
                     print(f'{bcolors.CAUTION}Caution:\n'
                           f'\t There is problem in the dihedrals datafram'
                           f'{bcolors.ENDC}')
-            f.write(f'\n')
+            f.write('\n')
             self.write_BoAnDi_infos(df, 'dihedrals')
         else:
             print(f'{bcolors.WARNING}'
@@ -306,8 +305,8 @@ class WriteLmp(GetData):
                        ) -> list[str]:
         """make a name column for the bonds"""
         atom_name: dict[int, str]  # id and name of the atoms
-        atom_name = {k: v for k, v in zip(self.obj.Atoms_df['atom_id'],
-                                          self.obj.Atoms_df['name'])}
+        atom_name = dict(zip(self.obj.Atoms_df['atom_id'],
+                         self.obj.Atoms_df['name']))
         name_list: list[str] = []  # Name of the bo/an/di
         for _, row in df.iterrows():
             names = []
@@ -330,24 +329,24 @@ class WriteLmp(GetData):
         df_dict: dict[typing.Any, list[typing.Any]]
         df_dict = df.to_dict(orient='records')
         with open(self.jfile, 'a') as f:
-            f.write(f'{{\n')
-            f.write(f'\t"files": [\n')
-            f.write(f'\t{{\n')
+            f.write('{{\n')
+            f.write('\t"files": [\n')
+            f.write('\t{{\n')
             f.write(f'\t\t"file": "{self.fname}",\n')
-            f.write(f'\t\t"atoms": \n')
+            f.write('\t\t"atoms": \n')
             f.write(f'\t\t{json.dumps(df_dict, indent = 4)}')
-            f.write(f',\n')
-            f.write(f'\t\t"bonds": \n')
+            f.write(',\n')
+            f.write('\t\t"bonds": \n')
             f.write(f'\t\t{json.dumps(self.Bonds_param, indent = 4)}')
-            f.write(f',\n')
-            f.write(f'\t\t"angles": \n')
+            f.write(',\n')
+            f.write('\t\t"angles": \n')
             f.write(f'\t\t{json.dumps(self.Angles_param, indent = 4)}')
-            f.write(f',\n')
-            f.write(f'\t\t"dihedrals": \n')
+            f.write(',\n')
+            f.write('\t\t"dihedrals": \n')
             f.write(f'\t\t{json.dumps(self.Dihedrals_param, indent = 4)}')
-            f.write(f'\t}}\n')
-            f.write(f'\t\t\t]  \n')
-            f.write(f'}}\n')
+            f.write('\t}}\n')
+            f.write('\t\t\t]  \n')
+            f.write('}}\n')
 
     def write_BoAnDi_infos(self,
                            df: pd.DataFrame,  # df to sort and write the info
@@ -392,4 +391,4 @@ class WriteLmp(GetData):
             f.write(f'#{char} {"info":<30}\n')
             f.write(f'#{"id type name":<30}\n')
             df1.to_csv(f, sep='\t', index=False)
-            f.write(f'\n')
+            f.write('\n')
