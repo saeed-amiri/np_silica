@@ -106,7 +106,9 @@ class Itp:
             df_i[' '] = [';' for _ in df_i['ai']]
             df_i['  '] = lmp.Bonds_df['name']
         except KeyError:
-            df_i.drop(columns=[' '])
+            df_i['  '] = self.__mk_boandi_name(df_i,
+                                               ['ai', 'aj'],
+                                               lmp.Atoms_df)
             print(f'{bcolors.WARNING}{self.__class__.__name__}: '
                   f'({self.__module__})\n'
                   f'\tThere is no bonds` names in LAMMPS read data'
