@@ -253,9 +253,9 @@ class GetOmGroups:
         """drop the silicons which are not bonded from si_df and/or
         have more then three OM bonds, which means they are body Si"""
         df: pd.DataFrame = si_df.copy()
-        df['OM_replace']: list[typing.Any]  # Index of OM atoms bonded to the Si
+        df['OM_replace']: list[typing.Any]  # Index of OM atom bonded to the Si
         df['OM_replace'] = [None for _ in self.replace_oxy]
-        for item, row in si_df.iterrows():
+        for item, _ in si_df.iterrows():
             if item not in self.replace_oxy.keys():
                 df.drop(index=[item], axis=0, inplace=True)
             elif len(self.replace_oxy[item]) > 3:
