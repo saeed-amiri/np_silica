@@ -56,7 +56,6 @@ For CONECT:
 import re
 import typing
 import my_tools
-import numpy as np
 import pandas as pd
 import static_info as stinfo
 from colors_text import TextColor as bcolors
@@ -356,9 +355,8 @@ class GetWaterDf:
         for item in atom_names:
             name = re.sub('[1-9]', '', item)
             if name not in row_list:
-                i_type = list(
-                          set(self.Atoms_df[self.Atoms_df['name'] == item]['typ'])
-                          )[0]
+                i_type = list(set(self.Atoms_df[self.Atoms_df['name'] == item]
+                                  ['typ']))[0]
                 i_row = {'mass': stinfo.Hydration.MASSES[name],
                          'typ': i_type,
                          'cmt': '#',
