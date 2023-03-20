@@ -1,3 +1,5 @@
+"""drop Oxygen atoms which are selcted to add chains to them"""
+
 import pandas as pd
 import static_info as stinfo
 from colors_text import TextColor as bcolors
@@ -10,33 +12,34 @@ class DropOM:
     def __init__(self,
                  amino,  # From Get amino, no annotaion for loop import!
                  si_row: pd.DataFrame,  # One row of si df
-                 del_OM: int,  # Number of OM to drop
-                 OM_xyz: pd.DataFrame  # XYZ info of OM atoms for amino
+                 del_om: int,  # Number of OM to drop
+                 om_xyz: pd.DataFrame  # XYZ info of OM atoms for amino
                  ) -> None:
-        self.__drop_OM(amino, si_row, del_OM, OM_xyz)
+        self.drop_om(amino, si_row, del_om, om_xyz)
+        self.print_info()
 
-    def __drop_OM(self,
-                  amino,  # From Get amino, no annotaion for loop import!
-                  si_row: pd.DataFrame,  # One row of si df
-                  del_OM: int,  # Number of OM to drop
-                  OM_xyz: pd.DataFrame  # XYZ info of OM atoms for amino
-                  ) -> None:
+    def drop_om(self,
+                amino,  # From Get amino, no annotaion for loop import!
+                si_row: pd.DataFrame,  # One row of si df
+                del_om: int,  # Number of OM to drop
+                om_xyz: pd.DataFrame  # XYZ info of OM atoms for amino
+                ) -> None:
         """drop OM atoms and update all the rest"""
-        OM_index: list[int]  # Index of OM n amino df
-        OM_index = [item for item in
-                    amino.Atoms_df[amino.Atoms_df['name'] == 'OM'].index]
+        om_index: list[int]  # Index of OM n amino df
+        om_index = list(
+                        amino.Atoms_df[amino.Atoms_df['name'] == 'OM'].index)
 
-        amino.Atoms_df = self.__set_OM_info(amino.Atoms_df,
+        amino.Atoms_df = self.__set_om_info(amino.Atoms_df,
                                             si_row,
-                                            OM_xyz,
-                                            OM_index)
-        df = self.__drop_om_atoms(del_OM,
-                                  OM_index,
+                                            om_xyz,
+                                            om_index)
+        df = self.__drop_om_atoms(del_om,
+                                  om_index,
                                   si_row,
                                   amino.Atoms_df.copy())
         df = self.__update_atom_ind(df, si_row['OM_list'])
         old_new_dict: dict[int, int]  # Index of new and old index of atoms
-        old_new_dict = {k: v for k, v in zip(df['undrop_ind'], df['atom_id'])}
+        old_new_dict = dict(zip(df['undrop_ind'], df['atom_id']))
         df.drop(axis=1, columns=['undrop_ind'], inplace=True)
         self.Atoms_df = df
         del df
@@ -48,13 +51,11 @@ class DropOM:
 
         angles_df: pd.DataFrame = amino.Angles_df.copy()
         self.Angles_df = self.__drop_angles(old_new_dict,
-                                            OM_index,
                                             angles_df,
                                             self.Atoms_df)
 
         dihedrals_df: pd.DataFrame = amino.Dihedrals_df.copy()
         self.Dihedrals_df = self.__drop_dihedrals(old_new_dict,
-                                                  OM_index,
                                                   dihedrals_df,
                                                   self.Atoms_df)
 
@@ -65,38 +66,38 @@ class DropOM:
         """check if there is boandi which all in ['SI', 'OM']"""
         df['name'] = n_list
         df_ = df.copy()
-        NP_LIST: list[str]  # Name of the amino's root in nanoparticles
-        NP_LIST = [stinfo.Constants.SI_amino, stinfo.Constants.OM_amino]
+        np_list: list[str]  # Name of the amino's root in nanoparticles
+        np_list = [stinfo.Constants.SI_amino, stinfo.Constants.OM_amino]
         for item, row in df_.iterrows():
             names = row['name'].split('_')
-            if set(names).issubset(NP_LIST):
+            if set(names).issubset(np_list):
                 df.drop(axis=0, index=item, inplace=True)
         df.drop(axis=1, columns=['name'], inplace=True)
         return df
 
     def __drop_om_atoms(self,
-                        del_OM: int,  # Number of OM to drop
-                        OM_index: list[int],  # Index of OM in amino
+                        del_om: int,  # Number of OM to drop
+                        om_index: list[int],  # Index of OM in amino
                         si_row: pd.DataFrame,  # One row of si df
                         atom_df: pd.DataFrame  # Amino atoms df
                         ) -> pd.DataFrame:
         """drop extra OM from amino dataframe"""
-        if del_OM < 3:
-            for i in OM_index:
+        if del_om < 3:
+            for i in om_index:
                 if atom_df.iloc[i-1]['atom_id'] \
                    not in si_row['OM_list']:
                     atom_df.drop(axis=0, index=i, inplace=True)
         else:
             pass
         # Check duplicacy: in case there is duplication after updating
-        atom_df = self.__OM_duplicacy_check(atom_df)
+        atom_df = self.__om_duplicacy_check(atom_df)
         atom_df.reset_index(inplace=True)
         # Keep the index of all atoms before drop
         atom_df.rename(columns={'index': 'undrop_ind'}, inplace=True)
         atom_df.index += 1
         return atom_df
 
-    def __OM_duplicacy_check(self,
+    def __om_duplicacy_check(self,
                              atom_df: pd.DataFrame  # Atoms_df of OM after ind
                              ) -> pd.DataFrame:
         """check if there are OM atoms with same atom index and drop
@@ -114,7 +115,7 @@ class DropOM:
 
     def __update_atom_ind(self,
                           df: pd.DataFrame,  # Amino atoms df with removed OM
-                          OM_list: list[int]  # Index of the OM in NP
+                          om_list: list[int]  # Index of the OM in NP
                           ) -> pd.DataFrame:
         """update the index of df after OM was droped"""
         for item, row in df.iterrows():
@@ -122,7 +123,7 @@ class DropOM:
                 if row['name'] != 'OM':
                     df.at[item, 'atom_id'] = item
                     df.at[item, 'old_id'] = item
-        if len(df[df['name'] == 'OM']) != len(OM_list):
+        if len(df[df['name'] == 'OM']) != len(om_list):
             print(f'{bcolors.WARNING}{self.__class__.__name__}'
                   f'({self.__module__}):\n'
                   f'\tThere are more OM in the amino list then the bonded'
@@ -148,7 +149,6 @@ class DropOM:
 
     def __drop_angles(self,
                       old_new_dict: dict[int, int],  # Of old and updated index
-                      OM_index: list[int],  # Index of the OM atoms
                       df: pd.DataFrame,  # Angles df of amino
                       atoms_df: pd.DataFrame  # Atoms df to get the names
                       ) -> pd.DataFrame:
@@ -167,7 +167,6 @@ class DropOM:
 
     def __drop_dihedrals(self,
                          old_new_dict: dict[int, int],  # Of old and updated id
-                         OM_index: list[int],  # Index of the OM atoms
                          df: pd.DataFrame,  # Dihedrals df of amino
                          atoms_df: pd.DataFrame  # Atoms df to get names
                          ) -> pd.DataFrame:
@@ -185,11 +184,11 @@ class DropOM:
         df = self.__drop_replicate_boandi(df, names)
         return df
 
-    def __set_OM_info(self,
+    def __set_om_info(self,
                       Atoms_df: pd.DataFrame,  # Atoms of the amino
                       si_row: pd.DataFrame,  # One row of si df
-                      OM_xyz: pd.DataFrame,  # XYZ info of OM atoms for amino
-                      OM_index: list[int]  # Index of the OM atoms in amino
+                      om_xyz: pd.DataFrame,  # XYZ info of OM atoms for amino
+                      om_index: list[int]  # Index of the OM atoms in amino
                       ) -> pd.DataFrame:
         """set info for OM in the amino df"""
 
@@ -197,12 +196,15 @@ class DropOM:
         column: list[str]  # Columns of the df to replace informations
         column = ['atom_id', 'mol', 'typ', 'x', 'y', 'z', 'rho', 'azimuth',
                   'polar']
-        for j, k in zip(si_row['OM_list'], OM_index):
-            OM_row: pd.DataFrame = OM_xyz[OM_xyz['atom_id'] == j]
+        for j, k in zip(si_row['OM_list'], om_index):
+            om_row: pd.DataFrame = om_xyz[om_xyz['atom_id'] == j]
             for col in column:
-                df.at[k, col] = OM_row[col][j]
-            del OM_row
+                df.at[k, col] = om_row[col][j]
+            del om_row
         return df
+
+    def print_info(self) -> None:
+        """pass the pylint"""
 
 
 def check_boandi_name(Atoms_df: pd.DataFrame,  # Updated atoms df
