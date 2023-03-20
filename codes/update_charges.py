@@ -15,14 +15,14 @@ class UpdateCharge:
                  old_new_dict: dict[int, int]  # Old: new atoms id
                  ) -> None:
         self.Atoms_df: pd.DataFrame  # Atoms with updated charges
-        si_df = self.__update_si_df(si_df)
-        self.Atoms_df = self.__update_charges(atoms_df, si_df, old_new_dict)
+        si_df = self.update_si_df(si_df)
+        self.Atoms_df = self.update_charges(atoms_df, si_df, old_new_dict)
 
-    def __update_charges(self,
-                         atoms_df: pd.DataFrame,  # Updated silica atoms coords
-                         si_df: pd.DataFrame,  # Si df, for adding amino
-                         old_new_dict: dict[int, int]  # Old: new atoms id
-                         ) -> pd.DataFrame:
+    def update_charges(self,
+                       atoms_df: pd.DataFrame,  # Updated silica atoms coords
+                       si_df: pd.DataFrame,  # Si df, for adding amino
+                       old_new_dict: dict[int, int]  # Old: new atoms id
+                       ) -> pd.DataFrame:
         si_df = self.__clean_si_df(si_df)
         si_df = self.__update_id_si(si_df, old_new_dict)
         si_df = self.__update_id_om(si_df, old_new_dict)
@@ -30,9 +30,9 @@ class UpdateCharge:
         atoms_df = self.__update_om_charge(si_df, atoms_df)
         return atoms_df
 
-    def __update_si_df(self,
-                       si_df: pd.DataFrame  # Si_df, selected for adding chains
-                       ) -> pd.DataFrame:
+    def update_si_df(self,
+                     si_df: pd.DataFrame  # Si_df, selected for adding chains
+                     ) -> pd.DataFrame:
         """get all the O bonded to the selected Si to update thier
         charges"""
         df_c: pd.DataFrame = si_df.copy()
@@ -65,16 +65,16 @@ class UpdateCharge:
         count_om: int = 0  # Get the number of OM with charge-change
         print(f'\t{bcolors.HEADER}{self.__class__.__name__}:')
         if stinfo.UpdateCharge.OM is None:
-            print(f'\t\tOM charges are remain unchanged!')
+            print('\t\tOM charges are remain unchanged!')
         else:
-            print(f'\t\tCharges of OM bonded to the Amine groups are set '
+            print('\t\tCharges of OM bonded to the Amine groups are set '
                   f'to {stinfo.UpdateCharge.OM}')
             for _, row in si_df.iterrows():
                 for ind in row['OM_q_list']:
                     if (atoms_df.iloc[ind-1]['charge'] !=
-                        stinfo.UpdateCharge.OM):
+                       stinfo.UpdateCharge.OM):
                         atoms_df.at[ind, 'charge'] = stinfo.UpdateCharge.OM
-                        count_om +=1
+                        count_om += 1
         print(f'\t\t["{count_om}" O atoms changed during set charges]'
               f'{bcolors.ENDC}')
         return atoms_df
@@ -88,9 +88,9 @@ class UpdateCharge:
         count_si: int = 0  # Get the number of si atoms with charge-change
         print(f'\t{bcolors.HEADER}{self.__class__.__name__}:')
         if stinfo.UpdateCharge.SI is None:
-            print(f'\t\tSi charges that are remain unchanged!')
+            print('\t\tSi charges that are remain unchanged!')
         else:
-            print(f'\t\tCharges of Si bonded to the Amine groups are set '
+            print('\t\tCharges of Si bonded to the Amine groups are set '
                   f'to {stinfo.UpdateCharge.SI}')
             for item, _ in si_df.iterrows():
                 if atoms_df.iloc[item-1]['charge'] != stinfo.UpdateCharge.SI:
@@ -106,8 +106,7 @@ class UpdateCharge:
                        ) -> pd.DataFrame:
         """update the atom_id with the updated ones in the atoms_df"""
         df: pd.DataFrame = si_df.copy()
-        df['old_atom_id']: list[int]  # Old atom_id
-        df['old_atom_id'] = df['atom_id']
+        df['old_atom_id'] = df['atom_id']  # Old atom_id
         for item, _ in si_df.iterrows():
             df.at[item, 'atom_id'] = old_new_dict[item]
         df.index = df['atom_id']
