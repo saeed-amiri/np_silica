@@ -17,6 +17,7 @@ def get_radius(atoms_df: pd.DataFrame  # Atoms infos, must contain x,y,z column
     z_max: float = atoms_df['z'].abs().max()
     return np.max([x_max, y_max, z_max])
 
+
 def com_to_zero(atoms_df: pd.DataFrame  # Atoms df
                 ) -> pd.DataFrame:
     """set the center of mass to zero"""
@@ -31,6 +32,7 @@ def com_to_zero(atoms_df: pd.DataFrame  # Atoms df
     df_c['y'] -= y_cm
     df_c['z'] -= z_cm
     return df_c
+
 
 def drop_duplicate(l_to_set: list[typing.Any]
                    ) -> list[typing.Any]:
