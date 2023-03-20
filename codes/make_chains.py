@@ -1,3 +1,9 @@
+"""read data
+    select the gropus to replace
+    write the output file
+"""
+
+import sys
 import numpy as np
 import pandas as pd
 import drop_om as dropOM
@@ -5,13 +11,6 @@ import static_info as stinfo
 import read_lmp_data as rdlmp
 import update_coords as upcord
 from colors_text import TextColor as bcolors
-
-
-class Doc:
-    """read data
-        select the gropus to replace
-        write the output file
-    """
 
 
 class GetAmino(rdlmp.ReadData):
@@ -27,7 +26,6 @@ class GetAmino(rdlmp.ReadData):
 
     def __set_attr(self) -> None:
         """set some attributes to data file"""
-        pass
 
     def __get_azimuths(self,
                        atoms: pd.DataFrame  # Atoms info of Aminopropyle
@@ -172,7 +170,7 @@ class PrepareAmino:
             amino.Atoms_df = self.__set_si_id(Atoms_df.copy(), row)
 
             # Get atoms info for OM atoms from all NP date
-            OM_xyz = self.__get_OM_xyz(row['OM_list'], update.Atoms_df)
+            OM_xyz = self.__get_om_xyz(row['OM_list'], update.Atoms_df)
 
             # Repalce the OM atoms info in aminopropyl with proper one
             amino.Atoms_df, amino.Bonds_df, amino.Angles_df, \
@@ -226,11 +224,10 @@ class PrepareAmino:
                             Atoms_df: pd.DataFrame,  # Updated atoms df
                             boandi  # All the data after complete update
                             ) -> list[str]:
-        """check the name of the bonds, angles, dihedrals"""
-        """make a name column for the bonds"""
+        """check the name of the bonds, angles, dihedrals
+        make a name column for the bonds"""
         atom_name: dict[int, str]  # id and name of the atoms
-        atom_name = {k: v for k, v in zip(Atoms_df['atom_id'],
-                                          Atoms_df['name'])}
+        atom_name = dict(zip(Atoms_df['atom_id'], Atoms_df['name']))
         name_list: list[str] = []  # Name of the bo/an/di
         df = boandi.Bonds_df
         a_list = ['ai', 'aj']
@@ -255,7 +252,7 @@ class PrepareAmino:
             amino_atoms.at[1, col] = si_row[col]
         return amino_atoms
 
-    def __get_OM_xyz(self,
+    def __get_om_xyz(self,
                      OM_list: list[int],  # Atom id of OM atoms
                      Atoms_df: pd.DataFrame  # Atoms info of NP
                      ) -> pd.DataFrame:
@@ -272,24 +269,24 @@ class PrepareAmino:
                     ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame,
                                pd.DataFrame]:
         """set the atom ids based on the id of the OM in system"""
-        amino_OM = stinfo.Constants.Amino_OM
-        OM_order: int = len(si_row['OM_list'])
-        del_OM: int = amino_OM - OM_order  # Number of extera OM atoms
+        amino_om = stinfo.Constants.Amino_OM
+        om_order: int = len(si_row['OM_list'])
+        del_om: int = amino_om - om_order  # Number of extera OM atoms
         Atoms_df = amino.Atoms_df.copy()
         Bonds_df = amino.Bonds_df.copy()
         Angles_df = amino.Angles_df.copy()
         Dihedrals_df = amino.Dihedrals_df.copy()
-        if del_OM == amino_OM:
+        if del_om == amino_om:
             print(f'\n{bcolors.WARNING}{self.__class__.__name__}\n'
-                  f'\tNo OM bonded to the SI?'
+                  '\tNo OM bonded to the SI?'
                   f'{bcolors.ENDC}')
-        elif del_OM < 0:
-            exit(f'\n{bcolors.FAIL}{self.__class__.__name__}:\tError:\n'
-                 f'\tWrong number of the OM atoms! Extera OM in amino file: '
-                 f'{del_OM}\n '
-                 f'{bcolors.ENDC}')
+        elif del_om < 0:
+            sys.exit(f'\n{bcolors.FAIL}{self.__class__.__name__}:\tError:\n'
+                     '\tWrong number of the OM atoms! Extera OM in amino file:'
+                     f' {del_om}\n '
+                     f'{bcolors.ENDC}')
         else:
-            do_om = dropOM.DropOM(amino, si_row, del_OM, OM_xyz)
+            do_om = dropOM.DropOM(amino, si_row, del_om, OM_xyz)
             Atoms_df = do_om.Atoms_df
             Bonds_df = do_om.Bonds_df
             Angles_df = do_om.Angles_df
@@ -342,8 +339,7 @@ class PrepareAmino:
                             ) -> pd.DataFrame:
         """update type of atoms before rotation and indexing"""
         old_new_dict: dict[int, int]  # To change the types
-        old_new_dict = {k: v for k, v in zip(amino_masses['old_typ'],
-                                             amino_masses['typ'])}
+        old_new_dict = dict(zip(amino_masses['old_typ'], amino_masses['typ']))
         df: pd.DataFrame = Atoms_df.copy()
         for item, row in Atoms_df.iterrows():
             df.at[item, 'typ'] = old_new_dict[row['typ']]
@@ -476,21 +472,6 @@ class PrepareAmino:
         df = df.assign(rho=rho, azimuth=azimuth, polar=polar)
         return df
 
-    def __to_origin(self,
-                    amino_atoms: pd.DataFrame  # Df amino Atoms
-                    ) -> pd.DataFrame:
-        """put the coordinate of Si in Aminopropyle to zero"""
-        df: pd.DataFrame = amino_atoms.copy()
-        print(f'{bcolors.OKCYAN}\tMove Aminopropyle [Si] to origin'
-              f'{bcolors.ENDC}')
-        x_si: float = amino_atoms[amino_atoms['name'] == self.Si]['x'][1]
-        y_si: float = amino_atoms[amino_atoms['name'] == self.Si]['y'][1]
-        z_si: float = amino_atoms[amino_atoms['name'] == self.Si]['z'][1]
-        df['x'] -= x_si
-        df['y'] -= y_si
-        df['z'] -= z_si
-        return df
-
     def __write_infos(self,
                       si_df: pd.DataFrame  # Si_df from update silica
                       ) -> None:
@@ -513,15 +494,15 @@ class UpdateBoAnDi:
     def __init__(self,
                  rot_amino: GetAmino  # Amino data with rotated positions
                  ) -> None:
-        self.__update_all(rot_amino)
+        self.update_all(rot_amino)
 
-    def __update_all(self,
-                     rot_amino: GetAmino  # Amino data with rotated pos
-                     ) -> None:
+    def update_all(self,
+                   rot_amino: GetAmino  # Amino data with rotated pos
+                   ) -> None:
         """call all the functions"""
         dict_atom_id: dict[int, int]  # to update the indeces
-        dict_atom_id = {k: v for k, v in zip(rot_amino.Atoms_df['old_id'],
-                                             rot_amino.Atoms_df['atom_id'])}
+        dict_atom_id = dict(zip(rot_amino.Atoms_df['old_id'],
+                                rot_amino.Atoms_df['atom_id']))
         self.Bonds_df = self.__update_bonds(
                         rot_amino.Bonds_df, dict_atom_id)
         self.Angles_df = self.__update_angles(
