@@ -243,7 +243,7 @@ class WriteItp:
                                      'theta': df1['theta'],
                                      'cth': df1['cth'],
                                      ' ': df1[' '],
-                                     'angle_name': df1['angle_name']})
+                                     'name': df1['name']})
                 df_list.append(df_i)
                 del df_i
             df_f: pd.DataFrame = pd.concat(df_list)
@@ -281,7 +281,7 @@ class WriteItp:
                                      'C3': df1['C3'],
                                      'C4': df1['C4'],
                                      ' ': df1[' '],
-                                     'dihedral_name': df1['dihedral_name']
+                                     'name': df1['name']
                                      })
                 df_list.append(df_i)
                 del df_i
