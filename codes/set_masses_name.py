@@ -25,11 +25,19 @@ class SetMasses:
             info: dict[str, typing.Any] = stinfo.PdbMass.ATOMS.get(row['name'])
             info_list: list[typing.Any]
             new_name: str  # To replace the name section with complete info
-            info_list = [info.get("Atoms_names"),
-                         info.get("Residue"),
-                         info.get("Element_symbol"),
-                         info.get("RECORD"),
-                         info.get("ff_type")]
+            try:
+                info_list = [info.get("Atoms_names"),
+                             info.get("Residue"),
+                             info.get("Element_symbol"),
+                             info.get("RECORD"),
+                             info.get("ff_type")]
+            except AttributeError:
+                info_list = ['None'] * 5
+                print(f'{bcolors.CAUTION}{self.__class__.__name__}: '
+                      f'({self.__module__})\n'
+                      f'\tThe info for `{info}` could not be found!\n'
+                      f'\tIt set to `None`{bcolors.ENDC}')
+
             new_name = ' '.join(info_list)
             df_c.at[item, 'name'] = new_name.strip('"')
             del new_name
