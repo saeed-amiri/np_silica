@@ -25,7 +25,7 @@
 """
 
 
-import sys
+import typing
 import pandas as pd
 import read_lmp_data as relmp
 import static_info as stinfo
@@ -109,18 +109,19 @@ class Itp:
             df_i['name'] = lmp.Bonds_df['name']
         except KeyError:
             df_i['name'] = self.__mk_boandi_name(df_i,
-                                               ['ai', 'aj'],
-                                               lmp.Atoms_df)
+                                                 ['ai', 'aj'],
+                                                 lmp.Atoms_df)
             print(f'{bcolors.WARNING}{self.__class__.__name__}: '
                   f'({self.__module__})\n'
                   f'\tThere is no bonds` names in LAMMPS read data'
                   f'{bcolors.ENDC}')
         if stinfo.BoAnDi.BONDS_FLAG:
-            df_i = self.__get_boandi_para(df_i, ['r', 'k'])
+            df_i = self.__get_boandi_para(df_i,
+                                          stinfo.BoAnDi.BONDS,
+                                          ['r', 'k'])
         if CHECK_RES:
             df_i['resname'], df_i['resnr'] = self.__get_bonds_res(lmp, df_i)
         return df_i
-
 
     def __get_bonds_res(self,
                         lmp: relmp.ReadData,  # LAMMPS data file
@@ -181,14 +182,16 @@ class Itp:
             df_i['name'] = lmp.Angles_df['name']
         except KeyError:
             df_i['name'] = self.__mk_boandi_name(df_i,
-                                                       ['ai', 'aj', 'ak'],
-                                                       lmp.Atoms_df)
+                                                 ['ai', 'aj', 'ak'],
+                                                 lmp.Atoms_df)
             print(f'{bcolors.WARNING}{self.__class__.__name__}: '
                   f'({self.__module__})\n'
                   f'\tGetting names for the angles ...'
                   f'{bcolors.ENDC}')
-        # if stinfo.BoAnDi.BONDS_FLAG:
-            # df_i = self.__get_boandi_para(df_i, ['r', 'k'])
+        if stinfo.BoAnDi.BONDS_FLAG:
+            df_i = self.__get_boandi_para(df_i,
+                                          stinfo.BoAnDi.ANGLES,
+                                          ['theta', 'cth'])
         if CHECK_RES:
             df_i['resname'], df_i['resnr'] = self.__get_angles_res(lmp, df_i)
         return df_i
@@ -327,22 +330,22 @@ class Itp:
         return resname, resnr
 
     def __get_boandi_para(self,
-                        df_i: pd.DataFrame,  # In ITP format to get bonds param
-                        columns: list[str]  # Name of the columns to replace
-                        ) -> pd.DataFrame:
+                          df_i: pd.DataFrame,  # To get parameter for ITP
+                          data_dict: dict[str, typing.Any],  # Data from stinfo
+                          columns: list[str]  # Name of the columns to replace
+                          ) -> pd.DataFrame:
         """try to get parameters for the bonds, angles, and dihedrals
         from static_info module"""
         df_c: pd.DataFrame = df_i.copy()
         for item, row in df_i.iterrows():
             try:
                 for col in columns:
-                    df_c.at[item, col] = stinfo.BoAnDi.BONDS.get(row['name'])\
-                                                                 [col]
+                    df_c.at[item, col] = data_dict.get(row['name'])[col]
             except (TypeError, KeyError):
                 print(f'{bcolors.CAUTION}{self.__class__.__name__}: '
                       f'({self.__module__})\n'
                       f'\tNo or bad info for the `{col}` with name: '
-                      f'{row["  "]}{bcolors.ENDC}')
+                      f'{row["name"]}{bcolors.ENDC}')
         return df_c
 
     def __mk_boandi_name(self,
