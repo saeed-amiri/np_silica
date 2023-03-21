@@ -102,7 +102,7 @@ class Hydration:
     Z_MIN: float = -20.0
     Z_MAX: float = 20.0
     # Constants
-    WATER_DENSITY = 0.9998395 #  g/ml
+    WATER_DENSITY = 0.9998395  # g/ml
     AVOGADRO: float = 6.0221408e+23  # 1/mol
     WATER_MOLAR_MASS: float = 18.01528  # g/mol
     MASSES: dict[str, float] = {'HW': 1.0080,
@@ -151,11 +151,11 @@ class PdbMass:
                                  'ff_type': 'oplsaa_xx'
                                  }
     OMH: dict[str, typing.Any] = {'Atoms_names': 'OMH',
-                                 'Residue':silica_residue,
-                                 'Element_symbol': 'O',
-                                 'RECORD': 'ATOM',
-                                 'ff_type': 'oplsaa_xx'
-                                 }
+                                  'Residue': silica_residue,
+                                  'Element_symbol': 'O',
+                                  'RECORD': 'ATOM',
+                                  'ff_type': 'oplsaa_xx'
+                                  }
     OD: dict[str, typing.Any] = {'Atoms_names': 'OD',
                                  'Residue': silica_residue,
                                  'Element_symbol': 'O',
@@ -181,22 +181,34 @@ class PdbMass:
                                  'ff_type':  'oplsaa_xx'
                                  }
     N: dict[str, typing.Any] = {'Atoms_names': 'N',
-                                 'Residue': aptes_residue,
-                                 'Element_symbol': 'N',
-                                 'RECORD': 'ATOM',
-                                 'ff_type': 'oplsaa_xx'
-                                 }
+                                'Residue': aptes_residue,
+                                'Element_symbol': 'N',
+                                'RECORD': 'ATOM',
+                                'ff_type': 'opls_287'
+                                }
     CH: dict[str, typing.Any] = {'Atoms_names': 'CH',
                                  'Residue': aptes_residue,
                                  'Element_symbol': 'C',
                                  'RECORD': 'ATOM',
-                                 'ff_type': 'oplsaa_xx'
+                                 'ff_type': 'opls_135'
                                  }
     HC: dict[str, typing.Any] = {'Atoms_names': 'HC',
                                  'Residue': aptes_residue,
                                  'Element_symbol': 'H',
                                  'RECORD': 'ATOM',
-                                 'ff_type': 'oplsaa_xx'
+                                 'ff_type': 'opls_140'
+                                 }
+    CN: dict[str, typing.Any] = {'Atoms_names': 'CN',
+                                 'Residue': aptes_residue,
+                                 'Element_symbol': 'C',
+                                 'RECORD': 'ATOM',
+                                 'ff_type': 'opls_292'
+                                 }
+    HN: dict[str, typing.Any] = {'Atoms_names': 'HN',
+                                 'Residue': aptes_residue,
+                                 'Element_symbol': 'H',
+                                 'RECORD': 'ATOM',
+                                 'ff_type': 'opls_290'
                                  }
     ATOMS: dict[str, dict[str, typing.Any]] = {'HO': HO,
                                                'OB': OB,
@@ -210,4 +222,6 @@ class PdbMass:
                                                'N': N,
                                                'CH': CH,
                                                'HC': HC,
+                                               'CN': CN,
+                                               'HN': HN,
                                                }
