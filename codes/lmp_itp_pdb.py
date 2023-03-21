@@ -209,7 +209,7 @@ class WriteItp:
                                      'r': df1['r'],
                                      'k': df1['k'],
                                      ' ': df1[' '],
-                                     '  ': df1['  ']})
+                                     'name': df1['name']})
                 df_list.append(df_i)
                 del df_i
             df_f = pd.concat(df_list)
