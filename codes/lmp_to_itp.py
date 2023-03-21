@@ -188,7 +188,7 @@ class Itp:
                   f'({self.__module__})\n'
                   f'\tGetting names for the angles ...'
                   f'{bcolors.ENDC}')
-        if stinfo.BoAnDi.BONDS_FLAG:
+        if stinfo.BoAnDi.ANGLES_FLAG:
             df_i = self.__get_boandi_para(df_i,
                                           stinfo.BoAnDi.ANGLES,
                                           ['theta', 'cth'])
@@ -274,9 +274,13 @@ class Itp:
                   f'({self.__module__})\n'
                   '\tGetting names for the dihedrals ...'
                   f'{bcolors.ENDC}')
+        if stinfo.BoAnDi.DIHEDRALS_FLAG:
+            df_i = self.__get_boandi_para(df_i,
+                                          stinfo.BoAnDi.DIHEDRLAS,
+                                          ['C0', 'C1', 'C2', 'C3', 'C4'])
         if CHECK_RES:
-            df_i['resname'], df_i['resnr'] = self.__get_dihedrals_res(lmp,
-                                                                      df_i)
+            df_i['resname'], df_i['resnr'] =\
+                self.__get_dihedrals_res(lmp, df_i)
         return df_i
 
     def __get_dihedrals_res(self,
