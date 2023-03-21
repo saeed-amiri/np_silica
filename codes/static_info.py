@@ -225,3 +225,288 @@ class PdbMass:
                                                'CN': CN,
                                                'HN': HN,
                                                }
+
+
+class BoAnDi:
+    """interaction for bonds, angles, and dihedrals in silanized
+    nanoparticles"""
+    BONDS: dict[str, dict[str, typing.Any]]  # Name and length(nm) and strength
+    BONDS = {
+             'OMH_HO': {'length': 1,
+                        'strength': 1,
+                        'source': 'doi.org/10.1021/la504178g'},
+
+             'SU_OB': {'length': 1,
+                       'strength': 1,
+                       'source': 'doi.org/10.1021/la504178g'},
+
+             'SD_OD': {'length': 1,
+                       'strength': 1,
+                       'source': 'doi.org/10.1021/la504178g'},
+
+             'SD_OMH': {'length': 1,
+                        'strength': 1,
+                        'source': 'doi.org/10.1021/la504178g'},
+
+             'SI_OB': {'length': 1,
+                       'strength': 1,
+                       'source': 'doi.org/10.1021/la504178g'},
+
+             'SI_OH': {'length': 1,
+                       'strength': 1,
+                       'source': 'doi.org/10.1021/la504178g'},
+
+             'OH_HO': {'length': 1,
+                       'strength': 1,
+                       'source': 'doi.org/10.1021/la504178g'},
+
+             'SD_OM': {'length': 1,
+                       'strength': 1,
+                       'source': 'doi.org/10.1021/la504178g'},
+
+             'SI_OM': {'length': 1,
+                       'strength': 1,
+                       'source': 'doi.org/10.1021/la504178g'},
+
+             'CH_HC': {'length': 1,
+                       'strength': 1,
+                       'source': 'doi.org/10.1021/la504178g'},
+
+             'CN_HC': {'length': 1,
+                       'strength': 1,
+                       'source': 'doi.org/10.1021/la504178g'},
+
+             'N_HN': {'length': 1,
+                      'strength': 1,
+                      'source': 'doi.org/10.1021/la504178g'},
+
+             'SI_CH': {'length': 1,
+                       'strength': 1,
+                       'source': 'doi.org/10.1021/la504178g'},
+
+             'CH_CH': {'length': 1,
+                       'strength': 1,
+                       'source': 'doi.org/10.1021/la504178g'},
+
+             'CH_CN': {'length': 1,
+                       'strength': 1,
+                       'source': 'doi.org/10.1021/la504178g'},
+
+             'CN_N': {'length': 1,
+                      'strength': 1,
+                      'source': 'doi.org/10.1021/la504178g'}
+
+             }
+    ANGLES: dict[str, dict[str, typing.Any]]  # Angles names, rad, strength
+    ANGLES = {
+              'SI_OM_SD': {'angle': 1,
+                           'strength': 1,
+                           'source': 'doi.org/10.1021/la504178g'},
+
+              'SI_OB_SI': {'angle': 1,
+                           'strength': 1,
+                           'source': 'doi.org/10.1021/la504178g'},
+
+              'SD_OMH_HO': {'angle': 1,
+                            'strength': 1,
+                            'source': 'doi.org/10.1021/la504178g'},
+
+              'SU_OB_SI': {'angle': 1,
+                           'strength': 1,
+                           'source': 'doi.org/10.1021/la504178g'},
+
+              'SI_OH_HO': {'angle': 1,
+                           'strength': 1,
+                           'source': 'doi.org/10.1021/la504178g'},
+
+              'SD_OM_SI': {'angle': 1,
+                           'strength': 1,
+                           'source': 'doi.org/10.1021/la504178g'},
+
+              'SI_OB_SU': {'angle': 1,
+                           'strength': 1,
+                           'source': 'doi.org/10.1021/la504178g'},
+
+              'SI_CH_CH': {'angle': 1,
+                           'strength': 1,
+                           'source': 'doi.org/10.1021/la504178g'},
+
+              'SD_CH_CH': {'angle': 1,
+                           'strength': 1,
+                           'source': 'doi.org/10.1021/la504178g'},
+
+              'CH_CN_N': {'angle': 1,
+                          'strength': 1,
+                          'source': 'doi.org/10.1021/la504178g'},
+
+              'CH_CH_CN': {'angle': 1,
+                           'strength': 1,
+                           'source': 'doi.org/10.1021/la504178g'},
+
+              'HN_N_HN': {'angle': 1,
+                          'strength': 1,
+                          'source': 'doi.org/10.1021/la504178g'},
+
+              'HC_CH_HC': {'angle': 1,
+                           'strength': 1,
+                           'source': 'doi.org/10.1021/la504178g'},
+
+              'HC_CN_HC': {'angle': 1,
+                           'strength': 1,
+                           'source': 'doi.org/10.1021/la504178g'},
+
+              'SD_CH_HC': {'angle': 1,
+                           'strength': 1,
+                           'source': 'doi.org/10.1021/la504178g'},
+
+              'SI_CH_HC': {'angle': 1,
+                           'strength': 1,
+                           'source': 'doi.org/10.1021/la504178g'},
+
+              'HC_CN_N': {'angle': 1,
+                          'strength': 1,
+                          'source': 'doi.org/10.1021/la504178g'},
+
+              'OB_SI_CH': {'angle': 1,
+                           'strength': 1,
+                           'source': 'doi.org/10.1021/la504178g'},
+
+              'OM_SI_CH': {'angle': 1,
+                           'strength': 1,
+                           'source': 'doi.org/10.1021/la504178g'},
+
+              'OM_SD_CH': {'angle': 1,
+                           'strength': 1,
+                           'source': 'doi.org/10.1021/la504178g'},
+
+              'CN_N_HN': {'angle': 1,
+                          'strength': 1,
+                          'source': 'doi.org/10.1021/la504178g'},
+
+              'CH_CH_HC': {'angle': 1,
+                           'strength': 1,
+                           'source': 'doi.org/10.1021/la504178g'},
+
+              'HC_CH_CH': {'angle': 1,
+                           'strength': 1,
+                           'source': 'doi.org/10.1021/la504178g'},
+
+              'CH_CN_HC': {'angle': 1,
+                           'strength': 1,
+                           'source': 'doi.org/10.1021/la504178g'},
+
+              'HC_CH_CN': {'angle': 1,
+                           'strength': 1,
+                           'source': 'doi.org/10.1021/la504178g'}
+
+              }
+    DIHEDRLAS: dict[str, typing.Any]  # Dihedrals names and parameters
+    DIHEDRLAS = {
+                 'SI_CH_CH_CN': {'C0': 0,
+                                 'C1': 0,
+                                 'C2': 0,
+                                 'C3': 0,
+                                 'source': 'doi.org/10.1021/la504178g'},
+
+                 'SD_CH_CH_CN': {'C0': 0,
+                                 'C1': 0,
+                                 'C2': 0,
+                                 'C3': 0,
+                                 'source': 'doi.org/10.1021/la504178g'},
+
+                 'CH_CH_CN_N': {'C0': 0,
+                                'C1': 0,
+                                'C2': 0,
+                                'C3': 0,
+                                'source': 'doi.org/10.1021/la504178g'},
+
+                 'SI_CH_CH_HC': {'C0': 0,
+                                 'C1': 0,
+                                 'C2': 0,
+                                 'C3': 0,
+                                 'source': 'doi.org/10.1021/la504178g'},
+
+                 'SD_CH_CH_HC': {'C0': 0,
+                                 'C1': 0,
+                                 'C2': 0,
+                                 'C3': 0,
+                                 'source': 'doi.org/10.1021/la504178g'},
+
+                 'HC_CH_CN_N': {'C0': 0,
+                                'C1': 0,
+                                'C2': 0,
+                                'C3': 0,
+                                'source': 'doi.org/10.1021/la504178g'},
+
+                 'OB_SI_CH_CH': {'C0': 0,
+                                 'C1': 0,
+                                 'C2': 0,
+                                 'C3': 0,
+                                 'source': 'doi.org/10.1021/la504178g'},
+
+                 'OM_SD_CH_CH': {'C0': 0,
+                                 'C1': 0,
+                                 'C2': 0,
+                                 'C3': 0,
+                                 'source': 'doi.org/10.1021/la504178g'},
+
+                 'OM_SI_CH_CH': {'C0': 0,
+                                 'C1': 0,
+                                 'C2': 0,
+                                 'C3': 0,
+                                 'source': 'doi.org/10.1021/la504178g'},
+
+                 'CH_CN_N_HN': {'C0': 0,
+                                'C1': 0,
+                                'C2': 0,
+                                'C3': 0,
+                                'source': 'doi.org/10.1021/la504178g'},
+
+                 'CH_CH_CN_HC': {'C0': 0,
+                                 'C1': 0,
+                                 'C2': 0,
+                                 'C3': 0,
+                                 'source': 'doi.org/10.1021/la504178g'},
+
+                 'HC_CH_CH_CN': {'C0': 0,
+                                 'C1': 0,
+                                 'C2': 0,
+                                 'C3': 0,
+                                 'source': 'doi.org/10.1021/la504178g'},
+
+                 'OM_SI_CH_HC': {'C0': 0,
+                                 'C1': 0,
+                                 'C2': 0,
+                                 'C3': 0,
+                                 'source': 'doi.org/10.1021/la504178g'},
+
+                 'OB_SI_CH_HC': {'C0': 0,
+                                 'C1': 0,
+                                 'C2': 0,
+                                 'C3': 0,
+                                 'source': 'doi.org/10.1021/la504178g'},
+
+                 'OM_SD_CH_HC': {'C0': 0,
+                                 'C1': 0,
+                                 'C2': 0,
+                                 'C3': 0,
+                                 'source': 'doi.org/10.1021/la504178g'},
+
+                 'HC_CN_N_HN': {'C0': 0,
+                                'C1': 0,
+                                'C2': 0,
+                                'C3': 0,
+                                'source': 'doi.org/10.1021/la504178g'},
+
+                 'HC_CH_CH_HC': {'C0': 0,
+                                 'C1': 0,
+                                 'C2': 0,
+                                 'C3': 0,
+                                 'source': 'doi.org/10.1021/la504178g'},
+
+                 'HC_CH_CN_HC': {'C0': 0,
+                                 'C1': 0,
+                                 'C2': 0,
+                                 'C3': 0,
+                                 'source': 'doi.org/10.1021/la504178g'}
+                 }
