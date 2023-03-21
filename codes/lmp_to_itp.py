@@ -98,7 +98,7 @@ class Itp:
                    'resnr',  # Nr. of the residue which atoms belonged to
                    ]
         df_i = pd.DataFrame(columns=columns)
-        Bonds_df: pd.DataFrame = lmp.Bonds_df.sort_values(by='ai')
+        Bonds_df: pd.DataFrame = lmp.Bonds_df.copy().sort_values(by='ai')
         df_i['ai'] = Bonds_df['ai']
         df_i['aj'] = Bonds_df['aj']
         df_i['funct'] = [1 for _ in df_i['ai']]
