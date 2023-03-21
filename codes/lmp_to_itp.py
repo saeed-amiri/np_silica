@@ -25,8 +25,10 @@
 """
 
 
+import sys
 import pandas as pd
 import read_lmp_data as relmp
+import static_info as stinfo
 from colors_text import TextColor as bcolors
 
 # Check the residues names to see if there is bo/an/di between
@@ -113,9 +115,29 @@ class Itp:
                   f'({self.__module__})\n'
                   f'\tThere is no bonds` names in LAMMPS read data'
                   f'{bcolors.ENDC}')
+        if stinfo.BoAnDi.BONDS_FLAG:
+            df_i = self.__get_bond_para(df_i)            
         if CHECK_RES:
             df_i['resname'], df_i['resnr'] = self.__get_bonds_res(lmp, df_i)
         return df_i
+
+    def __get_bond_para(self,
+                        df_i: pd.DataFrame  # In ITP format to get bonds params
+                        ) -> pd.DataFrame:
+        """try to get parameters for the bonds from static_info module"""
+        df_c: pd.DataFrame = df_i.copy()
+        for item, row in df_i.iterrows():
+            try:
+                df_c.at[item, 'r'] = stinfo.BoAnDi.BONDS.get(row['  '])\
+                                                             ['length']
+                df_c.at[item, 'k'] = stinfo.BoAnDi.BONDS.get(row['  '])\
+                                                             ['strength']
+            except (TypeError, KeyError):
+                print(f'{bcolors.CAUTION}{self.__class__.__name__}: '
+                      f'({self.__module__})\n'
+                      f'\tNo or bad info for the bond with name: {row["  "]}'
+                      f'{bcolors.ENDC}')
+        return df_c
 
     def __get_bonds_res(self,
                         lmp: relmp.ReadData,  # LAMMPS data file
