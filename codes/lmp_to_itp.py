@@ -106,9 +106,9 @@ class Itp:
         df_i['funct'] = [1 for _ in df_i['ai']]
         try:
             df_i[' '] = [';' for _ in df_i['ai']]
-            df_i['  '] = lmp.Bonds_df['name']
+            df_i['name'] = lmp.Bonds_df['name']
         except KeyError:
-            df_i['  '] = self.__mk_boandi_name(df_i,
+            df_i['name'] = self.__mk_boandi_name(df_i,
                                                ['ai', 'aj'],
                                                lmp.Atoms_df)
             print(f'{bcolors.WARNING}{self.__class__.__name__}: '
@@ -178,15 +178,17 @@ class Itp:
         df_i['funct'] = [1 for _ in df_i['ai']]
         df_i[' '] = [';' for _ in df_i['ai']]
         try:
-            df_i['angle_name'] = lmp.Angles_df['name']
+            df_i['name'] = lmp.Angles_df['name']
         except KeyError:
-            df_i['angle_name'] = self.__mk_boandi_name(df_i,
+            df_i['name'] = self.__mk_boandi_name(df_i,
                                                        ['ai', 'aj', 'ak'],
                                                        lmp.Atoms_df)
             print(f'{bcolors.WARNING}{self.__class__.__name__}: '
                   f'({self.__module__})\n'
                   f'\tGetting names for the angles ...'
                   f'{bcolors.ENDC}')
+        # if stinfo.BoAnDi.BONDS_FLAG:
+            # df_i = self.__get_boandi_para(df_i, ['r', 'k'])
         if CHECK_RES:
             df_i['resname'], df_i['resnr'] = self.__get_angles_res(lmp, df_i)
         return df_i
@@ -260,15 +262,14 @@ class Itp:
         df_i['funct'] = [3 for _ in df_i['ai']]
         df_i[' '] = [';' for _ in df_i['ai']]
         try:
-            df_i['dihedral_name'] = lmp.Dihedrals_df['name']
+            df_i['name'] = lmp.Dihedrals_df['name']
         except KeyError:
-            df_i['dihedral_name'] = \
-                self.__mk_boandi_name(df_i,
-                                      ['ai', 'aj', 'ak', 'ah'],
-                                      lmp.Atoms_df)
+            df_i['name'] = self.__mk_boandi_name(df_i,
+                                                 ['ai', 'aj', 'ak', 'ah'],
+                                                 lmp.Atoms_df)
             print(f'{bcolors.WARNING}{self.__class__.__name__}: '
                   f'({self.__module__})\n'
-                  '\tGetting names for the bonds ...'
+                  '\tGetting names for the dihedrals ...'
                   f'{bcolors.ENDC}')
         if CHECK_RES:
             df_i['resname'], df_i['resnr'] = self.__get_dihedrals_res(lmp,
@@ -335,7 +336,7 @@ class Itp:
         for item, row in df_i.iterrows():
             try:
                 for col in columns:
-                    df_c.at[item, col] = stinfo.BoAnDi.BONDS.get(row['  '])\
+                    df_c.at[item, col] = stinfo.BoAnDi.BONDS.get(row['name'])\
                                                                  [col]
             except (TypeError, KeyError):
                 print(f'{bcolors.CAUTION}{self.__class__.__name__}: '
