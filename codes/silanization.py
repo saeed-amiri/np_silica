@@ -200,6 +200,8 @@ class ConcatAll:
         columns: list[str]  # Columns to write to a different file
         columns = ['atom_id', 'mol', 'typ', 'charge', 'x', 'y', 'z', 'name']
         si_df.to_csv('SI_XYZ', sep=' ', index=False, columns=columns)
+        print(f'{bcolors.OKBLUE}\tWriting si_df in file in `SI_DF`\n'
+              f'\tWriting selected columns of si_df in `SI_XYZ`')
 
 
 if __name__ == '__main__':
