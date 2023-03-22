@@ -148,7 +148,7 @@ class PdbMass:
                                  'Residue': silica_residue,
                                  'Element_symbol': 'O',
                                  'RECORD': 'ATOM',
-                                 'ff_type': 'oplsaa_xx'
+                                 'ff_type': 'OPXX_000'
                                  }
     OMH: dict[str, typing.Any] = {'Atoms_names': 'OMH',
                                   'Residue': silica_residue,
@@ -166,19 +166,19 @@ class PdbMass:
                                  'Residue':  silica_residue,
                                  'Element_symbol': 'SI',
                                  'RECORD': 'ATOM',
-                                 'ff_type':  'oplsaa_xx'
+                                 'ff_type':  'OPXX_000'
                                  }
     SU: dict[str, typing.Any] = {'Atoms_names': 'SU',
                                  'Residue':  silica_residue,
                                  'Element_symbol': 'SI',
                                  'RECORD': 'ATOM',
-                                 'ff_type':  'oplsaa_xx'
+                                 'ff_type':  'OPXX_000'
                                  }
     SD: dict[str, typing.Any] = {'Atoms_names': 'SD',
                                  'Residue':  silica_residue,
                                  'Element_symbol': 'SI',
                                  'RECORD': 'ATOM',
-                                 'ff_type':  'oplsaa_xx'
+                                 'ff_type':  'OPXX_000'
                                  }
     N: dict[str, typing.Any] = {'Atoms_names': 'N',
                                 'Residue': aptes_residue,
