@@ -130,19 +130,19 @@ class PdbMass:
                                  'Residue': silica_residue,
                                  'Element_symbol': 'H',
                                  'RECORD': 'ATOM',
-                                 'ff_type': 'oplsaa_xx'
+                                 'ff_type': 'opls_428'
                                  }
     OB: dict[str, typing.Any] = {'Atoms_names': 'OB',
                                  'Residue': silica_residue,
                                  'Element_symbol': 'O',
                                  'RECORD': 'ATOM',
-                                 'ff_type': 'oplsaa_xx'
+                                 'ff_type': 'opls_018'
                                  }
     OH: dict[str, typing.Any] = {'Atoms_names': 'OH',
                                  'Residue': silica_residue,
                                  'Element_symbol': 'O',
                                  'RECORD': 'ATOM',
-                                 'ff_type': 'oplsaa_xx'
+                                 'ff_type': 'opls_018'
                                  }
     OM: dict[str, typing.Any] = {'Atoms_names': 'OM',
                                  'Residue': silica_residue,
@@ -154,13 +154,13 @@ class PdbMass:
                                   'Residue': silica_residue,
                                   'Element_symbol': 'O',
                                   'RECORD': 'ATOM',
-                                  'ff_type': 'oplsaa_xx'
+                                  'ff_type': 'opls_018'
                                   }
     OD: dict[str, typing.Any] = {'Atoms_names': 'OD',
                                  'Residue': silica_residue,
                                  'Element_symbol': 'O',
                                  'RECORD': 'ATOM',
-                                 'ff_type': 'oplsaa_xx'
+                                 'ff_type': 'opls_451'
                                  }
     SI: dict[str, typing.Any] = {'Atoms_names': 'SI',
                                  'Residue':  silica_residue,
