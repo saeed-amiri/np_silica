@@ -31,6 +31,7 @@ class ConcatAll:
         self.NDihedralTyp: int  # Number in the data file
         self.concate_all(silica, aminos)
         self.print_infos()
+        self.__wrt_si_index(silica.si_df)
 
     def concate_all(self,
                     silica: upcord.UpdateCoords,  # Silica updated
@@ -190,6 +191,15 @@ class ConcatAll:
               f'\t\tMax charge: {self.Atoms_df["charge"].max()}'
               f'{bcolors.ENDC}'
               )
+
+    def __wrt_si_index(self,
+                       si_df: pd.DataFrame  # Si with APTES attach to them
+                       ) -> None:
+        """write si_df to the file to keep track of SI information"""
+        si_df.to_csv('SI_DF', sep=' ', index=True)
+        columns: list[str]  # Columns to write to a different file
+        columns = ['atom_id', 'mol', 'typ', 'charge', 'x', 'y', 'z', 'name']
+        si_df.to_csv('SI_XYZ', sep=' ', index=False, columns=columns)
 
 
 if __name__ == '__main__':
