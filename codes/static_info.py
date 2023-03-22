@@ -148,7 +148,7 @@ class PdbMass:
                                  'Residue': silica_residue,
                                  'Element_symbol': 'O',
                                  'RECORD': 'ATOM',
-                                 'ff_type': 'OPXX_000'
+                                 'ff_type': 'opls_018'
                                  }
     OMH: dict[str, typing.Any] = {'Atoms_names': 'OMH',
                                   'Residue': silica_residue,
@@ -411,6 +411,7 @@ class BoAnDi:
                                  'C2': 0,
                                  'C3': 0,
                                  'C4': 0,
+                                 'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
                  'SD_CH_CH_CN': {'C0': 6.00000,
@@ -418,6 +419,7 @@ class BoAnDi:
                                  'C2': 0,
                                  'C3': 0,
                                  'C4': 0,
+                                 'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
                  'CH_CH_CN_N': {'C0': 6.00000,
@@ -425,6 +427,7 @@ class BoAnDi:
                                 'C2': 0,
                                 'C3': 0,
                                 'C4': 0,
+                                'C5': 0,
                                 'source': 'doi.org/10.1021/la504178g'},
 
                  'SI_CH_CH_HC': {'C0': 6.00000,
@@ -432,6 +435,7 @@ class BoAnDi:
                                  'C2': 0,
                                  'C3': 0,
                                  'C4': 0,
+                                 'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
                  'SD_CH_CH_HC': {'C0': 6.00000,
@@ -439,6 +443,7 @@ class BoAnDi:
                                  'C2': 0,
                                  'C3': 0,
                                  'C4': 0,
+                                 'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
                  'HC_CH_CN_N': {'C0': 6.00000,
@@ -446,6 +451,7 @@ class BoAnDi:
                                 'C2': 0,
                                 'C3': 0,
                                 'C4': 0,
+                                'C5': 0,
                                 'source': 'doi.org/10.1021/la504178g'},
 
                  'OB_SI_CH_CH': {'C0': 6.00000,
@@ -453,6 +459,7 @@ class BoAnDi:
                                  'C2': 0,
                                  'C3': 0,
                                  'C4': 0,
+                                 'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
                  'OM_SD_CH_CH': {'C0': 6.00000,
@@ -460,6 +467,7 @@ class BoAnDi:
                                  'C2': 0,
                                  'C3': 0,
                                  'C4': 0,
+                                 'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
                  'OM_SI_CH_CH': {'C0': 6.00000,
@@ -467,6 +475,7 @@ class BoAnDi:
                                  'C2': 0,
                                  'C3': 0,
                                  'C4': 0,
+                                 'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
                  'CH_CN_N_HN': {'C0': 6.00000,
@@ -474,6 +483,7 @@ class BoAnDi:
                                 'C2': 0,
                                 'C3': 0,
                                 'C4': 0,
+                                'C5': 0,
                                 'source': 'doi.org/10.1021/la504178g'},
 
                  'CH_CH_CN_HC': {'C0': 0.62760,
@@ -481,6 +491,7 @@ class BoAnDi:
                                  'C2': 0,
                                  'C3': -2.51040,
                                  'C4': 0,
+                                 'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
                  'HC_CH_CH_CN': {'C0': 0.62760,
@@ -488,6 +499,7 @@ class BoAnDi:
                                  'C2': 0,
                                  'C3': -2.51040,
                                  'C4': 0,
+                                 'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
                  'OM_SI_CH_HC': {'C0': 6.00000,
@@ -495,6 +507,7 @@ class BoAnDi:
                                  'C2': 0,
                                  'C3': 0,
                                  'C4': 0,
+                                 'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
                  'OB_SI_CH_HC': {'C0': 6.00000,
@@ -502,6 +515,7 @@ class BoAnDi:
                                  'C2': 0,
                                  'C3': 0,
                                  'C4': 0,
+                                 'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
                  'OM_SD_CH_HC': {'C0': 6.00000,
@@ -509,6 +523,7 @@ class BoAnDi:
                                  'C2': 0,
                                  'C3': 0,
                                  'C4': 0,
+                                 'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
                  'HC_CN_N_HN': {'C0': 6.00000,
@@ -516,6 +531,7 @@ class BoAnDi:
                                 'C2': 0,
                                 'C3': 0,
                                 'C4': 0,
+                                'C5': 0,
                                 'source': 'doi.org/10.1021/la504178g'},
 
                  'HC_CH_CH_HC': {'C0': 0.62760,
@@ -523,6 +539,7 @@ class BoAnDi:
                                  'C2': 0,
                                  'C3': -2.51040,
                                  'C4': 0,
+                                 'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
                  'HC_CH_CN_HC': {'C0': 0.62760,
@@ -530,5 +547,6 @@ class BoAnDi:
                                  'C2': 0,
                                  'C3': -2.51040,
                                  'C4': 0,
+                                 'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'}
                  }

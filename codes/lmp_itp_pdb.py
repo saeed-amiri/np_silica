@@ -288,6 +288,7 @@ class WriteItp:
                                      'C2': df1['C2'],
                                      'C3': df1['C3'],
                                      'C4': df1['C4'],
+                                     'C5': df1['C5'],
                                      ' ': df1[' '],
                                      'name': df1['name']
                                      })

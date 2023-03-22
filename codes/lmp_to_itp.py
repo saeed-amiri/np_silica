@@ -251,6 +251,7 @@ class Itp:
                    'C2',  # Dihedrals parameters
                    'C3',  # Dihedrals parameters
                    'C4',  # Dihedrals parameters
+                   'C5',  # Dihedrals parameters
                    ' ',  # Comment: name of the dihedrals
                    'dihedral_name',  # names
                    'resname',  # Name of the residue which atoms belonged to
@@ -277,7 +278,7 @@ class Itp:
         if stinfo.BoAnDi.DIHEDRALS_FLAG:
             df_i = self.__get_boandi_para(df_i,
                                           stinfo.BoAnDi.DIHEDRLAS,
-                                          ['C0', 'C1', 'C2', 'C3', 'C4'])
+                                          ['C0', 'C1', 'C2', 'C3', 'C4', 'C5'])
         if CHECK_RES:
             df_i['resname'], df_i['resnr'] =\
                 self.__get_dihedrals_res(lmp, df_i)
