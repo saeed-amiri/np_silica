@@ -216,7 +216,11 @@ class WriteItp:
             header: list[str] = list(df_f.columns)
             f_w.write('[ bonds ]\n')
             f_w.write(f'; {" ".join(header)}\n')
-            df_f.to_csv(f_w, header=None, sep='\t', index=False)
+            df_f.to_csv(f_w,
+                        header=None,
+                        sep='\t',
+                        index=False,
+                        float_format='%.5f')
             f_w.write('\n')
 
     def write_angles(self,
@@ -250,7 +254,11 @@ class WriteItp:
             header: list[str] = list(df_f.columns)
             f_w.write('[ angles ]\n')
             f_w.write(f'; {" ".join(header)}\n')
-            df_f.to_csv(f_w, header=None, sep='\t', index=False)
+            df_f.to_csv(f_w,
+                        header=None,
+                        sep='\t',
+                        index=False,
+                        float_format='%.5f')
             f_w.write('\n')
 
     def write_dihedrals(self,
@@ -289,7 +297,11 @@ class WriteItp:
             header: list[str] = list(df_f.columns)
             f_w.write('[ dihedrals ]\n')
             f_w.write(f'; {" ".join(header)}\n')
-            df_f.to_csv(f_w, header=None, sep='\t', index=False)
+            df_f.to_csv(f_w,
+                        header=None,
+                        sep='\t',
+                        index=False,
+                        float_format='%.5f')
             f_w.write('\n')
 
 
