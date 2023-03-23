@@ -107,8 +107,8 @@ class Hydration:
     WATER_MOLAR_MASS: float = 18.01528  # g/mol
     MASSES: dict[str, float] = {'HW': 1.0080,
                                 'OW': 15.9994,
-                                'Cl': 35.453,
-                                'Na': 22.989769}
+                                'CL': 35.453,
+                                'NA': 22.989769}
     # PACKMOL files
     WATER_PDB: str = '/scratch/saeed/MyScripts/np_silica/data/water.pdb'
     NA_PDB: str = '/scratch/saeed/MyScripts/np_silica/data/Na.pdb'
