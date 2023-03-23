@@ -54,6 +54,7 @@ For CONECT:
 """
 
 import re
+import sys
 import typing
 import my_tools
 import pandas as pd
@@ -355,14 +356,21 @@ class GetWaterDf:
         for item in atom_names:
             name = re.sub('[1-9]', '', item)
             if name not in row_list:
-                i_type = list(set(self.Atoms_df[self.Atoms_df['name'] == item]
-                                  ['typ']))[0]
-                i_row = {'mass': stinfo.Hydration.MASSES[name],
-                         'typ': i_type,
-                         'cmt': '#',
-                         'name': item,
-                         'b_name': item}
-                row_list.append(i_row)
+                try:
+                    i_type = \
+                        list(set(self.Atoms_df[self.Atoms_df['name'] == item]
+                                 ['typ']))[0]
+                    i_row = {'mass': stinfo.Hydration.MASSES[name],
+                             'typ': i_type,
+                             'cmt': '#',
+                             'name': item,
+                             'b_name': item}
+                    row_list.append(i_row)
+                except KeyError:
+                    sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}: '
+                             f'({self.__module__})\n'
+                             f'\tError! Informaton for `{name}` cannot not be '
+                             f'found in `static_info` module\n{bcolors.ENDC}')
         df_m = pd.DataFrame(row_list)
         return df_m
 
