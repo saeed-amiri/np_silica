@@ -280,9 +280,9 @@ class BoAnDi:
                        'k': 284512.0,
                        'source': 'doi.org/10.1021/la504178g'},
 
-             'N_HN': {'r': 1,
-                      'k': 1,
-                      'source': 'doi.org/10.1021/la504178g'},
+             'N_HN': {'r': 0.10100,
+                      'k': 363171,
+                      'source': 'ODA from lammps'},
 
              'SI_CH': {'r': 0.18400,
                        'k': 100000.0,
@@ -296,9 +296,9 @@ class BoAnDi:
                        'k': 224262.4,
                        'source': 'doi.org/10.1021/la504178g'},
 
-             'CN_N': {'r': 1,
-                      'k': 1,
-                      'source': 'doi.org/10.1021/la504178g'}
+             'CN_N': {'r': 0.14480,
+                      'k': 319658,
+                      'source': 'ODA from lammps'}
 
              }
     ANGLES: dict[str, dict[str, typing.Any]]  # Angles names, rad, strength
@@ -339,17 +339,17 @@ class BoAnDi:
                            'cth': 482.30,
                            'source': 'doi.org/10.1021/la504178g'},
 
-              'CH_CN_N': {'theta': 1,
-                          'cth': 1,
+              'CH_CN_N': {'theta': 109.47,
+                          'cth': 470.2816,
                           'source': 'doi.org/10.1021/la504178g'},
 
-              'CH_CH_CN': {'theta': 1,
-                           'cth': 1,
-                           'source': 'doi.org/10.1021/la504178g'},
+              'CH_CH_CN': {'theta': 112.70,
+                           'cth': 488.2728,
+                           'source': 'ODA from lammps'},
 
-              'HN_N_HN': {'theta': 1,
-                          'cth': 1,
-                          'source': 'doi.org/10.1021/la504178g'},
+              'HN_N_HN': {'theta': 106.4,
+                          'cth': 364.8448,
+                          'source': 'ODA from lammps'},
 
               'HC_CH_HC': {'theta': 107.80,
                            'cth': 276.144,
@@ -363,13 +363,13 @@ class BoAnDi:
                            'cth': 482.30,
                            'source': 'doi.org/10.1021/la504178g'},
 
-              'SI_CH_HC': {'theta': 1,
-                           'cth': 1,
+              'SI_CH_HC': {'theta': 111,
+                           'cth': 0.000,
                            'source': 'doi.org/10.1021/la504178g'},
 
-              'HC_CN_N': {'theta': 1,
-                          'cth': 1,
-                          'source': 'doi.org/10.1021/la504178g'},
+              'HC_CN_N': {'theta': 109.5,
+                          'cth': 292.88,
+                          'source': 'ODA from lammps'},
 
               'OB_SI_CH': {'theta': 109.47,
                            'cth': 469.72,
@@ -383,9 +383,9 @@ class BoAnDi:
                            'cth': 469.72,
                            'source': 'doi.org/10.1021/la504178g'},
 
-              'CN_N_HN': {'theta': 1,
-                          'cth': 1,
-                          'source': 'doi.org/10.1021/la504178g'},
+              'CN_N_HN': {'theta': 109.47,
+                          'cth': 292.88,
+                          'source': 'ODA from lammps'},
 
               'CH_CH_HC': {'theta': 110.70,
                            'cth': 313.800,
