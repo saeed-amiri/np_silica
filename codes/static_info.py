@@ -242,23 +242,28 @@ class BoAnDi:
 
              'SU_OB': {'r': 0.16300,
                        'k': 323984.0,
-                       'source': 'doi.org/10.1021/la504178g'},
+                       'source': 'doi.org/10.1021/la504178g',
+                       'note': '1 times of value of the source'},
 
              'SD_OD': {'r': 0.16300,
                        'k': 323984.0,
-                       'source': 'doi.org/10.1021/la504178g'},
+                       'source': 'doi.org/10.1021/la504178g',
+                       'note': '1 times of value of the source'},
 
              'SD_OMH': {'r': 0.16300,
                         'k': 323984.0,
-                        'source': 'doi.org/10.1021/la504178g'},
+                        'source': 'doi.org/10.1021/la504178g',
+                        'note': '1 times of value of the source'},
 
              'SI_OB': {'r': 0.16300,
                        'k': 323984.0,
-                       'source': 'doi.org/10.1021/la504178g'},
+                       'source': 'doi.org/10.1021/la504178g',
+                       'note': '1 times of value of the source'},
 
              'SI_OH': {'r': 0.16300,
                        'k': 323984.0,
-                       'source': 'doi.org/10.1021/la504178g'},
+                       'source': 'doi.org/10.1021/la504178g',
+                       'note': '1 times of value of the source'},
 
              'OH_HO': {'r': 0.09500,
                        'k': 533549.0,
