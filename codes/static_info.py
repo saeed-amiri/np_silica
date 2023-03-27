@@ -84,7 +84,7 @@ class AtomGroup:
 
 class DataFile:
     """Get data directory which are used in the script"""
-    APTES: str = '/scratch/saeed/MyScripts/np_silica/data/aminopropyl.data'
+    APTES: str = '/scratch/saeed/MyScripts/np_silica/data/aminopropyl_pro.data'
 
 
 class Hydration:
