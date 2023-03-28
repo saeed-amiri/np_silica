@@ -206,8 +206,8 @@ class Pdb:
             sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}: '
                      f'({self.__module__})\n'
                      '\tERROR!\n'
-                     '\tThe atoms in the masses section of the input file must\n'
-                     '\thave the follwoing order:\n'
+                     '\tThe atoms in the masses section of the input '
+                     '\tfile must have the follwoing order:\n'
                      '\tid mass # Atom_names Residue Element_symbol(CAP) '
                      'RECORD ff_type\n'
                      f'{bcolors.ENDC}'
@@ -302,11 +302,17 @@ class Pdb:
         """read the SI_DF to get index of the residues which the
         functionlaized Si are belong.
         """
-        df_i: pd.DataFrame = pd.read_csv(stinfo.DataFile.SI_DF,
-                                         header=0,
-                                         sep=' ',
-                                         index_col=0)
-        return df_i[col]
+        try:
+            df_i: pd.DataFrame = pd.read_csv(stinfo.DataFile.SI_DF,
+                                             header=0,
+                                             sep=' ',
+                                             index_col=0)
+            return df_i[col]
+        except FileNotFoundError:
+            sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}: '
+                     f'({self.__module__})\n'
+                     '\tError! The file `SI_DF` does not exsit!\n'
+                     f'{bcolors.ENDC}')
 
     def print_info(self) -> None:
         """Just to subpress the pylint error"""
