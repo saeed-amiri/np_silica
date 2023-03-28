@@ -123,6 +123,13 @@ class Hydration:
     # PACKMOL lib
     PACKMOL: str = '/home/saeed/Downloads/packmol/packmol'
 
+class PosRes:
+    """write the psition restrians for atoms in the core of the silica
+    nanoparticels"""
+    RES_FILE: str = 'STRONG_POSRES.itp'
+    FX: int = 1000  # Force along x axis
+    FY: int = 1000  # Force along y axis
+    FZ: int = 1000  # Force along z axis
 
 class PdbMass:
     """information for the masses section in the output file of the
