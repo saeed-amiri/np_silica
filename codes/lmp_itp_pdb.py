@@ -127,6 +127,7 @@ class WriteItp:
             self.write_bonds(f_w, itp.bonds)
             self.write_angles(f_w, itp.angles)
             self.write_dihedrals(f_w, itp.dihedrals)
+        if stinfo.PosRes.POSRES:
             self.write_posres(df_atoms)
 
     def write_molecule(self,
@@ -307,7 +308,7 @@ class WriteItp:
                         index=False,
                         float_format='%.5f')
             f_w.write('\n')
-    
+
     def write_posres(self,
                      df_atoms: pd.DataFrame  # Atoms section of the ITP
                      ) -> None:
@@ -342,6 +343,7 @@ class WriteItp:
         df_res['cmt'] = [';' for _ in df_res['atomnr']]
         df_res['element'] = df_core['element']
         return df_res
+
 
 class Call:
     """call the module from outside"""
