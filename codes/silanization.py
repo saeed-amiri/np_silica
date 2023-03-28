@@ -196,10 +196,13 @@ class ConcatAll:
                        si_df: pd.DataFrame  # Si with APTES attach to them
                        ) -> None:
         """write si_df to the file to keep track of SI information"""
-        si_df.to_csv('SI_DF', sep=' ', index=True)
+        si_df.to_csv(stinfo.DataFile.SI_DF, sep=' ', index=True)
         columns: list[str]  # Columns to write to a different file
         columns = ['atom_id', 'mol', 'typ', 'charge', 'x', 'y', 'z', 'name']
-        si_df.to_csv('SI_XYZ', sep=' ', index=False, columns=columns)
+        si_df.to_csv(stinfo.DataFile.SI_XYZ,
+                     sep=' ',
+                     index=False,
+                     columns=columns)
         print(f'{bcolors.OKBLUE}\tWriting si_df in file in `SI_DF`\n'
               f'\tWriting selected columns of si_df in `SI_XYZ`')
 
