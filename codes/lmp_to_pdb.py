@@ -109,6 +109,7 @@ import sys
 import typing
 from collections import Counter
 import pandas as pd
+import static_info as stinfo
 from colors_text import TextColor as bcolors
 
 
@@ -191,6 +192,7 @@ class Pdb:
         ff_type: list[str] = []  # Type of the atom in the FF, e.g., opls_XXX
         atoms_masses: list[float] = []  # Masses of the atoms
         # set columns of the df
+        residues_index: list[int] = list(self.__read_si_df(col='mol'))
         try:
             for item in Atoms_df['typ']:
                 df_row = Masses[Masses['typ'] == item]
@@ -293,6 +295,18 @@ class Pdb:
                      f'There is similar name in a same molecule! Nr.: {mol}'
                      f'{bcolors.ENDC}\n')
         return name_id
+
+    def __read_si_df(self,
+                     col: str  # Name of the column to return
+                     ) -> pd.DataFrame:
+        """read the SI_DF to get index of the residues which the
+        functionlaized Si are belong.
+        """
+        df_i: pd.DataFrame = pd.read_csv(stinfo.DataFile.SI_DF,
+                                         header=0,
+                                         sep=' ',
+                                         index_col=0)
+        return df_i[col]
 
     def print_info(self) -> None:
         """Just to subpress the pylint error"""
