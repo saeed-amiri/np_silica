@@ -85,6 +85,9 @@ class AtomGroup:
 class DataFile:
     """Get data directory which are used in the script"""
     APTES: str = '/scratch/saeed/MyScripts/np_silica/data/aminopropyl_pro.data'
+    SI_DF: str = 'SI_DF'  # File with selected info of si atom in adding APTES
+    SI_XYZ: str = 'SI_XYZ'  # File with  info of si atom in adding APTES
+    
 
 
 class Hydration:
