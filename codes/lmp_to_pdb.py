@@ -194,11 +194,15 @@ class Pdb:
         # set columns of the df
         residues_index: list[int] = list(self.__read_si_df(col='mol'))
         try:
-            for item in Atoms_df['typ']:
+            for _, row in Atoms_df.iterrows():
+                item: int = row['typ']
                 df_row = Masses[Masses['typ'] == item]
                 names.append(df_row['names'][item])
                 elements.append(df_row['elements'][item])
-                residues.append(df_row['residues'][item])
+                residues.append(
+                    self.__set_residue_name(df_row['residues'][item],
+                                            residues_index,
+                                            row['mol']))
                 records.append(df_row['records'][item])
                 ff_type.append(df_row['ff_type'][item])
                 atoms_masses.append(df_row['mass'][item])
@@ -296,6 +300,23 @@ class Pdb:
                      f'{bcolors.ENDC}\n')
         return name_id
 
+    def __set_residue_name(self,
+                           pre_name: str,  # Name before updating the cores
+                           residues_index: list[int],  # All the Si_df residues
+                           mol: int  # The index of the residues
+                           ) -> str:
+        """return the name of the residue for Silica, to seperate the
+        core residues from surface ones"""
+        residue_name: str  # Name of the residue
+        if pre_name == stinfo.PdbMass.silica_residue:
+            if mol in residues_index:
+                residue_name = stinfo.PdbMass.silica_residue
+            else:
+                residue_name = stinfo.PdbMass.core_residue
+        else:
+            residue_name = pre_name
+        return residue_name
+
     def __read_si_df(self,
                      col: str  # Name of the column to return
                      ) -> pd.DataFrame:
@@ -312,7 +333,8 @@ class Pdb:
             sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}: '
                      f'({self.__module__})\n'
                      '\tError! The file `SI_DF` does not exsit!\n'
-                     f'{bcolors.ENDC}')
+                     '\tTry to run `silanization.py` before running '
+                     f'this agian\n{bcolors.ENDC}')
 
     def print_info(self) -> None:
         """Just to subpress the pylint error"""
