@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 import lmp_to_pdb as lmpdb
 import lmp_to_itp as lmpitp
+import static_info as stinfo
 import read_lmp_data as relmp
 from colors_text import TextColor as bcolors
 
@@ -122,10 +123,11 @@ class WriteItp:
             f_w.write('; input pdb SMILES:\n')
             f_w.write('\n')
             self.write_molecule(f_w, itp_mols)
-            self.write_atoms(f_w, itp.atoms)
+            df_atoms: pd.DataFrame = self.write_atoms(f_w, itp.atoms)
             self.write_bonds(f_w, itp.bonds)
             self.write_angles(f_w, itp.angles)
             self.write_dihedrals(f_w, itp.dihedrals)
+            self.write_posres(df_atoms)
 
     def write_molecule(self,
                        f_w: typing.Any,  # The out put file
@@ -140,7 +142,7 @@ class WriteItp:
     def write_atoms(self,
                     f_w: typing.Any,  # The out put file
                     atoms: pd.DataFrame  # Atoms information
-                    ) -> None:
+                    ) -> pd.DataFrame:
         """write atom section of the itp file"""
         header: list[str] = list(atoms.columns)  # Header of atoms
         f_w.write('[ atoms ]\n')
@@ -187,6 +189,7 @@ class WriteItp:
             f_w.write('\n')
         f_w.write(f'; Total charge : {df_f["charge"].sum()}\n')
         f_w.write('\n')
+        return df_f
 
     def write_bonds(self,
                     f_w: typing.Any,  # The out put file
@@ -304,7 +307,41 @@ class WriteItp:
                         index=False,
                         float_format='%.5f')
             f_w.write('\n')
+    
+    def write_posres(self,
+                     df_atoms: pd.DataFrame  # Atoms section of the ITP
+                     ) -> None:
+        """write the position restrains file for CORE atoms of the
+        nanoparticle"""
+        df_core: pd.DataFrame  # All the Atoms belong the CORE section
+        df_core = df_atoms[df_atoms['resname'] == stinfo.PdbMass.core_residue]
+        df_res: pd.DataFrame = self.make_posres_df(df_core)
+        with open(stinfo.PosRes.RES_FILE, 'w', encoding="utf8") as f_w:
+            f_w.write(' [position_restraints]\n\n')
+            f_w.write(';')
+            df_res.to_csv(f_w, sep=' ', index=False)
 
+    def make_posres_df(self,
+                       df_core: pd.DataFrame  # Core atoms informations
+                       ) -> pd.DataFrame:
+        """make a dataframe for the posres section"""
+        columns: list[str] = ['atomnr',
+                              'funct',
+                              'fx',
+                              'fy',
+                              'fz',
+                              'cmt',
+                              'element']
+        df_res: pd.DataFrame  # Df in the asked format
+        df_res = pd.DataFrame(columns=columns)
+        df_res['atomnr'] = df_core['atomnr']
+        df_res['funct'] = [stinfo.PosRes.FUNCTION for _ in df_res['atomnr']]
+        df_res['fx'] = [stinfo.PosRes.FX for _ in df_res['atomnr']]
+        df_res['fy'] = [stinfo.PosRes.FY for _ in df_res['atomnr']]
+        df_res['fz'] = [stinfo.PosRes.FZ for _ in df_res['atomnr']]
+        df_res['cmt'] = [';' for _ in df_res['atomnr']]
+        df_res['element'] = df_core['element']
+        return df_res
 
 class Call:
     """call the module from outside"""
