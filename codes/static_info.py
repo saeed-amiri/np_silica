@@ -127,6 +127,7 @@ class PosRes:
     """write the psition restrians for atoms in the core of the silica
     nanoparticels"""
     RES_FILE: str = 'STRONG_POSRES.itp'
+    FUNCTION: int = 1  # Type of the function for the restrains
     FX: int = 1000  # Force along x axis
     FY: int = 1000  # Force along y axis
     FZ: int = 1000  # Force along z axis
