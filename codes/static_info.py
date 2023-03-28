@@ -125,6 +125,7 @@ class PdbMass:
     """information for the masses section in the output file of the
     silanization"""
     silica_residue: str = 'SIL'  # Name of the residue for the silica NP
+    core_residue: str = 'COR'  # Name of the residue to apply the restraints
     aptes_residue: str = 'APT'  # Name of the residue for the APTES
     HO: dict[str, typing.Any] = {'Atoms_names': 'HO',
                                  'Residue': silica_residue,
