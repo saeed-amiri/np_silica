@@ -126,6 +126,7 @@ class Hydration:
 class PosRes:
     """write the psition restrians for atoms in the core of the silica
     nanoparticels"""
+    POSRES: bool = False  # if want to write it: True
     RES_FILE: str = 'STRONG_POSRES.itp'
     FUNCTION: int = 1  # Type of the function for the restrains
     FX: int = 1000  # Force along x axis
