@@ -164,7 +164,14 @@ class InFile:
         water atoms so can fit the number of ions into box"""
         num_ions: int  # Number of required ions
         water_moles: int  # Number of water molecules after adding ions
-        num_ions, water_moles = self.__get_num_ions(net_charge, num_mols)
+        num_odap: int  # Number of ODAP molecues
+
+        # For now, the scripts take the -1 total charge of ODAp in itp
+        # to be true, later it should it be checked by the scripts
+        num_odap = self.__get_surfactants()
+        num_ions, water_moles = self.__get_num_ions(net_charge,
+                                                    num_mols,
+                                                    num_odap)
         out_file: str = 'water_box.pdb'
         with open(stinfo.Hydration.INP_FILE, 'w', encoding="utf8") as f_out:
             f_out.write('# Input file for PACKMOL, Water box for a NP ')
@@ -174,6 +181,11 @@ class InFile:
             self.__write_ions(f_out, num_ions, radius)
             f_out.write(f'output {out_file}\n\n')
         return water_moles
+
+    def __get_surfactants(self) -> int:
+        """return the number of the ODAP and ODA (later!)"""
+        n_odap: int = stinfo.Hydration.N_ODAP
+        return n_odap
 
     def __write_ions(self,
                      f_out: typing.IO,  # The file to write into it
@@ -221,15 +233,18 @@ class InFile:
 
     def __get_num_ions(self,
                        net_charge: float,  # Net charge of the NP
-                       num_mols: int  # Number of water molecules before ions
+                       num_mols: int,  # Number of water molecules before ions
+                       num_odap: int  # Number of ODAp molecuels, each with +1
                        ) -> tuple[int, int]:
         """return the number of ions, with sign"""
-        charge_floor: float = np.floor(np.abs(net_charge))
+        charge_floor: float = np.floor(np.abs(net_charge)) + num_odap
         num_ions: int = int(np.sign(net_charge)*charge_floor)
         if charge_floor != np.abs(net_charge):
             print(f'{bcolors.CAUTION}{self.__class__.__name__}" '
                   f'({self.__module__}):\n'
                   f'\tNet charge is not a complete number! "{net_charge}"\n'
+                  f'\tNumber of ODAP is set to `{num_odap}` with total '
+                  f'charge of `{num_odap}`\n'
                   f'\tThe number of ions is set to "{num_ions}"'
                   f'{bcolors.ENDC}')
         water_moles: int = num_mols - num_ions
