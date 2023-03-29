@@ -144,7 +144,7 @@ class NumberMols:
 
 
 class InFile:
-    """preparing input file for the"""
+    """preparing input file for the PACKMOL execution"""
     def __init__(self,
                  radius: float,  # Radius of the NP
                  num_mols: int,  # Number of the molecules in the water volume
