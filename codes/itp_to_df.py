@@ -1,11 +1,4 @@
-import sys
-import typing
-import pandas as pd
-from colors_text import TextColor as bcolors
-
-
-class Doc:
-    """reading itp files and return data several data frames
+"""reading itp files and return data several data frames
     Usually, the itp file contains information about atoms (not
     coordinates), bonds, angles, dihedrals, and improper dihedrals.
 
@@ -30,6 +23,11 @@ class Doc:
     (funct = 1), 3 improper (funct = 4) and no Ryckaert-Bellemans type
     dihedrals.
     """
+
+import sys
+import typing
+import pandas as pd
+from colors_text import TextColor as bcolors
 
 
 # A helper function needed by most of the classes to clean the lines
