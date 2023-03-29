@@ -9,10 +9,6 @@ import pandas as pd
 from colors_text import TextColor as bcolors
 
 
-FILEERROE = """there is problem in the header of the INFILE,
-    maybe a long header!\n"""
-
-
 class Header:
     """
     read haeder of the data file
@@ -73,7 +69,11 @@ class Header:
                     atomsLine = linecount
                     break
                 if linecount > MAXHEADER:
-                    sys.exit(FILEERROE)
+                    sys.exit(f'{bcolors.FAIL}\tError! there is problem '
+                             f'in the header of the `{self.infile}`, '
+                             'maybe a long header or wrong file format!\n'
+                             '\tThe input file should be in LAMMPS full '
+                             f'atom format{bcolors.ENDC}')
                 if not line:
                     sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}'
                              f'wrong data file{bcolors.ENDC}\n')
