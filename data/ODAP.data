@@ -1,7 +1,7 @@
 # LAMMPS data file from: system_clean.data by /scratch/saeed/MyScripts/converters/codes/convert.py
 
-60 atoms
-8 atom types
+59 atoms
+7 atom types
 58 bonds
 4 bond types
 114 angles
@@ -23,7 +23,6 @@ Masses
 5 1.008 # HCN hc
 6 14.0067 # NT nt
 7 1.008 # HN hn
-8 35.453 # Cl cl
 
 Atoms # full
 
@@ -86,7 +85,6 @@ Atoms # full
 57	1	7	0.33	20	1.0741603	-0.892431	0	0	0	#	HN
 58	1	7	0.33	20	1.0741603	0.892431	0	0	0	#	HN
 59	1	7	0.33	20.892431	-0.1879277	0	0	0	0	#	HN
-60	1	8	-1	24	0.4431163	0	0	0	0	#	Cl
 
 Bonds
 
