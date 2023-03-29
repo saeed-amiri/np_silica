@@ -122,6 +122,8 @@ class Hydration:
     GRO_PDB: str = 'silica_water.pdb'  # File for GROMACS input
     # PACKMOL lib
     PACKMOL: str = '/home/saeed/Downloads/packmol/packmol'
+    # Number or concentration of ODAP and ODA (in case later wanted)
+    N_ODAP: int = 16
 
 class PosRes:
     """write the psition restrians for atoms in the core of the silica
