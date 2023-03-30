@@ -114,6 +114,12 @@ class WriteItp:
         """write itp file for all the residues"""
         moles: set[str]  # Names of each mol to make files
         moles = set(itp.atoms['resname'])
+        ion_fname: str  # To add to the molecule name
+        if num_ions > 0:
+            ion_fname = 'CL'
+        elif num_ions < 0:
+            ion_fname = 'NA'
+        moles.add(ion_fname)
         fout: str  # Name of the input file
         # for mol in moles:
         itp_mols: str = '_'.join(sorted(moles))
@@ -373,10 +379,8 @@ class WriteItp:
                 df_list.append(df_i)
                 del df_i
             df_f: pd.DataFrame = pd.concat(df_list)
-            df_f['ai'] += int(np.abs(num_ions))
-            df_f['aj'] += int(np.abs(num_ions))
-            df_f['ak'] += int(np.abs(num_ions))
-            df_f['ah'] += int(np.abs(num_ions))
+            for item in (['ai', 'aj', 'ak', 'ah']):
+                df_f[item] += int(np.abs(num_ions))
             header: list[str] = list(df_f.columns)
             f_w.write('[ dihedrals ]\n')
             f_w.write(f'; {" ".join(header)}\n')
