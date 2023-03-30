@@ -127,8 +127,8 @@ class WriteItp:
             self.write_molecule(f_w, itp_mols)
             df_atoms: pd.DataFrame = self.write_atoms(f_w, itp.atoms, num_ions)
             self.write_bonds(f_w, itp.bonds, num_ions)
-            self.write_angles(f_w, itp.angles)
-            self.write_dihedrals(f_w, itp.dihedrals)
+            self.write_angles(f_w, itp.angles, num_ions)
+            self.write_dihedrals(f_w, itp.dihedrals, num_ions)
         if stinfo.PosRes.POSRES:
             self.write_posres(df_atoms)
 
@@ -287,8 +287,8 @@ class WriteItp:
             header: list[str] = list(df_f.columns)
             f_w.write('[ bonds ]\n')
             f_w.write(f'; {" ".join(header)}\n')
-            df_f['ai'] += num_ions
-            df_f['aj'] += num_ions
+            df_f['ai'] += int(np.abs(num_ions))
+            df_f['aj'] += int(np.abs(num_ions))
             df_f.to_csv(f_w,
                         header=None,
                         sep='\t',
@@ -298,7 +298,8 @@ class WriteItp:
 
     def write_angles(self,
                      f_w: typing.Any,  # The out put file
-                     angles: pd.DataFrame  # Angles inoformation
+                     angles: pd.DataFrame,  # Angles inoformation
+                     num_ions: int  # Numbers of ions with sign
                      ) -> None:
         """write section of the itp file"""
         df_raw: pd.DataFrame  # Copy of the df with mol selected info
@@ -324,6 +325,9 @@ class WriteItp:
                 df_list.append(df_i)
                 del df_i
             df_f: pd.DataFrame = pd.concat(df_list)
+            df_f['ai'] += int(np.abs(num_ions))
+            df_f['aj'] += int(np.abs(num_ions))
+            df_f['ak'] += int(np.abs(num_ions))
             header: list[str] = list(df_f.columns)
             f_w.write('[ angles ]\n')
             f_w.write(f'; {" ".join(header)}\n')
@@ -336,7 +340,8 @@ class WriteItp:
 
     def write_dihedrals(self,
                         f_w: typing.Any,  # The out put file
-                        dihedrals: pd.DataFrame  # Dihedrals inoformation
+                        dihedrals: pd.DataFrame,  # Dihedrals inoformation
+                        num_ions: int  # Numbers of ions with sign
                         ) -> None:
         """write section of the itp file"""
         df_raw: pd.DataFrame  # Copy of the df with mol selected info
@@ -368,6 +373,10 @@ class WriteItp:
                 df_list.append(df_i)
                 del df_i
             df_f: pd.DataFrame = pd.concat(df_list)
+            df_f['ai'] += int(np.abs(num_ions))
+            df_f['aj'] += int(np.abs(num_ions))
+            df_f['ak'] += int(np.abs(num_ions))
+            df_f['ah'] += int(np.abs(num_ions))
             header: list[str] = list(df_f.columns)
             f_w.write('[ dihedrals ]\n')
             f_w.write(f'; {" ".join(header)}\n')
