@@ -114,8 +114,11 @@ class Hydration:
                                 'NA': 22.989769}
     # PACKMOL files
     WATER_PDB: str = '/scratch/saeed/MyScripts/np_silica/data/water.pdb'
+    ODAP_PDB: str = '/scratch/saeed/MyScripts/np_silica/data/ODAp.pdb'
     NA_PDB: str = '/scratch/saeed/MyScripts/np_silica/data/Na.pdb'
     CL_PDB: str = '/scratch/saeed/MyScripts/np_silica/data/Cl.pdb'
+    NA_ITP: str = '/scratch/saeed/MyScripts/np_silica/data/Na.itp'
+    CL_ITP: str = '/scratch/saeed/MyScripts/np_silica/data/Cl.itp'
     INP_FILE: str = 'water_box.inp'
     OUT_FILE: str = 'water_box.pdb'
     WS_INP: str = 'water_silica.inp'  # Input for final water & silanized file
@@ -123,12 +126,12 @@ class Hydration:
     # PACKMOL lib
     PACKMOL: str = '/home/saeed/Downloads/packmol/packmol'
     # Number or concentration of ODAP and ODA (in case later wanted)
-    N_ODAP: int = 16
+    N_ODAP: int = 0
 
 class PosRes:
     """write the psition restrians for atoms in the core of the silica
     nanoparticels"""
-    POSRES: bool = False  # if want to write it: True
+    POSRES: bool = True  # if want to write it: True
     RES_FILE: str = 'STRONG_POSRES.itp'
     FUNCTION: int = 1  # Type of the function for the restrains
     FX: int = 1000  # Force along x axis
