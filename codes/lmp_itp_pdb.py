@@ -105,14 +105,11 @@ class WriteItp:
                  ) -> None:
         """call functions"""
         self.__atoms_one: dict[int, int]  # Atoms index from one
-        self.__atoms: pd.DataFrame  # Updateded atoms with adding ions
-        self.__bonds: pd.DataFrame  # Updateded bonds with adding ions
-        self.__angles: pd.DataFrame  # Updateded angles with adding ions
-        self.__dihedrals: pd.DataFrame  # Updateded dihedrals with adding ions
-        self.write_itp(itp)
+        self.write_itp(itp, num_ions)
 
     def write_itp(self,
-                  itp: lmpitp.Itp  # Data frames restructerd from LAMMPS
+                  itp: lmpitp.Itp,  # Data frames restructerd from LAMMPS
+                  num_ions: int  # Numbers of ions with sign
                   ) -> None:
         """write itp file for all the residues"""
         moles: set[str]  # Names of each mol to make files
@@ -128,7 +125,7 @@ class WriteItp:
             f_w.write('; input pdb SMILES:\n')
             f_w.write('\n')
             self.write_molecule(f_w, itp_mols)
-            df_atoms: pd.DataFrame = self.write_atoms(f_w, itp.atoms)
+            df_atoms: pd.DataFrame = self.write_atoms(f_w, itp.atoms, num_ions)
             self.write_bonds(f_w, itp.bonds)
             self.write_angles(f_w, itp.angles)
             self.write_dihedrals(f_w, itp.dihedrals)
@@ -147,7 +144,8 @@ class WriteItp:
 
     def write_atoms(self,
                     f_w: typing.Any,  # The out put file
-                    atoms: pd.DataFrame  # Atoms information
+                    atoms: pd.DataFrame,  # Atoms information
+                    num_ions: int  # Numbers of ions with sign
                     ) -> pd.DataFrame:
         """write atom section of the itp file"""
         header: list[str] = list(atoms.columns)  # Header of atoms
@@ -169,6 +167,7 @@ class WriteItp:
                              ' ': df1[' '],
                              'element': df1['element']
                              })
+        df_f = self.__atoms_add_ions(df_f, num_ions)
         for row in df_f.iterrows():
             line: list[str]  # line with length of 85 spaces to fix output
             line = [' '*85]
@@ -196,6 +195,68 @@ class WriteItp:
         f_w.write(f'; Total charge : {df_f["charge"].sum()}\n')
         f_w.write('\n')
         return df_f
+
+    def __atoms_add_ions(self,
+                         df_i: pd.DataFrame,  # df with mol_id selected info
+                         num_ions: int  # Number of ions with sign
+                         ) -> pd.DataFrame:
+        """adding ions based on the sign of the num_ions to begening of
+        the atoms section"""
+        ion_line: str = self.__read_ion(num_ions)  # info in the ion file
+        df_ions: pd.DataFrame  # All the needed ions
+        df_ions = self.__mk_ion_df(ion_line, list(df_i.columns), num_ions)
+        df_i["atomnr"] += num_ions
+        df_i["resnr"] += num_ions
+        df_atoms: pd.DataFrame  # Silanized system with ions
+        df_atoms = pd.concat([df_ions, df_i])
+        return df_atoms
+
+    def __read_ion(self,
+                   num_ions: int  # Number of ions with sign
+                   ) -> str:
+        """read ion file and return the data line as a whole"""
+        f_ion: str  # Name of the ion file based on the need
+        ion_line: str  # Data in the ion file; it must have only one line data
+        if num_ions > 0:
+            f_ion = stinfo.Hydration.CL_ITP
+        elif num_ions < 0:
+            f_ion = stinfo.Hydration.NA_ITP
+        with open(f_ion, 'r', encoding='utf8') as f_r:
+            while True:
+                line: str = f_r.readline()
+                if line.strip().startswith('1'):
+                    ion_line = line
+                    break
+                if not line:
+                    break
+        return ion_line
+
+    def __mk_ion_df(self,
+                    ion_line: str,  # Data of ion in the pdb file
+                    columns: list[str],  # columns of the dataframe
+                    num_ions: int  # Numbers of the ions with sign
+                    ) -> pd.DataFrame:
+        """making a data frame out of the ion with number of we need"""
+        df_i: pd.DataFrame = pd.DataFrame(columns=columns)
+        df_i["atomnr"] = [int(ion_line[0:7].strip())]
+        df_i["atomtype"] = [ion_line[9:17].strip()]
+        df_i["resnr"] = [int(ion_line[19:24].strip())]
+        df_i["resname"] = [ion_line[26:33].strip()]
+        df_i["atomname"] = [ion_line[35:43].strip()]
+        df_i["chargegrp"] = [int(ion_line[45:54].strip())]
+        df_i["charge"] = [float(ion_line[56:62].strip())]
+        df_i["mass"] = [float(ion_line[64:71].strip())]
+        df_i[" "] = [ion_line[73:75]]
+        df_i["element"] = [ion_line[76:].strip()]
+        df_list: list[pd.DataFrame] = []  # For appending all the df
+        for _ in range(int(np.abs(num_ions))):
+            df_list.append(df_i)
+        df_ions: pd.DataFrame  # Of all the needed ions
+        df_ions = pd.concat(df_list, ignore_index=True)
+        df_ions.index += 1
+        df_ions["atomnr"] = df_ions.index
+        df_ions["resnr"] = df_ions.index
+        return df_ions
 
     def write_bonds(self,
                     f_w: typing.Any,  # The out put file
@@ -382,4 +443,4 @@ if __name__ == '__main__':
     pdb_out = lmpdb.Pdb(lmp_out.Masses_df, lmp_out.Atoms_df)
     pdb_w = WritePdb(pdb_out.pdb_df, lmpf_name)
     itp_i = lmpitp.Itp(lmp_out, pdb_out.pdb_df)
-    itp_w = WriteItp(itp_i)
+    itp_w = WriteItp(itp_i, num_ions=147)
