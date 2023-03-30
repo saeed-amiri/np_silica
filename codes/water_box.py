@@ -189,6 +189,41 @@ class InFile:
         n_odap: int = stinfo.Hydration.N_ODAP
         return n_odap
 
+    def __write_odap(self,
+                     f_out: typing.IO,  # The file to write into it
+                     num_odap: int,  # Number of the ODAP moles 
+                     radius: float  # Radius of the nanoparticle
+                     ) -> None:
+        """write the ODAP section in the inp file"""
+        tlr: float = stinfo.Hydration.TOLERANCE
+        if num_odap == 0:
+            pass
+        else:
+            if num_odap < 0:
+                sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}: '
+                         f'({self.__module__})\n'
+                         f'\tWrong number is set for the ODAP molecules!\n'
+                         f'{bcolors.ENDC}')
+            else:
+                f_out.write(f'structure {stinfo.Hydration.ODAP_PDB}\n')
+                f_out.write(f'\tnumber {num_odap}\n')
+                f_out.write('\tinside box ')
+                f_out.write(
+                    f'{-self.edge/2 + stinfo.Hydration.X_MIN - tlr: .2f} ')
+                f_out.write(
+                    f'{-self.edge/2 + stinfo.Hydration.Y_MIN - tlr: .2f} ')
+                f_out.write(
+                    f'{-self.edge/2 + stinfo.Hydration.Z_MIN - tlr: .2f} ')
+                f_out.write(
+                    f'{self.edge/2 + stinfo.Hydration.X_MAX + tlr: .2f} ')
+                f_out.write(
+                    f'{self.edge/2 + stinfo.Hydration.Y_MAX + tlr: .2f} ')
+                f_out.write(
+                    f'{self.edge/2 + stinfo.Hydration.Z_MAX + tlr: .2f}\n')
+                f_out.write(
+                    f'\toutside sphere 0. 0. 0. {radius: .2f}\n')
+                f_out.write('end structure\n\n')
+
     def __write_ions(self,
                      f_out: typing.IO,  # The file to write into it
                      ion_mols: int,  # Number of the moles in the volume
