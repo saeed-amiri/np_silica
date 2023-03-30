@@ -100,10 +100,15 @@ class WriteItp:
     There is no uniqe structure one should follow
     The columns will be seperated by single space"""
     def __init__(self,
-                 itp: lmpitp.Itp  # Data frames restructerd from LAMMPS
+                 itp: lmpitp.Itp,  # Data frames restructerd from LAMMPS
+                 num_ions: int  # Numbers of ions with sign
                  ) -> None:
         """call functions"""
         self.__atoms_one: dict[int, int]  # Atoms index from one
+        self.__atoms: pd.DataFrame  # Updateded atoms with adding ions
+        self.__bonds: pd.DataFrame  # Updateded bonds with adding ions
+        self.__angles: pd.DataFrame  # Updateded angles with adding ions
+        self.__dihedrals: pd.DataFrame  # Updateded dihedrals with adding ions
         self.write_itp(itp)
 
     def write_itp(self,
@@ -348,14 +353,16 @@ class WriteItp:
 class Call:
     """call the module from outside"""
     def __init__(self,
-                 fname: str  # Name of the data file in LAMMPS full atom format
+                 fname: str,  # Name of the data file in LAMMPS full atom forma
+                 num_ions: int  # Number of counter ions with sign
                  ) -> None:
         self.pdb_file: str  # Name of the output pdb file
-        self.write_itpdb(fname)
+        self.write_itpdb(fname, num_ions)
         self.print_info()
 
     def write_itpdb(self,
-                    fname: str  # Name of the data file,LAMMPS full atom format
+                    fname: str,  # Name of the data file,LAMMPS full atom forma
+                    num_ions: int  # Number of counter ions with sign
                     ) -> None:
         """call other classes in the module to get data"""
         lmp: relmp.ReadData = relmp.ReadData(fname)  # All data in input file
@@ -363,7 +370,7 @@ class Call:
         w_pdb = WritePdb(pdb.pdb_df, fname)
         self.pdb_file = w_pdb.pdb_file
         itp = lmpitp.Itp(lmp, pdb.pdb_df)
-        WriteItp(itp)
+        WriteItp(itp, num_ions)
 
     def print_info(self) -> None:
         """to subpress pylint"""
