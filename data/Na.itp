@@ -1,0 +1,7 @@
+[ moleculetype ]
+; molname   nrexcl
+NA          1
+
+[ atoms ]
+; atomnr  atomtype  resnr  resname  atomname  chargegrp  charge  mass     element
+      1  opls_407      1       NA        NA          1   1.000  22.9897 :     NA    

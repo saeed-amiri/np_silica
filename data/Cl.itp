@@ -1,0 +1,8 @@
+[ moleculetype ]
+; molname   nrexcl
+CL      1
+
+[ atoms ]
+; atomnr  atomtype  resnr  resname  atomname  chargegrp  charge  mass     element
+      1  opls_401      1       CL        CL          1  -1.000  35.453  ;     CL
+      
