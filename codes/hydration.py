@@ -35,6 +35,6 @@ if __name__ == '__main__':
     fout = f'boxed_{fname}'
     write_lmp = wrlmp.WriteLmp(combined_box, output=fout)
     write_lmp.write_lmp()
-    silica_pdb = itpdb.Call(fname=fname)
+    silica_pdb = itpdb.Call(fname=fname, num_ions=in_file.num_ion)
     write_pdb = cpdb.InFile(silaniz_pdb=silica_pdb.pdb_file)
     cpdb.RunPackMol()
