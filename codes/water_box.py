@@ -152,6 +152,7 @@ class InFile:
                  net_charge: float  # Net charge of the NP
                  ) -> None:
         self.edge: float = edge
+        self.num_ion: int  # Number of ions with sign
         self.num_water: int = self.write_file(radius, num_mols, net_charge)
         self.print_info()
 
@@ -179,6 +180,7 @@ class InFile:
             f_out.write(f'tolerance {stinfo.Hydration.TOLERANCE}\n\n')
             self.__write_water(f_out, water_moles, radius)
             self.__write_ions(f_out, num_ions, radius)
+            self.__write_odap(f_out, num_odap, radius)
             f_out.write(f'output {out_file}\n\n')
         return water_moles
 
@@ -251,6 +253,7 @@ class InFile:
         print(f'{bcolors.OKCYAN}\tThe number water molecules is now set'
               f' to "{water_moles}", and number of counter ions is '
               f'"{num_ions}"{bcolors.ENDC}')
+        self.num_ion = int(np.sign(net_charge)*num_ions)
         return np.sign(net_charge)*num_ions, water_moles
 
     def print_info(self) -> None:
