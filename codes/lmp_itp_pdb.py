@@ -126,7 +126,7 @@ class WriteItp:
             f_w.write('\n')
             self.write_molecule(f_w, itp_mols)
             df_atoms: pd.DataFrame = self.write_atoms(f_w, itp.atoms, num_ions)
-            self.write_bonds(f_w, itp.bonds)
+            self.write_bonds(f_w, itp.bonds, num_ions)
             self.write_angles(f_w, itp.angles)
             self.write_dihedrals(f_w, itp.dihedrals)
         if stinfo.PosRes.POSRES:
@@ -260,7 +260,8 @@ class WriteItp:
 
     def write_bonds(self,
                     f_w: typing.Any,  # The out put file
-                    bonds: pd.DataFrame  # bonds information
+                    bonds: pd.DataFrame,  # bonds information
+                    num_ions: int  # Number of ions with sign
                     ) -> None:
         """write bonds section of the itp file"""
         df_raw: pd.DataFrame  # Copy of the df with mol selected info
@@ -286,6 +287,8 @@ class WriteItp:
             header: list[str] = list(df_f.columns)
             f_w.write('[ bonds ]\n')
             f_w.write(f'; {" ".join(header)}\n')
+            df_f['ai'] += num_ions
+            df_f['aj'] += num_ions
             df_f.to_csv(f_w,
                         header=None,
                         sep='\t',
