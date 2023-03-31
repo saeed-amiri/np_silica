@@ -117,7 +117,7 @@ class Hydration:
     ODAP_PDB: str = '/scratch/saeed/MyScripts/np_silica/data/ODAp.pdb'
     NA_PDB: str = '/scratch/saeed/MyScripts/np_silica/data/Na.pdb'
     CL_PDB: str = '/scratch/saeed/MyScripts/np_silica/data/Cl.pdb'
-    ADD_ION: bool = True  # if True it will add the ion to the itp file
+    ADD_ION: bool = False  # if True it will add the ion to the itp file
     NA_ITP: str = '/scratch/saeed/MyScripts/np_silica/data/Na.itp'
     CL_ITP: str = '/scratch/saeed/MyScripts/np_silica/data/Cl.itp'
     INP_FILE: str = 'water_box.inp'
@@ -132,6 +132,7 @@ class Hydration:
 class PosRes:
     """write the psition restrians for atoms in the core of the silica
     nanoparticels"""
+    RESTRINS_GROUP: list[str] = ['COR', 'SIL']
     POSRES: bool = True  # if want to write it: True
     RES_FILE: str = 'STRONG_POSRES.itp'
     FUNCTION: int = 1  # Type of the function for the restrains
