@@ -415,7 +415,20 @@ class WriteItp:
         """write the position restrains file for CORE atoms of the
         nanoparticle"""
         df_core: pd.DataFrame  # All the Atoms belong the CORE section
-        df_list:list[pd.DataFrame] = [] # All of the reidues for the posres
+        df_core = self.get_posres_atoms(df_atoms)
+        df_res: pd.DataFrame  # The final data in GROMACS format
+        df_res = self.make_posres_df(df_core)
+        with open(stinfo.PosRes.RES_FILE, 'w', encoding="utf8") as f_w:
+            f_w.write(' [position_restraints]\n\n')
+            f_w.write(';')
+            df_res.to_csv(f_w, sep=' ', index=False)
+
+    def get_posres_atoms(self,
+                         df_atoms: pd.DataFrame  # Atoms section of the ITP
+                         ) -> pd.DataFrame:
+        """get the atoms for the asked group to write the POSRES"""
+        df_core: pd.DataFrame  # All the Atoms belong the CORE section
+        df_list: list[pd.DataFrame] = []  # All of the reidues for the posres
         for item in stinfo.PosRes.RESTRINS_GROUP:
             if item not in set(df_atoms['resname']):
                 print(f'{bcolors.WARNING}\tThe asked residue `{item}` '
@@ -431,11 +444,7 @@ class WriteItp:
                   f'`{stinfo.PdbMass.core_residue}`{bcolors.ENDC}')
         df_core = pd.concat(df_list)
         df_core.sort_values(by=['atomnr'], inplace=True)
-        df_res: pd.DataFrame = self.make_posres_df(df_core)
-        with open(stinfo.PosRes.RES_FILE, 'w', encoding="utf8") as f_w:
-            f_w.write(' [position_restraints]\n\n')
-            f_w.write(';')
-            df_res.to_csv(f_w, sep=' ', index=False)
+        return df_core
 
     def make_posres_df(self,
                        df_core: pd.DataFrame  # Core atoms informations
