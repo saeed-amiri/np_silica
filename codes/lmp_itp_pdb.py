@@ -114,29 +114,41 @@ class WriteItp:
         """write itp file for all the residues"""
         moles: set[str]  # Names of each mol to make files
         moles = set(itp.atoms['resname'])
-        ion_fname: str  # To add to the molecule name
-        if num_ions > 0:
-            ion_fname = 'CL'
-        elif num_ions < 0:
-            ion_fname = 'NA'
-        moles.add(ion_fname)
+        itp_mols_name: str = self.mk_mole_name(moles, num_ions)  # Name of mol
         fout: str  # Name of the input file
-        # for mol in moles:
-        itp_mols: str = '_'.join(sorted(moles))
-        fout = rename_file(itp_mols, 'itp')
+        fout = rename_file(itp_mols_name, 'itp')
         print(f'{bcolors.OKBLUE}{self.__class__.__name__}: '
               f'({self.__module__})\n'
               f'\tITP file is `{fout}`{bcolors.ENDC}\n')
         with open(fout, 'w', encoding="utf8") as f_w:
             f_w.write('; input pdb SMILES:\n')
             f_w.write('\n')
-            self.write_molecule(f_w, itp_mols)
+            self.write_molecule(f_w, itp_mols_name)
             df_atoms: pd.DataFrame = self.write_atoms(f_w, itp.atoms, num_ions)
             self.write_bonds(f_w, itp.bonds, num_ions)
             self.write_angles(f_w, itp.angles, num_ions)
             self.write_dihedrals(f_w, itp.dihedrals, num_ions)
         if stinfo.PosRes.POSRES:
             self.write_posres(df_atoms)
+
+    def mk_mole_name(self,
+                     moles: set[str],  # Name of the molecules in the system
+                     num_ions: int  # Number of ions with sign
+                     ) -> str:
+        """make the molecule name for the itp file and if ion should
+        be add to it or not"""
+        ion_fname: str  # To add to the molecule name
+        if stinfo.Hydration.ADD_ION:
+            if num_ions > 0:
+                ion_fname = 'CL'
+            elif num_ions < 0:
+                ion_fname = 'NA'
+            moles.add(ion_fname)
+            print(f'{bcolors.CAUTION}\tThe ion atoms info for `{ion_fname}`'
+                  f' will be add to the itp file{bcolors.ENDC}')
+        # for mol in moles:
+        itp_mols: str = '_'.join(sorted(moles))
+        return itp_mols
 
     def write_molecule(self,
                        f_w: typing.Any,  # The out put file
