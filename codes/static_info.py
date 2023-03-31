@@ -117,6 +117,7 @@ class Hydration:
     ODAP_PDB: str = '/scratch/saeed/MyScripts/np_silica/data/ODAp.pdb'
     NA_PDB: str = '/scratch/saeed/MyScripts/np_silica/data/Na.pdb'
     CL_PDB: str = '/scratch/saeed/MyScripts/np_silica/data/Cl.pdb'
+    ADD_ION: bool = True  # if True it will add the ion to the itp file
     NA_ITP: str = '/scratch/saeed/MyScripts/np_silica/data/Na.itp'
     CL_ITP: str = '/scratch/saeed/MyScripts/np_silica/data/Cl.itp'
     INP_FILE: str = 'water_box.inp'
