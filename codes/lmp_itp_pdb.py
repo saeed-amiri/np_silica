@@ -415,7 +415,22 @@ class WriteItp:
         """write the position restrains file for CORE atoms of the
         nanoparticle"""
         df_core: pd.DataFrame  # All the Atoms belong the CORE section
-        df_core = df_atoms[df_atoms['resname'] == stinfo.PdbMass.core_residue]
+        df_list:list[pd.DataFrame] = [] # All of the reidues for the posres
+        for item in stinfo.PosRes.RESTRINS_GROUP:
+            if item not in set(df_atoms['resname']):
+                print(f'{bcolors.WARNING}\tThe asked residue `{item}` '
+                      f'does not exist in the atoms section')
+            else:
+                df_list.append(df_atoms[df_atoms['resname'] == item])
+        if not df_list:
+            df_list.append(
+                df_atoms[df_atoms['resname'] == stinfo.PdbMass.core_residue])
+            print(f'{bcolors.CAUTION}\tNone of The selected group for psition '
+                  f'restrains in `{stinfo.PosRes.RESTRINS_GROUP}` exist\n'
+                  f'\t`{stinfo.PosRes.RES_FILE}` is written for '
+                  f'`{stinfo.PdbMass.core_residue}`{bcolors.ENDC}')
+        df_core = pd.concat(df_list)
+        df_core.sort_values(by=['atomnr'], inplace=True)
         df_res: pd.DataFrame = self.make_posres_df(df_core)
         with open(stinfo.PosRes.RES_FILE, 'w', encoding="utf8") as f_w:
             f_w.write(' [position_restraints]\n\n')
@@ -432,7 +447,8 @@ class WriteItp:
                               'fy',
                               'fz',
                               'cmt',
-                              'element']
+                              'element',
+                              'resname']
         df_res: pd.DataFrame  # Df in the asked format
         df_res = pd.DataFrame(columns=columns)
         df_res['atomnr'] = df_core['atomnr']
@@ -442,6 +458,7 @@ class WriteItp:
         df_res['fz'] = [stinfo.PosRes.FZ for _ in df_res['atomnr']]
         df_res['cmt'] = [';' for _ in df_res['atomnr']]
         df_res['element'] = df_core['element']
+        df_res['resname'] = df_core['resname']
         return df_res
 
 
