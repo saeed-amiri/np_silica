@@ -220,13 +220,16 @@ class WriteItp:
                          ) -> pd.DataFrame:
         """adding ions based on the sign of the num_ions to begening of
         the atoms section"""
-        ion_line: str = self.__read_ion(num_ions)  # info in the ion file
-        df_ions: pd.DataFrame  # All the needed ions
-        df_ions = self.__mk_ion_df(ion_line, list(df_i.columns), num_ions)
-        df_i["atomnr"] += num_ions
-        df_i["resnr"] += num_ions
-        df_atoms: pd.DataFrame  # Silanized system with ions
-        df_atoms = pd.concat([df_ions, df_i])
+        if stinfo.Hydration.ADD_ION:
+            ion_line: str = self.__read_ion(num_ions)  # info in the ion file
+            df_ions: pd.DataFrame  # All the needed ions
+            df_ions = self.__mk_ion_df(ion_line, list(df_i.columns), num_ions)
+            df_i["atomnr"] += num_ions
+            df_i["resnr"] += num_ions
+            df_atoms: pd.DataFrame  # Silanized system with ions
+            df_atoms = pd.concat([df_ions, df_i])
+        else:
+            df_atoms = df_i.copy()
         return df_atoms
 
     def __read_ion(self,
@@ -305,8 +308,9 @@ class WriteItp:
             header: list[str] = list(df_f.columns)
             f_w.write('[ bonds ]\n')
             f_w.write(f'; {" ".join(header)}\n')
-            df_f['ai'] += int(np.abs(num_ions))
-            df_f['aj'] += int(np.abs(num_ions))
+            if stinfo.Hydration.ADD_ION:
+                df_f['ai'] += int(np.abs(num_ions))
+                df_f['aj'] += int(np.abs(num_ions))
             df_f.to_csv(f_w,
                         header=None,
                         sep='\t',
@@ -343,9 +347,10 @@ class WriteItp:
                 df_list.append(df_i)
                 del df_i
             df_f: pd.DataFrame = pd.concat(df_list)
-            df_f['ai'] += int(np.abs(num_ions))
-            df_f['aj'] += int(np.abs(num_ions))
-            df_f['ak'] += int(np.abs(num_ions))
+            if stinfo.Hydration.ADD_ION:
+                df_f['ai'] += int(np.abs(num_ions))
+                df_f['aj'] += int(np.abs(num_ions))
+                df_f['ak'] += int(np.abs(num_ions))
             header: list[str] = list(df_f.columns)
             f_w.write('[ angles ]\n')
             f_w.write(f'; {" ".join(header)}\n')
@@ -391,8 +396,9 @@ class WriteItp:
                 df_list.append(df_i)
                 del df_i
             df_f: pd.DataFrame = pd.concat(df_list)
-            for item in (['ai', 'aj', 'ak', 'ah']):
-                df_f[item] += int(np.abs(num_ions))
+            if stinfo.Hydration.ADD_ION:
+                for item in (['ai', 'aj', 'ak', 'ah']):
+                    df_f[item] += int(np.abs(num_ions))
             header: list[str] = list(df_f.columns)
             f_w.write('[ dihedrals ]\n')
             f_w.write(f'; {" ".join(header)}\n')
