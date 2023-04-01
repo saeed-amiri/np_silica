@@ -1,7 +1,10 @@
 """All the constant values use in the silanization"""
 
 import typing
+import os
 
+SOURCE_DIR: str  # SOURCE OF THE DATA FILES
+SOURCE_DIR = '/scratch/saeed/MyScripts/np_silica/data'
 
 class AtomMass:
     """atmoic masses of the particles"""
@@ -84,7 +87,7 @@ class AtomGroup:
 
 class DataFile:
     """Get data directory which are used in the script"""
-    APTES: str = '/scratch/saeed/MyScripts/np_silica/data/aminopropyl_pro.data'
+    APTES: str = os.path.join(SOURCE_DIR, 'aminopropyl_pro.data')
     SI_DF: str = 'SI_DF'  # File with selected info of si atom in adding APTES
     SI_XYZ: str = 'SI_XYZ'  # File with  info of si atom in adding APTES
     
@@ -115,13 +118,14 @@ class Hydration:
                                 'C': 12.011,
                                 'N': 14.0067}
     # PACKMOL files
-    WATER_PDB: str = '/scratch/saeed/MyScripts/np_silica/data/water.pdb'
-    ODAP_PDB: str = '/scratch/saeed/MyScripts/np_silica/data/ODAp.pdb'
-    NA_PDB: str = '/scratch/saeed/MyScripts/np_silica/data/Na.pdb'
-    CL_PDB: str = '/scratch/saeed/MyScripts/np_silica/data/Cl.pdb'
+    WATER_PDB: str = os.path.join(SOURCE_DIR, 'water.pdb')
+    ODAP_PDB: str = os.path.join(SOURCE_DIR, 'ODAp.pdb')
+    NA_PDB: str = os.path.join(SOURCE_DIR, 'Na.pdb')
+    CL_PDB: str = os.path.join(SOURCE_DIR, 'Cl.pdb')
     ADD_ION: bool = False  # if True it will add the ion to the itp file
-    NA_ITP: str = '/scratch/saeed/MyScripts/np_silica/data/Na.itp'
-    CL_ITP: str = '/scratch/saeed/MyScripts/np_silica/data/Cl.itp'
+    NA_ITP: str = os.path.join(SOURCE_DIR, 'Na.itp')
+    CL_ITP: str = os.path.join(SOURCE_DIR, 'Cl.itp')
+    ODAP_ITP: str = os.path.join(SOURCE_DIR, 'ODAp.itp')
     INP_FILE: str = 'water_box.inp'
     OUT_FILE: str = 'water_box.pdb'
     WS_INP: str = 'water_silica.inp'  # Input for final water & silanized file
@@ -129,6 +133,7 @@ class Hydration:
     # PACKMOL lib
     PACKMOL: str = '/home/saeed/Downloads/packmol/packmol'
     # Number or concentration of ODAP and ODA (in case later wanted)
+    # It is used in the write_water and lmp_itp_pdb
     N_ODAP: int = 16
 
 class PosRes:
@@ -148,7 +153,7 @@ class PdbMass:
     silica_residue: str = 'SIL'  # Name of the residue for the silica NP
     core_residue: str = 'COR'  # Name of the residue to apply the restraints
     aptes_residue: str = 'APT'  # Name of the residue for the APTES
-    odap_residue: str = 'ODP'  # Name of the protenated ODA
+    odap_residue: str = 'ODA'  # Name of the protenated ODA
     HO: dict[str, typing.Any] = {'Atoms_names': 'HO',
                                  'Residue': silica_residue,
                                  'Element_symbol': 'H',
