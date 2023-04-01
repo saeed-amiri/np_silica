@@ -354,7 +354,7 @@ class GetWaterDf:
         i_row: dict[str, typing.Any]  # Row per atom type
         row_list: list[dict[str, typing.Any]] = []  # All the row to convert
         for item in atom_names:
-            name = re.sub('[1-9]', '', item)
+            name = re.sub(r'\d+$', '', item)
             if name not in row_list:
                 try:
                     i_type = \
@@ -369,8 +369,10 @@ class GetWaterDf:
                 except KeyError:
                     sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}: '
                              f'({self.__module__})\n'
-                             f'\tError! Informaton for `{name}` cannot not be '
-                             f'found in `static_info` module\n{bcolors.ENDC}')
+                             f'\tError! Informaton (mass) for `{name}` cannot'
+                             f' be found in `{stinfo.Hydration.__name__}`'
+                             f' class in `static_info` module\n'
+                             f'{bcolors.ENDC}')
         df_m = pd.DataFrame(row_list)
         return df_m
 
