@@ -6,6 +6,7 @@ import os
 SOURCE_DIR: str  # SOURCE OF THE DATA FILES
 SOURCE_DIR = '/scratch/saeed/MyScripts/np_silica/data'
 
+
 class AtomMass:
     """atmoic masses of the particles"""
     HO: float = 1.0080
@@ -90,12 +91,16 @@ class DataFile:
     APTES: str = os.path.join(SOURCE_DIR, 'aminopropyl_pro.data')
     SI_DF: str = 'SI_DF'  # File with selected info of si atom in adding APTES
     SI_XYZ: str = 'SI_XYZ'  # File with  info of si atom in adding APTES
-    
+
 
 class Hydration:
     """set all the info for water box
     Limitation for the box are added to the maximum radius of the NP"""
     TOLERANCE: float = 2.0
+    # Contact angle, it defeins how much of the nanoparticle should be
+    # in the oil phase, in case there is oil phase the APTES on the oil
+    # phase are unprotonated
+    CONATCT_ANGLE: float = -1  # If negetive -> there is no oil phase
     # Box dimensions
     # x
     X_MIN: float = -20.0
@@ -122,10 +127,12 @@ class Hydration:
     ODAP_PDB: str = os.path.join(SOURCE_DIR, 'ODAp.pdb')
     NA_PDB: str = os.path.join(SOURCE_DIR, 'Na.pdb')
     CL_PDB: str = os.path.join(SOURCE_DIR, 'Cl.pdb')
+    D10_PDB: str = os.path.join(SOURCE_DIR, 'D10.pdb')
     ADD_ION: bool = False  # if True it will add the ion to the itp file
     NA_ITP: str = os.path.join(SOURCE_DIR, 'Na.itp')
     CL_ITP: str = os.path.join(SOURCE_DIR, 'Cl.itp')
     ODAP_ITP: str = os.path.join(SOURCE_DIR, 'ODAp.itp')
+    D10_ITP: str = os.path.join(SOURCE_DIR, 'D10.itp')
     INP_FILE: str = 'water_box.inp'
     OUT_FILE: str = 'water_box.pdb'
     WS_INP: str = 'water_silica.inp'  # Input for final water & silanized file
@@ -135,6 +142,7 @@ class Hydration:
     # Number or concentration of ODAP and ODA (in case later wanted)
     # It is used in the write_water and lmp_itp_pdb
     N_ODAP: int = 16
+
 
 class PosRes:
     """write the psition restrians for atoms in the core of the silica
@@ -146,6 +154,7 @@ class PosRes:
     FX: int = 1000  # Force along x axis
     FY: int = 1000  # Force along y axis
     FZ: int = 1000  # Force along z axis
+
 
 class PdbMass:
     """information for the masses section in the output file of the
@@ -161,11 +170,11 @@ class PdbMass:
                                  'ff_type': 'opls_428'
                                  }
     H: dict[str, typing.Any] = {'Atoms_names': 'H',
-                                 'Residue': odap_residue,
-                                 'Element_symbol': 'H',
-                                 'RECORD': 'ATOM',
-                                 'ff_type': 'opls_140'
-                                 }
+                                'Residue': odap_residue,
+                                'Element_symbol': 'H',
+                                'RECORD': 'ATOM',
+                                'ff_type': 'opls_140'
+                                }
     OB: dict[str, typing.Any] = {'Atoms_names': 'OB',
                                  'Residue': silica_residue,
                                  'Element_symbol': 'O',
@@ -227,11 +236,11 @@ class PdbMass:
                                  'ff_type': 'opls_135'
                                  }
     C: dict[str, typing.Any] = {'Atoms_names': 'C',
-                                 'Residue': odap_residue,
-                                 'Element_symbol': 'C',
-                                 'RECORD': 'ATOM',
-                                 'ff_type': 'opls_135'
-                                 }
+                                'Residue': odap_residue,
+                                'Element_symbol': 'C',
+                                'RECORD': 'ATOM',
+                                'ff_type': 'opls_135'
+                                }
     HC: dict[str, typing.Any] = {'Atoms_names': 'HC',
                                  'Residue': aptes_residue,
                                  'Element_symbol': 'H',
@@ -267,7 +276,6 @@ class PdbMass:
                                                'C': C
                                                }
     MOLECULES: dict[str, typing.Any]  # Contains all the molecules' atoms info
-
 
 
 class BoAnDi:
