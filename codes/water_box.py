@@ -191,7 +191,7 @@ class InFile:
 
     def __write_odap(self,
                      f_out: typing.IO,  # The file to write into it
-                     num_odap: int,  # Number of the ODAP moles 
+                     num_odap: int,  # Number of the ODAP moles
                      radius: float  # Radius of the nanoparticle
                      ) -> None:
         """write the ODAP section in the inp file"""
@@ -274,12 +274,16 @@ class InFile:
                        num_odap: int  # Number of ODAp molecuels, each with +1
                        ) -> tuple[int, int]:
         """return the number of ions, with sign"""
-        charge_floor: float = np.floor(np.abs(net_charge)) + num_odap
-        num_ions: int = int(np.sign(net_charge)*charge_floor)
+        charge_floor: float = np.floor(np.abs(net_charge))
+        num_ions: int = int(np.sign(net_charge)*charge_floor) + num_odap
         if charge_floor != np.abs(net_charge):
             print(f'{bcolors.CAUTION}{self.__class__.__name__}" '
                   f'({self.__module__}):\n'
                   f'\tNet charge is not a complete number! "{net_charge}"\n'
+                  f'{bcolors.ENDC}')
+        if num_ions > 0:
+            print(f'{bcolors.CAUTION}'
+                  f'\tTotal charge of the system is {charge_floor}\n'
                   f'\tNumber of ODAP is set to `{num_odap}` with total '
                   f'charge of `{num_odap}`\n'
                   f'\tThe number of ions is set to "{num_ions}"'
