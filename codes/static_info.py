@@ -89,7 +89,6 @@ class DataFile:
     SI_XYZ: str = 'SI_XYZ'  # File with  info of si atom in adding APTES
     
 
-
 class Hydration:
     """set all the info for water box
     Limitation for the box are added to the maximum radius of the NP"""
@@ -111,7 +110,10 @@ class Hydration:
     MASSES: dict[str, float] = {'HW': 1.0080,
                                 'OW': 15.9994,
                                 'CL': 35.453,
-                                'NA': 22.989769}
+                                'NA': 22.989769,
+                                'H': 1.00080,
+                                'C': 12.011,
+                                'N': 14.0067}
     # PACKMOL files
     WATER_PDB: str = '/scratch/saeed/MyScripts/np_silica/data/water.pdb'
     ODAP_PDB: str = '/scratch/saeed/MyScripts/np_silica/data/ODAp.pdb'
@@ -127,7 +129,7 @@ class Hydration:
     # PACKMOL lib
     PACKMOL: str = '/home/saeed/Downloads/packmol/packmol'
     # Number or concentration of ODAP and ODA (in case later wanted)
-    N_ODAP: int = 0
+    N_ODAP: int = 16
 
 class PosRes:
     """write the psition restrians for atoms in the core of the silica
@@ -146,11 +148,18 @@ class PdbMass:
     silica_residue: str = 'SIL'  # Name of the residue for the silica NP
     core_residue: str = 'COR'  # Name of the residue to apply the restraints
     aptes_residue: str = 'APT'  # Name of the residue for the APTES
+    odap_residue: str = 'ODP'  # Name of the protenated ODA
     HO: dict[str, typing.Any] = {'Atoms_names': 'HO',
                                  'Residue': silica_residue,
                                  'Element_symbol': 'H',
                                  'RECORD': 'ATOM',
                                  'ff_type': 'opls_428'
+                                 }
+    H: dict[str, typing.Any] = {'Atoms_names': 'H',
+                                 'Residue': odap_residue,
+                                 'Element_symbol': 'H',
+                                 'RECORD': 'ATOM',
+                                 'ff_type': 'opls_140'
                                  }
     OB: dict[str, typing.Any] = {'Atoms_names': 'OB',
                                  'Residue': silica_residue,
@@ -212,6 +221,12 @@ class PdbMass:
                                  'RECORD': 'ATOM',
                                  'ff_type': 'opls_135'
                                  }
+    C: dict[str, typing.Any] = {'Atoms_names': 'C',
+                                 'Residue': odap_residue,
+                                 'Element_symbol': 'C',
+                                 'RECORD': 'ATOM',
+                                 'ff_type': 'opls_135'
+                                 }
     HC: dict[str, typing.Any] = {'Atoms_names': 'HC',
                                  'Residue': aptes_residue,
                                  'Element_symbol': 'H',
@@ -244,7 +259,10 @@ class PdbMass:
                                                'HC': HC,
                                                'CN': CN,
                                                'HN': HN,
+                                               'C': C
                                                }
+    MOLECULES: dict[str, typing.Any]  # Contains all the molecules' atoms info
+
 
 
 class BoAnDi:
