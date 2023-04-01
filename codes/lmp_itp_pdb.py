@@ -5,7 +5,9 @@ The input is the LAMMPS data file:
     force filed file in GROMACS
 """
 
+import os
 import sys
+import shutil
 import typing
 import numpy as np
 import pandas as pd
@@ -119,7 +121,7 @@ class WriteItp:
         fout = rename_file(itp_mols_name, 'itp')
         print(f'{bcolors.OKBLUE}{self.__class__.__name__}: '
               f'({self.__module__})\n'
-              f'\tITP file is `{fout}`{bcolors.ENDC}\n')
+              f'\tITP file is `{fout}`{bcolors.ENDC}')
         with open(fout, 'w', encoding="utf8") as f_w:
             f_w.write('; input pdb SMILES:\n')
             f_w.write('\n')
@@ -479,6 +481,7 @@ class Call:
                  ) -> None:
         self.pdb_file: str  # Name of the output pdb file
         self.write_itpdb(fname, num_ions)
+        self.other_itps()
         self.print_info()
 
     def write_itpdb(self,
@@ -493,14 +496,33 @@ class Call:
         itp = lmpitp.Itp(lmp, pdb.pdb_df)
         WriteItp(itp, num_ions)
 
+    def other_itps(self) -> None:
+        """To copy the source ITP files for other residues not involved
+        in silanization."""
+        if stinfo.Hydration.N_ODAP > 0:
+            self.copy_itps(stinfo.Hydration.ODAP_ITP)
+
+    def copy_itps(self,
+                  file_in_src: str  # Name of the file to make copy of in cwd
+                  ) -> None:
+        """check and copy other needed ITP files from source to current
+        working directory"""
+        dist_cwd: str  # Current working directory as the distenation
+        dist_cwd = os.getcwd()
+        itp_fname: str = os.path.basename(file_in_src)
+        file_in_dist: str = os.path.join(dist_cwd, itp_fname)
+        if os.path.exists(file_in_dist):
+            os.remove(file_in_dist)
+            print(f'{bcolors.WARNING}\tThe `ITP` file: `{itp_fname}`'
+                  f' already exsit, it is removed{bcolors.ENDC}')
+        shutil.copy(file_in_src, dist_cwd)
+        print(f'{bcolors.OKBLUE}\tITP file `{itp_fname}` is copied '
+              f'to the cwd{bcolors.ENDC}')
+
     def print_info(self) -> None:
         """to subpress pylint"""
 
 
 if __name__ == '__main__':
     lmpf_name: str = sys.argv[1]  # Input file name
-    lmp_out: relmp.ReadData = relmp.ReadData(lmpf_name)  # All data in input
-    pdb_out = lmpdb.Pdb(lmp_out.Masses_df, lmp_out.Atoms_df)
-    pdb_w = WritePdb(pdb_out.pdb_df, lmpf_name)
-    itp_i = lmpitp.Itp(lmp_out, pdb_out.pdb_df)
-    itp_w = WriteItp(itp_i, num_ions=147)
+    call = Call(lmpf_name, num_ions=147)
