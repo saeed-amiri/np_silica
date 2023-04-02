@@ -10,16 +10,6 @@ import sys
 import numpy as np
 import static_info as stinfo
 from colors_text import TextColor as bcolors
-from pprint import pprint
-
-
-def set_oil_depth(radius: float  # Radius of the nanoparticle
-                  ) -> float:
-    """calculate and return the the depth of oil phase `h` in system
-    box"""
-    angle_rad: float  # Contact angle in radian
-    angle_rad = np.radians(stinfo.Hydration.CONATCT_ANGLE)
-    return radius * np.tan(angle_rad/2)
 
 
 class BoxEdges:
@@ -65,7 +55,6 @@ class NumMols:
                                   'y_lim': 0.0,
                                   'z_lim': 0.0}}
         self.get_numbers(radius, net_charge)
-        pprint(self.moles_nums)
 
     def get_numbers(self,
                     radius: float,  # Radius of the silanized nanoparticle
@@ -80,11 +69,10 @@ class NumMols:
         if stinfo.Hydration.CONATCT_ANGLE < 0:
             self.__pure_water_system(box_volume)
         else:
-            self.__oil_water_system(box_volume, radius)
+            self.__oil_water_system(radius)
             self.moles_nums['odn'] = self.__get_odn_num()
 
     def __oil_water_system(self,
-                           box_volume: float,  # The volume of the system's box
                            radius: float  # Radius of the silanized NP
                            ) -> None:
         """set the data for the system with oil and water"""
@@ -98,6 +86,7 @@ class NumMols:
         oil_volume: float = self.__get_ow_volumes(
             self.box_edges['oil'].copy())
         self.moles_nums['sol'] = self.__get_sol_num(water_volume)
+        self.moles_nums['oil'] = self.__get_oil_num(oil_volume)
 
     def __get_ow_volumes(self,
                          edges: dict[str, float]  # Edges of the section
@@ -110,7 +99,7 @@ class NumMols:
                               ) -> None:
         """set the edges of the box for water and oil system"""
         oil_depth: float  # Depth of the oil phase in the system box
-        oil_depth = set_oil_depth(radius)
+        oil_depth = self.set_oil_depth(radius)
         self.box_edges['sol'] = self.box_edges['box'].copy()
         self.box_edges['oil'] = self.box_edges['box'].copy()
         self.box_edges['sol']['z_lim'] -= oil_depth
@@ -158,6 +147,20 @@ class NumMols:
               f'"{sol_moles}"{bcolors.ENDC}')
         return sol_moles
 
+    def __get_oil_num(self,
+                      volume: float  # Volume that contains water (SOL)
+                      ) -> int:
+        """calculate the number of the oil molecules int the volume"""
+        lit_m3: float = 1e-24  # convert units
+        m_oil: float  # Mass of the oil in the volume
+        m_oil = volume * stinfo.Hydration.OIL_DENSITY * lit_m3
+        oil_moles: float
+        oil_moles = int(m_oil * stinfo.Hydration.AVOGADRO /
+                        stinfo.Hydration.OIL_MOLAR_MASS) + 1
+        print(f'{bcolors.OKCYAN}\tThe number oil molecules is '
+              f'"{oil_moles}"{bcolors.ENDC}')
+        return oil_moles
+
     def __get_odap_num(self) -> int:
         """calculate the number of oda based on the concentration"""
         oda_moles: int  # Number of oda molecules in the system
@@ -173,8 +176,8 @@ class NumMols:
         odn_moles: int  # Number of oda molecules in the system
         # I will add the calculation later, but for now:
         odn_moles = stinfo.Hydration.N_ODN
-        print(f'{bcolors.OKCYAN}\tNumber of ODA (unprotonated) is set to '
-              f'"{odn_moles}" with total charge of `{odn_moles}`'
+        print(f'{bcolors.OKCYAN}\tNumber of ODN (unprotonated ODA) is '
+              f'set to "{odn_moles}" with total charge of `{odn_moles}`'
               f'{bcolors.ENDC}')
         return odn_moles
 
@@ -224,6 +227,15 @@ class NumMols:
                      f'valume, it is "{sphere_volume:.3f}"'
                      f'{bcolors.ENDC}')
         return sphere_volume
+
+    def set_oil_depth(self,
+                      radius: float  # Radius of the nanoparticle
+                      ) -> float:
+        """calculate and return the the depth of oil phase `h` in system
+        box"""
+        angle_rad: float  # Contact angle in radian
+        angle_rad = np.radians(stinfo.Hydration.CONATCT_ANGLE)
+        return radius * np.tan(angle_rad/2)
 
 
 if __name__ == '__main__':
