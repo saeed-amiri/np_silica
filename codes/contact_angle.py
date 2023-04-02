@@ -234,8 +234,8 @@ class BoxEdges:
                  num_mols: NumMols  # Number of each molecule or ion
                  ) -> None:
         self.radius: float = radius  # To have it as attribute for later use
-        self.water_axis: dict[str, float] = {}
-        self.oil_axis: dict[str, float] = {}
+        self.water_axis: dict[str, float] = {}  # Limitation of the water part
+        self.oil_axis: dict[str, float] = {}  # Limitation of the oil part
         self.get_sections_edge(num_mols)
         self.print_info()
 
@@ -255,16 +255,17 @@ class BoxEdges:
         """set limtations for the z axis in both water and oil"""
         z_w_lo: float  # Low limit water's section
         z_w_hi: float  # High limit water's section
-        z_o_lo: float  # Low limit of the oil section
-        z_o_hi: float  # High limit water's section
         z_w_lo = - num_mols.box_edges['box'].copy()['z_lim'] / 2
         z_w_hi = num_mols.box_edges['sol'].copy()['z_lim'] + z_w_lo
-        z_o_lo = z_w_hi + stinfo.Hydration.TOLERANCE
-        z_o_hi = - z_w_lo + stinfo.Hydration.TOLERANCE
         self.water_axis['z_lo'] = z_w_lo
         self.water_axis['z_hi'] = z_w_hi
-        self.oil_axis['z_lo'] = z_o_lo
-        self.oil_axis['z_hi'] = z_o_hi
+        if stinfo.Hydration.CONATCT_ANGLE > 0:
+            z_o_lo: float  # Low limit of the oil section
+            z_o_hi: float  # High limit water's section
+            z_o_lo = z_w_hi + stinfo.Hydration.TOLERANCE
+            z_o_hi = - z_w_lo + stinfo.Hydration.TOLERANCE
+            self.oil_axis['z_lo'] = z_o_lo
+            self.oil_axis['z_hi'] = z_o_hi
 
     def __set_xy_lims(self,
                       x_lo: float,  # Low limit of system box in x direction
@@ -275,10 +276,11 @@ class BoxEdges:
         self.water_axis['x_hi'] = -x_lo
         self.water_axis['y_lo'] = y_lo
         self.water_axis['y_hi'] = -y_lo
-        self.oil_axis['x_lo'] = x_lo
-        self.oil_axis['x_hi'] = -x_lo
-        self.oil_axis['y_lo'] = y_lo
-        self.oil_axis['y_hi'] = -y_lo
+        if stinfo.Hydration.CONATCT_ANGLE > 0:
+            self.oil_axis['x_lo'] = x_lo
+            self.oil_axis['x_hi'] = -x_lo
+            self.oil_axis['y_lo'] = y_lo
+            self.oil_axis['y_hi'] = -y_lo
 
     def __get_xy_lims(self,
                       num_mols: NumMols  # Number of each molecule or ion
