@@ -231,7 +231,7 @@ class NumMols:
         return sphere_volume
 
     def set_oil_depth(self,
-                      radius: float  # Radius of the nanoparticle
+                      radius: float  # Radius of the NP after silanization
                       ) -> float:
         """calculate and return the the depth of oil phase `h` in system
         box"""
