@@ -100,7 +100,7 @@ class Hydration:
     # Contact angle, it defeins how much of the nanoparticle should be
     # in the oil phase, in case there is oil phase the APTES on the oil
     # phase are unprotonated
-    CONATCT_ANGLE: float = -1  # In degree; If negetive -> no oil phase
+    CONATCT_ANGLE: float = 90  # In degree; If negetive -> no oil phase
     # Box dimensions
     # x
     X_MIN: float = -20.0
@@ -113,8 +113,10 @@ class Hydration:
     Z_MAX: float = 20.0
     # Constants
     WATER_DENSITY = 0.9998395  # g/ml
-    AVOGADRO: float = 6.0221408e+23  # 1/mol
     WATER_MOLAR_MASS: float = 18.01528  # g/mol
+    OIL_DENSITY = 0.730  # g/ml for Decane (D10)
+    OIL_MOLAR_MASS: float = 142.286  # g/mol for Decane (D10)
+    AVOGADRO: float = 6.0221408e+23  # 1/mol
     MASSES: dict[str, float] = {'HW': 1.0080,
                                 'OW': 15.9994,
                                 'CL': 35.453,
