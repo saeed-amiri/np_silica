@@ -45,12 +45,16 @@ class NumMols:
                  radius: float,  # Radius of the silanized nanoparticle (NP)
                  net_charge: float  # Charge of the silanized NP with sign!
                  ) -> None:
-        self.sol_num: int  # Number of water molecules
-        self.d10_num: int  # Number of decane molecules
-        self.oda_num: int  # Number of ODAp molecules
-        self.odn_num: int  # Number of ODA molecules
-        self.ion_num: int  # Number of ion atoms with sign!
-        self.cube_edge: float  # Edge of the cube that inscribed the NP
+        self.moles_nums: dict[str, int]  # All the needed moles and atoms
+        self.moles_nums = {'sol': 0,
+                           'd10': 0,
+                           'oda': 0,
+                           'odn': 0,
+                           'ion': 0
+                           }
+        self.cube_edges: dict[str, float]  # Edges of the system's box
+        self.sol_edges: dict[str, float]   # Edges of the water's section
+        self.d10_edges: dict[str, float]   # Edges of the decane's section
         self.get_numbers(radius, net_charge)
 
     def get_numbers(self,
@@ -60,6 +64,21 @@ class NumMols:
         """clculate the numbers of each moles if asked"""
         box_volume: float  # Volume of the final system's box
         box_volume = self.__box_volumes(radius)
+        if stinfo.Hydration.CONATCT_ANGLE < 0:
+            self.moles_nums['d10'] = 0  # No oil in the system
+            self.moles_nums['sol'] = self.__get_sol_num(box_volume)
+
+    def __get_sol_num(self,
+                      volume: float  # Volume that contains water (SOL)
+                      ) -> int:
+        """calculate the number of the water molecules int the volume"""
+        lit_m3: float = 1e-24  # convert units
+        m_water: float  # Mass of the water in the volume
+        m_water = volume * stinfo.Hydration.WATER_DENSITY * lit_m3
+        num_moles: float
+        num_moles = int(m_water * stinfo.Hydration.AVOGADRO /
+                        stinfo.Hydration.WATER_MOLAR_MASS) + 1
+        return num_moles
 
     def __box_volumes(self,
                       radius: float  # Radius of the silanized nanoparticle
@@ -67,18 +86,19 @@ class NumMols:
         sphere_volume: float  # Volume of the sphere (NP apprx. with sphere)
         box_volume: float  # Volume of the final system's box
         sphere_volume = self.__get_sphere_volume(radius)
-        self.cube_edge, box_volume = self.__get_box_volume(sphere_volume)
+        self.cube_edges, box_volume = self.__get_box_volume(sphere_volume)
         return box_volume
 
     def __get_box_volume(self,
                          sphere_volume: float  # Volume of the sphere
-                         ) -> tuple[float, float]:
+                         ) -> tuple[dict[str, float], float]:
         """calculate the volume of the box including sphere's area
         For the largest possible sphere is inscribed in cube, the ratio
         of volumes is: V_sphere/V_cube = pi/6"""
         v_inscribed_box: float = 6*sphere_volume/np.pi
         cube_edge: float  # Edge of the cube that inscribed the sphere
         cube_edge = v_inscribed_box**(1/3)
+        cube_edges: dict[str, float]  # Edges of the system box
         x_lim: float = (stinfo.Hydration.X_MAX -
                         stinfo.Hydration.X_MIN) + cube_edge
         y_lim: float = (stinfo.Hydration.Y_MAX -
@@ -86,12 +106,13 @@ class NumMols:
         z_lim: float = (stinfo.Hydration.Z_MAX -
                         stinfo.Hydration.Z_MIN) + cube_edge
         box_volume: float = x_lim*y_lim*z_lim
+        cube_edges = {'x_lim': x_lim, 'y_lim': y_lim, 'z_lim': z_lim}
         if box_volume <= 0:
             sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}:\n'
                      f'\tZero volume, there in problem in setting box '
                      f'limitaion, box_volume is "{box_volume:.3f}"'
                      f'{bcolors.ENDC}')
-        return cube_edge, box_volume
+        return cube_edges, box_volume
 
     def __get_sphere_volume(self,
                             radius: float  # Radius of the NP after silanizatio
