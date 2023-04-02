@@ -100,7 +100,7 @@ class Hydration:
     # Contact angle, it defeins how much of the nanoparticle should be
     # in the oil phase, in case there is oil phase the APTES on the oil
     # phase are unprotonated
-    CONATCT_ANGLE: float = -1  # If negetive -> there is no oil phase
+    CONATCT_ANGLE: float = -1  # In degree; If negetive -> no oil phase
     # Box dimensions
     # x
     X_MIN: float = -20.0
@@ -139,9 +139,10 @@ class Hydration:
     GRO_PDB: str = 'silica_water.pdb'  # File for GROMACS input
     # PACKMOL lib
     PACKMOL: str = '/home/saeed/Downloads/packmol/packmol'
-    # Number or concentration of ODAP and ODA (in case later wanted)
+    # Number or concentration of ODAP and ODN (in case later wanted)
     # It is used in the write_water and lmp_itp_pdb
-    N_ODAP: int = 16
+    N_ODAP: int = 16  # Protonated ODA
+    N_ODN: int = 0  # Unprotonated ODA
 
 
 class PosRes:
