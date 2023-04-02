@@ -46,15 +46,22 @@ class NumMols:
                  net_charge: float  # Charge of the silanized NP with sign!
                  ) -> None:
         self.moles_nums: dict[str, int]  # All the needed moles and atoms
-        self.moles_nums = {'sol': 0,
-                           'd10': 0,
-                           'oda': 0,
-                           'odn': 0,
-                           'ion': 0
+        self.moles_nums = {'sol': 0,  # Number of water molecues in the system
+                           'd10': 0,  # Number of decane molecues in the system
+                           'oda': 0,  # Number of ODAp molecues in the system
+                           'odn': 0,  # Number of ODA molecues in the system
+                           'ion': 0  # Number of ION atoms in the system
                            }
-        self.cube_edges: dict[str, float]  # Edges of the system's box
-        self.sol_edges: dict[str, float]   # Edges of the water's section
-        self.d10_edges: dict[str, float]   # Edges of the decane's section
+        self.box_edges: dict[str, dict[str, float]]  # Edges of system's box
+        self.box_edges = {'box': {'x_lim': 0.0,  # System's box
+                                  'y_lim': 0.0,
+                                  'z_lim': 0.0},
+                          'sol': {'x_lim': 0.0,  # Water's section
+                                  'y_lim': 0.0,
+                                  'z_lim': 0.0},
+                          'd10': {'x_lim': 0.0,  # Decane's section
+                                  'y_lim': 0.0,
+                                  'z_lim': 0.0}}
         self.get_numbers(radius, net_charge)
 
     def get_numbers(self,
@@ -86,7 +93,8 @@ class NumMols:
         sphere_volume: float  # Volume of the sphere (NP apprx. with sphere)
         box_volume: float  # Volume of the final system's box
         sphere_volume = self.__get_sphere_volume(radius)
-        self.cube_edges, box_volume = self.__get_box_volume(sphere_volume)
+        self.box_edges['box'], box_volume = \
+            self.__get_box_volume(sphere_volume)
         return box_volume
 
     def __get_box_volume(self,
@@ -98,7 +106,7 @@ class NumMols:
         v_inscribed_box: float = 6*sphere_volume/np.pi
         cube_edge: float  # Edge of the cube that inscribed the sphere
         cube_edge = v_inscribed_box**(1/3)
-        cube_edges: dict[str, float]  # Edges of the system box
+        box_edges: dict[str, float]  # Edges of the system box
         x_lim: float = (stinfo.Hydration.X_MAX -
                         stinfo.Hydration.X_MIN) + cube_edge
         y_lim: float = (stinfo.Hydration.Y_MAX -
@@ -106,13 +114,13 @@ class NumMols:
         z_lim: float = (stinfo.Hydration.Z_MAX -
                         stinfo.Hydration.Z_MIN) + cube_edge
         box_volume: float = x_lim*y_lim*z_lim
-        cube_edges = {'x_lim': x_lim, 'y_lim': y_lim, 'z_lim': z_lim}
+        box_edges = {'x_lim': x_lim, 'y_lim': y_lim, 'z_lim': z_lim}
         if box_volume <= 0:
             sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}:\n'
                      f'\tZero volume, there in problem in setting box '
                      f'limitaion, box_volume is "{box_volume:.3f}"'
                      f'{bcolors.ENDC}')
-        return cube_edges, box_volume
+        return box_edges, box_volume
 
     def __get_sphere_volume(self,
                             radius: float  # Radius of the NP after silanizatio
