@@ -85,8 +85,16 @@ class NumMols:
             self.box_edges['sol'].copy())
         oil_volume: float = self.__get_ow_volumes(
             self.box_edges['oil'].copy())
-        self.moles_nums['sol'] = self.__get_sol_num(water_volume)
-        self.moles_nums['oil'] = self.__get_oil_num(oil_volume)
+        self.moles_nums['sol'] = \
+            self.__solution_mol_num(water_volume,
+                                    stinfo.Hydration.WATER_DENSITY,
+                                    stinfo.Hydration.WATER_MOLAR_MASS,
+                                    'water')
+        self.moles_nums['oil'] = \
+            self.__solution_mol_num(oil_volume,
+                                    stinfo.Hydration.OIL_DENSITY,
+                                    stinfo.Hydration.OIL_MOLAR_MASS,
+                                    'oil')
 
     def __get_ow_volumes(self,
                          edges: dict[str, float]  # Edges of the section
@@ -111,7 +119,11 @@ class NumMols:
         """set the data for system with pure water"""
         self.moles_nums['oil'] = 0  # No oil in the system
         self.moles_nums['odn'] = 0  # ODA must be protonated
-        self.moles_nums['sol'] = self.__get_sol_num(box_volume)
+        self.moles_nums['sol'] = \
+            self.__solution_mol_num(box_volume,
+                                    stinfo.Hydration.WATER_DENSITY,
+                                    stinfo.Hydration.WATER_MOLAR_MASS,
+                                    'water')
         self.box_edges['sol'] = self.box_edges['box']
 
     def __get_ion_num(self,
@@ -133,40 +145,30 @@ class NumMols:
                   f'{bcolors.ENDC}')
         return num_ions
 
-    def __get_sol_num(self,
-                      volume: float  # Volume that contains water (SOL)
-                      ) -> int:
+    def __solution_mol_num(self,
+                           volume: float,  # Volume of the system
+                           density: float,  # Density of the soultion
+                           molar_mass: float,  # Self explanetory
+                           sys_name: str  # Name of the section
+                           ) -> int:
         """calculate the number of the water molecules int the volume"""
         lit_m3: float = 1e-24  # convert units
         m_water: float  # Mass of the water in the volume
-        m_water = volume * stinfo.Hydration.WATER_DENSITY * lit_m3
+        m_water = volume * density * lit_m3
         sol_moles: float
         sol_moles = int(m_water * stinfo.Hydration.AVOGADRO /
-                        stinfo.Hydration.WATER_MOLAR_MASS) + 1
-        print(f'{bcolors.OKCYAN}\tThe number water molecules is '
+                        molar_mass) + 1
+        print(f'{bcolors.OKCYAN}\tThe number {sys_name} molecules is '
               f'"{sol_moles}"{bcolors.ENDC}')
         return sol_moles
-
-    def __get_oil_num(self,
-                      volume: float  # Volume that contains water (SOL)
-                      ) -> int:
-        """calculate the number of the oil molecules int the volume"""
-        lit_m3: float = 1e-24  # convert units
-        m_oil: float  # Mass of the oil in the volume
-        m_oil = volume * stinfo.Hydration.OIL_DENSITY * lit_m3
-        oil_moles: float
-        oil_moles = int(m_oil * stinfo.Hydration.AVOGADRO /
-                        stinfo.Hydration.OIL_MOLAR_MASS) + 1
-        print(f'{bcolors.OKCYAN}\tThe number oil molecules is '
-              f'"{oil_moles}"{bcolors.ENDC}')
-        return oil_moles
 
     def __get_odap_num(self) -> int:
         """calculate the number of oda based on the concentration"""
         oda_moles: int  # Number of oda molecules in the system
         # I will add the calculation later, but for now:
         oda_moles = stinfo.Hydration.N_ODAP
-        print(f'{bcolors.OKCYAN}\tNumber of ODAP is set to '
+        print(f'{bcolors.OKCYAN}{self.__class__.__name__}:'
+              f' ({self.__module__})\n\tNumber of ODAP is set to '
               f'"{oda_moles}" with total charge of `{oda_moles}`'
               f'{bcolors.ENDC}')
         return oda_moles
