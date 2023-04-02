@@ -71,7 +71,9 @@ class NumMols:
         """clculate the numbers of each moles if asked"""
         box_volume: float  # Volume of the final system's box
         box_volume = self.__box_volumes(radius)
-        self.moles_nums['ion'] = self.__get_num_ions(net_charge)
+        # num_oda must be set before num_ioins!
+        self.moles_nums['oda'] = self.__get_odap_num()
+        self.moles_nums['ion'] = self.__get_ion_num(net_charge)
         if stinfo.Hydration.CONATCT_ANGLE < 0:
             self.__pure_water(box_volume)
 
@@ -85,9 +87,9 @@ class NumMols:
         self.moles_nums['oda'] = stinfo.Hydration.N_ODAP
         self.box_edges['sol'] = self.box_edges['box']
 
-    def __get_num_ions(self,
-                       net_charge: float,  # Net charge of the NP
-                       ) -> int:
+    def __get_ion_num(self,
+                      net_charge: float,  # Net charge of the NP
+                      ) -> int:
         """return the number of ions, with sign"""
         num_odap: int = self.moles_nums['oda']  # Number of ODAp
         charge_floor: float = np.floor(np.abs(net_charge))
@@ -100,8 +102,6 @@ class NumMols:
         if num_ions > 0:
             print(f'{bcolors.CAUTION}'
                   f'\tTotal charge of the system is `{charge_floor}`\n'
-                  f'\tNumber of ODAP is set to `{num_odap}` with total '
-                  f'charge of `{num_odap}`\n'
                   f'\tThe number of ions is set to "{num_ions}"'
                   f'{bcolors.ENDC}')
         return num_ions
@@ -119,6 +119,16 @@ class NumMols:
         print(f'{bcolors.OKCYAN}\tThe number water molecules is '
               f'"{sol_moles}"{bcolors.ENDC}')
         return sol_moles
+
+    def __get_odap_num(self) -> int:
+        """calculate the number of oda based on the concentration"""
+        oda_moles: int  # Number of oda molecules in the system
+        # I will add the calculation later, but for now:
+        oda_moles = stinfo.Hydration.N_ODAP
+        print(f'{bcolors.OKCYAN}\tNumber of ODAP is set to '
+              f'"{oda_moles}" with total charge of `{oda_moles}`'
+              f'{bcolors.ENDC}')
+        return oda_moles
 
     def __box_volumes(self,
                       radius: float  # Radius of the silanized nanoparticle
