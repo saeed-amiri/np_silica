@@ -237,6 +237,7 @@ class BoxEdges:
         self.water_axis: dict[str, float] = {}
         self.oil_axis: dict[str, float] = {}
         self.get_sections_edge(num_mols)
+        self.print_info()
 
     def get_sections_edge(self,
                           num_mols: NumMols  # Number of each molecule or ion
@@ -288,6 +289,9 @@ class BoxEdges:
         y_lo: float  # min of the axis in the x_axis
         y_lo = - num_mols.box_edges['box'].copy()['y_lim'] / 2
         return x_lo, y_lo
+
+    def print_info(self) -> None:
+        """pylit"""
 
 
 if __name__ == '__main__':
