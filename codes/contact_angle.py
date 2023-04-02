@@ -48,7 +48,55 @@ class NumMols:
         self.oda_num: int  # Number of ODAp molecules
         self.odn_num: int  # Number of ODA molecules
         self.ion_num: int  # Number of ion atoms with sign!
+        self.cube_edge: float  # Edge of the cube that inscribed the NP
+        self.get_numbers(radius, net_charge)
+
+    def get_numbers(self,
+                    radius: float,  # Radius of the silanized nanoparticle
+                    net_charge: float  # Charge of the silanized NP with sign!
+                    ) -> None:
+        """clculate the numbers of each moles if asked"""
+        sphere_volume: float  # Volume of the sphere (NP apprx. with sphere)
+        box_volume: float  # Volume of the final system's box
+        sphere_volume = self.__get_sphere_volume(radius)
+        self.cube_edge, box_volume = self.__get_box_volume(sphere_volume)
+
+    def __get_box_volume(self,
+                         sphere_volume: float  # Volume of the sphere
+                         ) -> tuple[float, float]:
+        """calculate the volume of the box including sphere's area
+        For the largest possible sphere is inscribed in cube, the ratio
+        of volumes is: V_sphere/V_cube = pi/6"""
+        v_inscribed_box: float = 6*sphere_volume/np.pi
+        cube_edge: float  # Edge of the cube that inscribed the sphere
+        cube_edge = v_inscribed_box**(1/3)
+        x_lim: float = (stinfo.Hydration.X_MAX -
+                        stinfo.Hydration.X_MIN) + cube_edge
+        y_lim: float = (stinfo.Hydration.Y_MAX -
+                        stinfo.Hydration.Y_MIN) + cube_edge
+        z_lim: float = (stinfo.Hydration.Z_MAX -
+                        stinfo.Hydration.Z_MIN) + cube_edge
+        box_volume: float = x_lim*y_lim*z_lim
+        if box_volume <= 0:
+            sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}:\n'
+                     f'\tZero volume, there in problem in setting box '
+                     f'limitaion, box_volume is "{box_volume:.3f}"'
+                     f'{bcolors.ENDC}')
+        return cube_edge, box_volume
+
+    def __get_sphere_volume(self,
+                            radius: float  # Radius of the NP after silanizatio
+                            ) -> float:
+        """calculate the volume of the sphere for the NP"""
+        sphere_volume: float = 4*np.pi*(radius**3)/3
+        if sphere_volume <= 0:
+            sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}:\n'
+                     f'\tZero volume, there in problem in setting sphere '
+                     f'valume, it is "{sphere_volume:.3f}"'
+                     f'{bcolors.ENDC}')
+        return sphere_volume
 
 
 if __name__ == '__main__':
-    sys_box = BoxEdges(radius=25)
+    # sys_box = BoxEdges(radius=25)
+    mole_nums = NumMols(radius=25, net_charge=0)
