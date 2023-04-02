@@ -12,19 +12,6 @@ import static_info as stinfo
 from colors_text import TextColor as bcolors
 
 
-class BoxEdges:
-    """make the calculation for system box based on the contact angle"""
-    def __init__(self,
-                 radius: float  # Radius of NP after silanization
-                 ) -> None:
-        self.get_box_edges(radius)
-
-    def get_box_edges(self,
-                      radius: float  # Radius of NP after silanization
-                      ) -> None:
-        """calculate the edges of the water and oil phases"""
-
-
 class NumMols:
     """calculate the number of molecules for each of the system:
     Numbers of water molecules (In data files named as: SOL)
@@ -240,6 +227,54 @@ class NumMols:
         return radius * np.tan(angle_rad/2)
 
 
+class BoxEdges:
+    """make the calculation for system box based on the contact angle"""
+    def __init__(self,
+                 radius: float,  # Radius of NP after silanization
+                 num_mols: NumMols  # Number of each molecule or ion
+                 ) -> None:
+        self.radius: float = radius  # To have it as attribute for later use
+        self.water_axis: dict[str, float] = {}
+        self.oil_axis: dict[str, float] = {}
+        self.get_sections_edge(num_mols)
+
+    def get_sections_edge(self,
+                          num_mols: NumMols  # Number of each molecule or ion
+                          ) -> None:
+        """set the limits of axis for each sections of the system box"""
+        x_lo: float  # Low limit of the system box in x direction
+        y_lo: float  # Low limit of the system box in y direction
+        x_lo, y_lo = self.__get_xy_lims(num_mols)
+        self.__set_xy_lims(x_lo, y_lo)
+        self.__set_z_lims(num_mols)
+
+    def __set_xy_lims(self,
+                      x_lo: float,  # Low limit of system box in x direction
+                      y_lo: float  # Low limit of system box in y direction
+                      ) -> None:
+        """set limitations in x and y"""
+        self.water_axis['x_lo'] = x_lo
+        self.water_axis['x_hi'] = -x_lo
+        self.water_axis['y_lo'] = y_lo
+        self.water_axis['y_hi'] = -y_lo
+        self.oil_axis['x_lo'] = x_lo
+        self.oil_axis['x_hi'] = -x_lo
+        self.oil_axis['y_lo'] = y_lo
+        self.oil_axis['y_hi'] = -y_lo
+        print(self.oil_axis)
+
+    def __get_xy_lims(self,
+                      num_mols: NumMols  # Number of each molecule or ion
+                      ) -> tuple[float, float]:
+        """find the x and y lowe limitations of the box"""
+        x_lo: float  # min of the axis in the x_axis
+        x_lo = - num_mols.box_edges['box'].copy()['x_lim'] / 2
+        y_lo: float  # min of the axis in the x_axis
+        y_lo = - num_mols.box_edges['box'].copy()['y_lim'] / 2
+        return x_lo, y_lo
+
+
 if __name__ == '__main__':
     # sys_box = BoxEdges(radius=25)
     mole_nums = NumMols(radius=25, net_charge=10)
+    axis_limits = BoxEdges(radius=25, num_mols=mole_nums)
