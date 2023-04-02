@@ -15,7 +15,7 @@ from colors_text import TextColor as bcolors
 def oil_depth(radius: float  # Radius of the nanoparticle
               ) -> float:
     """calculate and return the the depth of oil phase `h` in water"""
-    angle_rad: float  # Angle in radian
+    angle_rad: float  # Contact angle in radian
     angle_rad = np.radians(stinfo.Hydration.CONATCT_ANGLE)
     return radius * np.tan(angle_rad/2)
 
@@ -58,10 +58,16 @@ class NumMols:
                     net_charge: float  # Charge of the silanized NP with sign!
                     ) -> None:
         """clculate the numbers of each moles if asked"""
+        self.__get_volumes(radius)
+
+    def __get_volumes(self,
+                      radius: float  # Radius of the silanized nanoparticle
+                      ) -> float:
         sphere_volume: float  # Volume of the sphere (NP apprx. with sphere)
         box_volume: float  # Volume of the final system's box
         sphere_volume = self.__get_sphere_volume(radius)
         self.cube_edge, box_volume = self.__get_box_volume(sphere_volume)
+        return box_volume
 
     def __get_box_volume(self,
                          sphere_volume: float  # Volume of the sphere
