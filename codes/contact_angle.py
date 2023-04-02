@@ -10,11 +10,13 @@ import sys
 import numpy as np
 import static_info as stinfo
 from colors_text import TextColor as bcolors
+from pprint import pprint
 
 
-def oil_depth(radius: float  # Radius of the nanoparticle
-              ) -> float:
-    """calculate and return the the depth of oil phase `h` in water"""
+def set_oil_depth(radius: float  # Radius of the nanoparticle
+                  ) -> float:
+    """calculate and return the the depth of oil phase `h` in system
+    box"""
     angle_rad: float  # Contact angle in radian
     angle_rad = np.radians(stinfo.Hydration.CONATCT_ANGLE)
     return radius * np.tan(angle_rad/2)
@@ -63,6 +65,7 @@ class NumMols:
                                   'y_lim': 0.0,
                                   'z_lim': 0.0}}
         self.get_numbers(radius, net_charge)
+        pprint(self.box_edges)
 
     def get_numbers(self,
                     radius: float,  # Radius of the silanized nanoparticle
@@ -70,23 +73,41 @@ class NumMols:
                     ) -> None:
         """clculate the numbers of each moles if asked"""
         box_volume: float  # Volume of the final system's box
-        box_volume = self.__box_volumes(radius)
-        # num_oda must be set before num_ioins!
+        box_volume = self.__box_volume(radius)
+        # !!!num_oda must be set before num_ioins!!!
         self.moles_nums['oda'] = self.__get_odap_num()
         self.moles_nums['ion'] = self.__get_ion_num(net_charge)
         if stinfo.Hydration.CONATCT_ANGLE < 0:
             self.__pure_water_system(box_volume)
         else:
+            self.__oil_water_system(box_volume, radius)
             self.moles_nums['odn'] = self.__get_odn_num()
+
+    def __oil_water_system(self,
+                           box_volume: float,  # The volume of the system's box
+                           radius: float  # Radius of the silanized NP
+                           ) -> None:
+        """set the data for the system with oil and water"""
+        self.__set_oil_water_edges(radius)
+
+    def __set_oil_water_edges(self,
+                              radius: float  # Radius of the silanized NP
+                              ) -> None:
+        """set the edges of the box for water and oil system"""
+        oil_depth: float  # Depth of the oil phase in the system box
+        oil_depth = set_oil_depth(radius)
+        self.box_edges['sol'] = self.box_edges['box'].copy()
+        self.box_edges['d10'] = self.box_edges['box'].copy()
+        self.box_edges['sol']['z_lim'] -= oil_depth
+        self.box_edges['d10']['z_lim'] = oil_depth
 
     def __pure_water_system(self,
                             box_volume: float  # The volume of the system's box
                             ) -> None:
-        """set data for system with pure water"""
+        """set the data for system with pure water"""
         self.moles_nums['d10'] = 0  # No oil in the system
         self.moles_nums['odn'] = 0  # ODA must be protonated
         self.moles_nums['sol'] = self.__get_sol_num(box_volume)
-        self.moles_nums['oda'] = stinfo.Hydration.N_ODAP
         self.box_edges['sol'] = self.box_edges['box']
 
     def __get_ion_num(self,
@@ -142,9 +163,9 @@ class NumMols:
               f'{bcolors.ENDC}')
         return odn_moles
 
-    def __box_volumes(self,
-                      radius: float  # Radius of the silanized nanoparticle
-                      ) -> float:
+    def __box_volume(self,
+                     radius: float  # Radius of the silanized nanoparticle
+                     ) -> float:
         sphere_volume: float  # Volume of the sphere (NP apprx. with sphere)
         box_volume: float  # Volume of the final system's box
         sphere_volume = self.__get_sphere_volume(radius)
