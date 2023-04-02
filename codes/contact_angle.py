@@ -38,7 +38,7 @@ class BoxEdges:
 class NumMols:
     """calculate the number of molecules for each of the system:
     Numbers of water molecules (In data files named as: SOL)
-    Number of decane molecules (In data files named as: D10)
+    Number of decane molecules (In data files named as: oil)
     Numbers of ODAP molecules (In data files named as: ODA)
     Numbers od ODA molecules (In data files named as: ODN)
     Numbers of ION atoms (In data files named as: NA or CL)
@@ -49,7 +49,7 @@ class NumMols:
                  ) -> None:
         self.moles_nums: dict[str, int]  # All the needed moles and atoms
         self.moles_nums = {'sol': 0,  # Number of water molecues in the system
-                           'd10': 0,  # Number of decane molecues in the system
+                           'oil': 0,  # Number of decane molecues in the system
                            'oda': 0,  # Number of ODAp molecues in the system
                            'odn': 0,  # Number of ODA molecues in the system
                            'ion': 0  # Number of ION atoms in the system
@@ -61,11 +61,11 @@ class NumMols:
                           'sol': {'x_lim': 0.0,  # Water's section
                                   'y_lim': 0.0,
                                   'z_lim': 0.0},
-                          'd10': {'x_lim': 0.0,  # Decane's section
+                          'oil': {'x_lim': 0.0,  # Decane's section
                                   'y_lim': 0.0,
                                   'z_lim': 0.0}}
         self.get_numbers(radius, net_charge)
-        pprint(self.box_edges)
+        pprint(self.moles_nums)
 
     def get_numbers(self,
                     radius: float,  # Radius of the silanized nanoparticle
@@ -89,6 +89,21 @@ class NumMols:
                            ) -> None:
         """set the data for the system with oil and water"""
         self.__set_oil_water_edges(radius)
+        self.__get_oil_water_numbers()
+
+    def __get_oil_water_numbers(self) -> None:
+        """set the numbers for the water and oil"""
+        water_volume: float = self.__get_ow_volumes(
+            self.box_edges['sol'].copy())
+        oil_volume: float = self.__get_ow_volumes(
+            self.box_edges['oil'].copy())
+        self.moles_nums['sol'] = self.__get_sol_num(water_volume)
+
+    def __get_ow_volumes(self,
+                         edges: dict[str, float]  # Edges of the section
+                         ) -> float:
+        """return the volume of the oil and water phases"""
+        return edges['x_lim']*edges['y_lim']*edges['z_lim']
 
     def __set_oil_water_edges(self,
                               radius: float  # Radius of the silanized NP
@@ -97,15 +112,15 @@ class NumMols:
         oil_depth: float  # Depth of the oil phase in the system box
         oil_depth = set_oil_depth(radius)
         self.box_edges['sol'] = self.box_edges['box'].copy()
-        self.box_edges['d10'] = self.box_edges['box'].copy()
+        self.box_edges['oil'] = self.box_edges['box'].copy()
         self.box_edges['sol']['z_lim'] -= oil_depth
-        self.box_edges['d10']['z_lim'] = oil_depth
+        self.box_edges['oil']['z_lim'] = oil_depth
 
     def __pure_water_system(self,
                             box_volume: float  # The volume of the system's box
                             ) -> None:
         """set the data for system with pure water"""
-        self.moles_nums['d10'] = 0  # No oil in the system
+        self.moles_nums['oil'] = 0  # No oil in the system
         self.moles_nums['odn'] = 0  # ODA must be protonated
         self.moles_nums['sol'] = self.__get_sol_num(box_volume)
         self.box_edges['sol'] = self.box_edges['box']
