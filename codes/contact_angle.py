@@ -71,9 +71,40 @@ class NumMols:
         """clculate the numbers of each moles if asked"""
         box_volume: float  # Volume of the final system's box
         box_volume = self.__box_volumes(radius)
+        self.moles_nums['ion'] = self.__get_num_ions(net_charge)
         if stinfo.Hydration.CONATCT_ANGLE < 0:
-            self.moles_nums['d10'] = 0  # No oil in the system
-            self.moles_nums['sol'] = self.__get_sol_num(box_volume)
+            self.__pure_water(box_volume)
+
+    def __pure_water(self,
+                     box_volume: float  # The total volume of the system's box
+                     ) -> None:
+        """set data for system with pure water"""
+        self.moles_nums['d10'] = 0  # No oil in the system
+        self.moles_nums['odn'] = 0  # ODA must be protonated
+        self.moles_nums['sol'] = self.__get_sol_num(box_volume)
+        self.moles_nums['oda'] = stinfo.Hydration.N_ODAP
+        self.box_edges['sol'] = self.box_edges['box']
+
+    def __get_num_ions(self,
+                       net_charge: float,  # Net charge of the NP
+                       ) -> int:
+        """return the number of ions, with sign"""
+        num_odap: int = self.moles_nums['oda']  # Number of ODAp
+        charge_floor: float = np.floor(np.abs(net_charge))
+        num_ions: int = int(np.sign(net_charge)*charge_floor) + num_odap
+        if charge_floor != np.abs(net_charge):
+            print(f'{bcolors.CAUTION}{self.__class__.__name__}" '
+                  f'({self.__module__}):\n'
+                  f'\tNet charge is not a complete number! "{net_charge}"\n'
+                  f'{bcolors.ENDC}')
+        if num_ions > 0:
+            print(f'{bcolors.CAUTION}'
+                  f'\tTotal charge of the system is `{charge_floor}`\n'
+                  f'\tNumber of ODAP is set to `{num_odap}` with total '
+                  f'charge of `{num_odap}`\n'
+                  f'\tThe number of ions is set to "{num_ions}"'
+                  f'{bcolors.ENDC}')
+        return num_ions
 
     def __get_sol_num(self,
                       volume: float  # Volume that contains water (SOL)
@@ -82,10 +113,12 @@ class NumMols:
         lit_m3: float = 1e-24  # convert units
         m_water: float  # Mass of the water in the volume
         m_water = volume * stinfo.Hydration.WATER_DENSITY * lit_m3
-        num_moles: float
-        num_moles = int(m_water * stinfo.Hydration.AVOGADRO /
+        sol_moles: float
+        sol_moles = int(m_water * stinfo.Hydration.AVOGADRO /
                         stinfo.Hydration.WATER_MOLAR_MASS) + 1
-        return num_moles
+        print(f'{bcolors.OKCYAN}\tThe number water molecules is '
+              f'"{sol_moles}"{bcolors.ENDC}')
+        return sol_moles
 
     def __box_volumes(self,
                       radius: float  # Radius of the silanized nanoparticle
@@ -137,4 +170,4 @@ class NumMols:
 
 if __name__ == '__main__':
     # sys_box = BoxEdges(radius=25)
-    mole_nums = NumMols(radius=25, net_charge=0)
+    mole_nums = NumMols(radius=25, net_charge=10)
