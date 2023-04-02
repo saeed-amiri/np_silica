@@ -75,11 +75,13 @@ class NumMols:
         self.moles_nums['oda'] = self.__get_odap_num()
         self.moles_nums['ion'] = self.__get_ion_num(net_charge)
         if stinfo.Hydration.CONATCT_ANGLE < 0:
-            self.__pure_water(box_volume)
+            self.__pure_water_system(box_volume)
+        else:
+            self.moles_nums['odn'] = self.__get_odn_num()
 
-    def __pure_water(self,
-                     box_volume: float  # The total volume of the system's box
-                     ) -> None:
+    def __pure_water_system(self,
+                            box_volume: float  # The volume of the system's box
+                            ) -> None:
         """set data for system with pure water"""
         self.moles_nums['d10'] = 0  # No oil in the system
         self.moles_nums['odn'] = 0  # ODA must be protonated
@@ -129,6 +131,16 @@ class NumMols:
               f'"{oda_moles}" with total charge of `{oda_moles}`'
               f'{bcolors.ENDC}')
         return oda_moles
+
+    def __get_odn_num(self) -> int:
+        """calculate the number of odn based on the concentration in oil"""
+        odn_moles: int  # Number of oda molecules in the system
+        # I will add the calculation later, but for now:
+        odn_moles = stinfo.Hydration.N_ODN
+        print(f'{bcolors.OKCYAN}\tNumber of ODA (unprotonated) is set to '
+              f'"{odn_moles}" with total charge of `{odn_moles}`'
+              f'{bcolors.ENDC}')
+        return odn_moles
 
     def __box_volumes(self,
                       radius: float  # Radius of the silanized nanoparticle
