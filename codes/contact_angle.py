@@ -58,9 +58,10 @@ class NumMols:
                     net_charge: float  # Charge of the silanized NP with sign!
                     ) -> None:
         """clculate the numbers of each moles if asked"""
-        self.__get_volumes(radius)
+        box_volume: float  # Volume of the final system's box
+        box_volume = self.__box_volumes(radius)
 
-    def __get_volumes(self,
+    def __box_volumes(self,
                       radius: float  # Radius of the silanized nanoparticle
                       ) -> float:
         sphere_volume: float  # Volume of the sphere (NP apprx. with sphere)
