@@ -15,7 +15,9 @@ from colors_text import TextColor as bcolors
 def oil_depth(radius: float  # Radius of the nanoparticle
               ) -> float:
     """calculate and return the the depth of oil phase `h` in water"""
-    return radius * np.tan(stinfo.Hydration.CONATCT_ANGLE/2)
+    angle_rad: float  # Angle in radian
+    angle_rad = np.radians(stinfo.Hydration.CONATCT_ANGLE)
+    return radius * np.tan(angle_rad/2)
 
 
 class BoxEdges:
