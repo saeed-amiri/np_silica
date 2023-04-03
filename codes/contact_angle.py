@@ -41,6 +41,7 @@ class NumMols:
                           'oil': {'x_lim': 0.0,  # Decane's section
                                   'y_lim': 0.0,
                                   'z_lim': 0.0}}
+        self.inscibed_edge: float  # Edge of the cube that inscribed the sphere
         self.get_numbers(radius, net_charge)
 
     def get_numbers(self,
@@ -93,12 +94,13 @@ class NumMols:
                               radius: float  # Radius of the silanized NP
                               ) -> None:
         """set the edges of the box for water and oil system"""
-        oil_depth: float  # Depth of the oil phase in the system box
+        oil_depth: float  # Depth of the oil phase on the NP
         oil_depth = self.set_oil_depth(radius)
         self.box_edges['sol'] = self.box_edges['box'].copy()
         self.box_edges['oil'] = self.box_edges['box'].copy()
-        self.box_edges['sol']['z_lim'] -= oil_depth
-        self.box_edges['oil']['z_lim'] = oil_depth
+        self.box_edges['sol']['z_lim'] = \
+            self.inscibed_edge - stinfo.Hydration.Z_MIN - oil_depth
+        self.box_edges['oil']['z_lim'] = oil_depth+stinfo.Hydration.Z_MAX
 
     def __pure_water_system(self,
                             box_volume: float  # The volume of the system's box
@@ -187,15 +189,15 @@ class NumMols:
         For the largest possible sphere is inscribed in cube, the ratio
         of volumes is: V_sphere/V_cube = pi/6"""
         v_inscribed_box: float = 6*sphere_volume/np.pi
-        cube_edge: float  # Edge of the cube that inscribed the sphere
-        cube_edge = v_inscribed_box**(1/3)
+        inscibed_edge: float  # Edge of the cube that inscribed the sphere
+        inscibed_edge = v_inscribed_box**(1/3)
         box_edges: dict[str, float]  # Edges of the system box
         x_lim: float = (stinfo.Hydration.X_MAX -
-                        stinfo.Hydration.X_MIN) + cube_edge
+                        stinfo.Hydration.X_MIN) + inscibed_edge
         y_lim: float = (stinfo.Hydration.Y_MAX -
-                        stinfo.Hydration.Y_MIN) + cube_edge
+                        stinfo.Hydration.Y_MIN) + inscibed_edge
         z_lim: float = (stinfo.Hydration.Z_MAX -
-                        stinfo.Hydration.Z_MIN) + cube_edge
+                        stinfo.Hydration.Z_MIN) + inscibed_edge
         box_volume: float = x_lim*y_lim*z_lim
         box_edges = {'x_lim': x_lim, 'y_lim': y_lim, 'z_lim': z_lim}
         if box_volume <= 0:
@@ -203,6 +205,7 @@ class NumMols:
                      f'\tZero volume, there in problem in setting box '
                      f'limitaion, box_volume is "{box_volume:.3f}"'
                      f'{bcolors.ENDC}')
+        self.inscibed_edge = inscibed_edge
         return box_edges, box_volume
 
     def __get_sphere_volume(self,
