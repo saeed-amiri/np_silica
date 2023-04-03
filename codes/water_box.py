@@ -71,19 +71,18 @@ class InFile:
             f_out.write(f'tolerance {stinfo.Hydration.TOLERANCE}\n')
             f_out.write(f'output {out_file}\n\n')
             self.__water_section(f_out, dimensions)
-            # self.__oil_section(f_out, dimensions)
+            self.__oil_section(f_out, dimensions)
 
-    # def __oil_section(self,
-    #                   f_out: typing.IO,  # The file to write into it
-    #                   dimensions: boxd.BoxEdges  # Num_moles, dims of box
-    #                   ) -> None:
-    #         """set the data for mols in water section"""
-    #         self.__write_oil_section(f_out,
-    #                                    dimensions,
-    #                                    stinfo.Hydration.WATER_PDB,
-    #                                    'sol')
-    #         self.__check_ions(f_out, dimensions)
-    #         self.__check_odap(f_out, dimensions)
+    def __oil_section(self,
+                      f_out: typing.IO,  # The file to write into it
+                      dimensions: boxd.BoxEdges  # Num_moles, dims of box
+                      ) -> None:
+            """set the data for mols in water section"""
+            self.__write_inp_sections(f_out,
+                                       dimensions.oil_axis,
+                                       stinfo.Hydration.OIL_PDB,
+                                       dimensions.num_mols['oil'])
+            # self.__check_odn(f_out, dimensions)
 
     def __water_section(self,
                         f_out: typing.IO,  # The file to write into it
@@ -156,12 +155,11 @@ class InFile:
                 f_out.write('\tinside box ')
                 f_out.write(f'{dimens["x_lo"] - tlr : .2f} ')
                 f_out.write(f'{dimens["y_lo"] - tlr : .2f} ')
-                f_out.write(f'{dimens["z_lo"] - tlr : .2f} ')
+                f_out.write(f'{dimens["z_lo"] : .2f} ')
                 f_out.write(f'{dimens["x_hi"] + tlr : .2f} ')
                 f_out.write(f'{dimens["y_hi"] + tlr : .2f} ')
-                f_out.write(f'{dimens["z_hi"] + tlr : .2f}\n')
-                f_out.write(
-                    f'\toutside sphere 0. 0. 0. {self.radius: .2f}\n')
+                f_out.write(f'{dimens["z_hi"] : .2f}\n')
+                f_out.write(f'\toutside sphere 0. 0. 0. {self.radius: .2f}\n')
                 f_out.write('end structure\n\n')
 
     def print_info(self) -> None:
