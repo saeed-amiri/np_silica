@@ -37,6 +37,7 @@ The number of molecules should be calculated from the final volume of
 the water box based on the limitations.
 """
 
+import os
 import sys
 import typing
 import subprocess
@@ -63,7 +64,7 @@ class InFile:
         water atoms so can fit the number of ions into box"""
         # For now, the scripts take the +1 as total charge of ODAp in itp
         # to be true, later it should it be checked by the scripts
-        out_file: str = 'water_box.pdb'
+        out_file: str = stinfo.Hydration.OUT_FILE
         with open(stinfo.Hydration.INP_FILE, 'w', encoding="utf8") as f_out:
             f_out.write('# Input file for PACKMOL, Water box for a NP ')
             f_out.write(f'with the radius of {self.radius}\n\n')
@@ -148,7 +149,7 @@ class InFile:
         """write water section: which include the water, ions, and
         protonated ODA"""
         tlr: float = stinfo.Hydration.TOLERANCE
-        expend_edg: float = 5 * tlr # To expand the edges, fasting the test run
+        expend_edg: float = 5 * tlr  # To expand edges, fasting the test run
         if num_mol == 0:
             pass
         else:
@@ -183,7 +184,11 @@ class InFile:
 class RunPackMol:
     """call PACKMOL and run the input script prepared for it"""
     def __init__(self) -> None:
-        """run the input with subprocess"""
+        """run the input with subprocess
+        inputs:
+            inp_file name from stinfo to write PACKMOL file in it
+            out_file name from stinfo to check if the PACKMOL ran
+        """
         pack_mol: str = stinfo.Hydration.PACKMOL  # Compiler of PACKMOL
         inp_file: str = stinfo.Hydration.INP_FILE  # Input file for packmol
         pack_flag: int  # If PACKMOL executed successfully
@@ -195,8 +200,29 @@ class RunPackMol:
                    inp_file: str  # Input file for packmol
                    ) -> int:
         """call the subprocess and run the input file"""
-        pack_flag: int = subprocess.call(f'{pack_mol} < {inp_file}>/dev/null',
-                                         shell=True, cwd='./')
+        self.__check_file(delete=True)
+        pack_flag: int  # Check if PACKMOL executed successfully
+        subprocess.call(f'{pack_mol} < {inp_file}>/dev/null',
+                        shell=True, cwd='./')
+        pack_flag = self.__check_file(delete=False)
+        return pack_flag
+
+    def __check_file(self,
+                     delete: bool = False  # Keep the file or not
+                     ) -> int:
+        """check if water box exist, if delete"""
+        pack_flag: int = -1  # Check if PACKMOL executed successfully
+        water_box: str = stinfo.Hydration.OUT_FILE
+        if delete:
+            if os.path.isfile(water_box):
+                print(f'{bcolors.CAUTION}{self.__class__.__name__} '
+                      f'({self.__module__})\n'
+                      f'\tAn old "{water_box}" exists, it will be deleted'
+                      f'{bcolors.ENDC}')
+                os.remove(water_box)
+        else:
+            if os.path.isfile(water_box):
+                pack_flag = 0
         return pack_flag
 
     def print_info(self,
@@ -204,13 +230,15 @@ class RunPackMol:
                    ) -> None:
         """print infos"""
         if pack_flag == 0:
-            print(f'{bcolors.OKCYAN}{self.__class__.__name__}:'
-                  f' ({self.__module__})\n'
+            print(f'{bcolors.OKCYAN}{self.__class__.__name__}: '
+                  f'({self.__module__})\n'
                   '\tPACKMOL executed successfully, output is: '
-                  f'"{stinfo.Hydration.OUT_FILE}"'
+                  f'"{stinfo.Hydration.GRO_PDB}"'
                   f'{bcolors.ENDC}')
         else:
-            sys.exit(f'{bcolors.FAIL}\tError! in executing PACKMOL'
+            sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}: '
+                     f'({self.__module__})\n'
+                     f'\tError! in executing PACKMOL\n'
                      f'{bcolors.ENDC}')
 
 
@@ -218,4 +246,4 @@ if __name__ == "__main__":
     dims = boxd.BoxEdges(radius=20, net_charge=10)
     in_file = InFile(radius=20, dimensions=dims)
 
-    water_box = RunPackMol()
+    water_b = RunPackMol()
