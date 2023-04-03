@@ -77,12 +77,12 @@ class InFile:
                       f_out: typing.IO,  # The file to write into it
                       dimensions: boxd.BoxEdges  # Num_moles, dims of box
                       ) -> None:
-            """set the data for mols in water section"""
-            self.__write_inp_sections(f_out,
-                                       dimensions.oil_axis,
-                                       stinfo.Hydration.OIL_PDB,
-                                       dimensions.num_mols['oil'])
-            # self.__check_odn(f_out, dimensions)
+        """set the data for mols in water section"""
+        self.__write_inp_sections(f_out,
+                                  dimensions.oil_axis,
+                                  stinfo.Hydration.OIL_PDB,
+                                  dimensions.num_mols['oil'])
+        self.__check_oda(f_out, dimensions, 'odn')
 
     def __water_section(self,
                         f_out: typing.IO,  # The file to write into it
@@ -94,7 +94,7 @@ class InFile:
                                   stinfo.Hydration.WATER_PDB,
                                   dimensions.num_mols['sol'])
         self.__check_ions(f_out, dimensions)
-        self.__check_odap(f_out, dimensions)
+        self.__check_oda(f_out, dimensions, 'oda')
 
     def __check_ions(self,
                      f_out: typing.IO,  # The file to write into it
@@ -112,25 +112,32 @@ class InFile:
                                   pdb_file,
                                   dimensions.num_mols['ion'])
 
-    def __check_odap(self,
-                     f_out: typing.IO,  # The file to write into it
-                     dimensions: boxd.BoxEdges  # Num_moles, dims of box
-                     ) -> None:
+    def __check_oda(self,
+                    f_out: typing.IO,  # The file to write into it
+                    dimensions: boxd.BoxEdges,  # Num_moles, dims of box
+                    style: str  # Protonated or not, ODA, ODAN
+                    ) -> None:
         """check odap and write them if needed"""
-        num_odap: int = dimensions.num_mols['oda']
-        if num_odap == 0:
+        num_oda: int = dimensions.num_mols[style]
+        if num_oda == 0:
             pass
         else:
-            if num_odap < 0:
+            if num_oda < 0:
                 sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}: '
                          f'({self.__module__})\n'
-                         f'\tWrong number is set for the ODAP molecules!\n'
+                         f'\tWrong number is set for the {style} molecules!\n'
                          f'{bcolors.ENDC}')
             else:
+                if style == 'oda':
+                    pdb_file = stinfo.Hydration.ODAP_PDB
+                    dimens = dimensions.water_axis
+                elif style == 'odn':
+                    pdb_file = stinfo.Hydration.ODAN_PDB
+                    dimens = dimensions.oil_axis
                 self.__write_inp_sections(f_out,
-                                          dimensions.water_axis,
-                                          stinfo.Hydration.ODAP_PDB,
-                                          dimensions.num_mols['oda'])
+                                          dimens,
+                                          pdb_file,
+                                          dimensions.num_mols[style])
 
     def __write_inp_sections(self,
                              f_out: typing.IO,  # The file to write into it
@@ -159,7 +166,8 @@ class InFile:
                 f_out.write(f'{dimens["x_hi"] + tlr : .2f} ')
                 f_out.write(f'{dimens["y_hi"] + tlr : .2f} ')
                 f_out.write(f'{dimens["z_hi"] : .2f}\n')
-                f_out.write(f'\toutside sphere 0. 0. 0. {self.radius: .2f}\n')
+                f_out.write(
+                    f'\toutside sphere 0. 0. 0. {self.radius + tlr: .2f}\n')
                 f_out.write('end structure\n\n')
 
     def print_info(self) -> None:
@@ -207,7 +215,6 @@ class RunPackMol:
 
 if __name__ == "__main__":
     dims = boxd.BoxEdges(radius=20, net_charge=10)
-    print(dims.num_mols)
     in_file = InFile(radius=20, dimensions=dims)
 
     water_box = RunPackMol()
