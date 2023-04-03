@@ -63,10 +63,13 @@ class InFile:
         water atoms so can fit the number of ions into box"""
         # For now, the scripts take the +1 as total charge of ODAp in itp
         # to be true, later it should it be checked by the scripts
+        out_file: str = 'water_box.pdb'
         with open(stinfo.Hydration.INP_FILE, 'w', encoding="utf8") as f_out:
             f_out.write('# Input file for PACKMOL, Water box for a NP ')
             f_out.write(f'with the radius of {self.radius}\n\n')
-            f_out.write(f'tolerance {stinfo.Hydration.TOLERANCE}\n\n')
+            f_out.write('filetype pdb\n')
+            f_out.write(f'tolerance {stinfo.Hydration.TOLERANCE}\n')
+            f_out.write(f'output {out_file}\n\n')
             self.__water_section(f_out, dimensions)
 
     def __water_section(self,
@@ -123,6 +126,7 @@ class InFile:
         """write water section: which include the water, ions, and
         protonated ODA"""
         num_mol: int = dimensions.num_mols[molecules]  # Num of mol
+        tlr: float = stinfo.Hydration.TOLERANCE
         if num_mol == 0:
             pass
         else:
@@ -135,12 +139,12 @@ class InFile:
                 f_out.write(f'structure {pdb_file}\n')
                 f_out.write(f'\tnumber {num_mol}\n')
                 f_out.write('\tinside box ')
-                f_out.write(f'{-dimensions.water_axis["x_lo"]: .2f} ')
-                f_out.write(f'{-dimensions.water_axis["y_lo"]: .2f} ')
-                f_out.write(f'{-dimensions.water_axis["z_lo"]: .2f} ')
-                f_out.write(f'{dimensions.water_axis["x_hi"]: .2f} ')
-                f_out.write(f'{dimensions.water_axis["y_hi"]: .2f} ')
-                f_out.write(f'{dimensions.water_axis["z_hi"]: .2f}\n')
+                f_out.write(f'{dimensions.water_axis["x_lo"] - tlr : .2f} ')
+                f_out.write(f'{dimensions.water_axis["y_lo"] - tlr : .2f} ')
+                f_out.write(f'{dimensions.water_axis["z_lo"] - tlr : .2f} ')
+                f_out.write(f'{dimensions.water_axis["x_hi"] + tlr: .2f} ')
+                f_out.write(f'{dimensions.water_axis["y_hi"] + tlr: .2f} ')
+                f_out.write(f'{dimensions.water_axis["z_hi"] + tlr: .2f}\n')
                 f_out.write(
                     f'\toutside sphere 0. 0. 0. {self.radius: .2f}\n')
                 f_out.write('end structure\n\n')
@@ -189,8 +193,8 @@ class RunPackMol:
 
 
 if __name__ == "__main__":
-    dims = boxd.BoxEdges(radius=50, net_charge=10)
+    dims = boxd.BoxEdges(radius=20, net_charge=10)
     print(dims.num_mols)
-    in_file = InFile(radius=50, dimensions=dims)
+    in_file = InFile(radius=20, dimensions=dims)
 
-    # water_box = RunPackMol()
+    water_box = RunPackMol()
