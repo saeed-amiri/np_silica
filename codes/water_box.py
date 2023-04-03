@@ -78,11 +78,12 @@ class InFile:
                       dimensions: boxd.BoxEdges  # Num_moles, dims of box
                       ) -> None:
         """set the data for mols in water section"""
-        self.__write_inp_sections(f_out,
-                                  dimensions.oil_axis,
-                                  stinfo.Hydration.OIL_PDB,
-                                  dimensions.num_mols['oil'])
-        self.__check_oda(f_out, dimensions, 'odn')
+        if stinfo.Hydration.CONATCT_ANGLE > 0:
+            self.__write_inp_sections(f_out,
+                                      dimensions.oil_axis,
+                                      stinfo.Hydration.OIL_PDB,
+                                      dimensions.num_mols['oil'])
+            self.__check_oda(f_out, dimensions, 'odn')
 
     def __water_section(self,
                         f_out: typing.IO,  # The file to write into it
@@ -148,7 +149,7 @@ class InFile:
         """write water section: which include the water, ions, and
         protonated ODA"""
         tlr: float = stinfo.Hydration.TOLERANCE
-        expend_edg: float = 5 * tlr  # To expand edges, fasting the test run
+        expend_edg: float = 1 * tlr  # To expand edges, fasting the test run
         if num_mol == 0:
             pass
         else:
