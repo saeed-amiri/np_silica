@@ -72,15 +72,20 @@ class NumMols:
                            radius: float  # Radius of the silanized NP
                            ) -> None:
         """set the data for the system with oil and water"""
-        self.__set_oil_water_edges(radius)
-        self.__get_oil_water_numbers()
+        oil_depth: float  # Depth of the oil phase on the NP
+        oil_depth = self.set_oil_depth(radius)
+        self.__set_oil_water_edges(oil_depth)
+        self.__get_oil_water_numbers(radius, oil_depth)
 
-    def __get_oil_water_numbers(self) -> None:
+    def __get_oil_water_numbers(self,
+                                radius: float,  # Radius of the silanized NP
+                                oil_depth: float  # Depth of oil around NP
+                                ) -> None:
         """set the numbers for the water and oil"""
         water_volume: float = self.__get_ow_volumes(
-            self.box_edges['sol'].copy())
+            self.box_edges['sol'].copy(), 'sol', radius, oil_depth)
         oil_volume: float = self.__get_ow_volumes(
-            self.box_edges['oil'].copy())
+            self.box_edges['oil'].copy(), 'oil', radius, oil_depth)
         self.moles_nums['sol'] = \
             self.__solution_mol_num(water_volume,
                                     stinfo.Hydration.WATER_DENSITY,
@@ -93,17 +98,33 @@ class NumMols:
                                     'oil')
 
     def __get_ow_volumes(self,
-                         edges: dict[str, float]  # Edges of the section
+                         edges: dict[str, float],  # Edges of the section
+                         section: str,  # Name of section: water or oil
+                         radius: float,  # Of silanized NP
+                         oil_depth: float  # Depth of oil around NP
                          ) -> float:
         """return the volume of the oil and water phases"""
-        return edges['x_lim']*edges['y_lim']*edges['z_lim']
+        box_volume: float  # Volume of the box with the area of NP in it
+        box_volume = edges['x_lim']*edges['y_lim']*edges['z_lim']
+        print('box_volume ', section, box_volume, 'net_vol', end=': ')
+        net_volume: float  # Net volume of the asked section
+        sphere_volume: float = self.__get_sphere_volume(radius)
+        sphere_in_water: float  # Volume in water section
+        sphere_in_oil: float  # Volume in oil section
+        sphere_in_oil = (1/3)*np.pi*(oil_depth**3)*(3*radius-oil_depth)
+        sphere_in_water = sphere_volume - sphere_in_oil
+        if section == 'sol':
+            net_volume = box_volume - sphere_in_water
+        elif section == 'oil':
+            net_volume = box_volume - sphere_in_oil
+        print(net_volume)
+        print(sphere_in_water, sphere_in_oil)
+        return net_volume
 
     def __set_oil_water_edges(self,
-                              radius: float  # Radius of the silanized NP
+                              oil_depth: float  # Depth of oil around NP
                               ) -> None:
         """set the edges of the box for water and oil system"""
-        oil_depth: float  # Depth of the oil phase on the NP
-        oil_depth = self.set_oil_depth(radius)
         self.box_edges['sol'] = self.box_edges['box'].copy()
         self.box_edges['oil'] = self.box_edges['box'].copy()
         self.box_edges['sol']['z_lim'] = \
@@ -151,7 +172,6 @@ class NumMols:
         """calculate the number of the water molecules int the volume"""
         lit_m3: float = 1e-24  # convert units
         m_water: float  # Mass of the water in the volume
-        print("cal", volume)
         m_water = volume * density * lit_m3
         sol_moles: float
         sol_moles = int(m_water * stinfo.Hydration.AVOGADRO /
@@ -307,4 +327,4 @@ class BoxEdges:
 
 
 if __name__ == '__main__':
-    axis_limits = BoxEdges(radius=25,  net_charge=10)
+    axis_limits = BoxEdges(radius=25, net_charge=10)
