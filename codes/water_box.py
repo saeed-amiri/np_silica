@@ -71,16 +71,29 @@ class InFile:
             f_out.write(f'tolerance {stinfo.Hydration.TOLERANCE}\n')
             f_out.write(f'output {out_file}\n\n')
             self.__water_section(f_out, dimensions)
+            # self.__oil_section(f_out, dimensions)
+
+    # def __oil_section(self,
+    #                   f_out: typing.IO,  # The file to write into it
+    #                   dimensions: boxd.BoxEdges  # Num_moles, dims of box
+    #                   ) -> None:
+    #         """set the data for mols in water section"""
+    #         self.__write_oil_section(f_out,
+    #                                    dimensions,
+    #                                    stinfo.Hydration.WATER_PDB,
+    #                                    'sol')
+    #         self.__check_ions(f_out, dimensions)
+    #         self.__check_odap(f_out, dimensions)
 
     def __water_section(self,
                         f_out: typing.IO,  # The file to write into it
                         dimensions: boxd.BoxEdges  # Num_moles, dims of box
                         ) -> None:
         """set the data for mols in water section"""
-        self.__write_water_section(f_out,
-                                   dimensions,
-                                   stinfo.Hydration.WATER_PDB,
-                                   'sol')
+        self.__write_inp_sections(f_out,
+                                  dimensions.water_axis,
+                                  stinfo.Hydration.WATER_PDB,
+                                  dimensions.num_mols['sol'])
         self.__check_ions(f_out, dimensions)
         self.__check_odap(f_out, dimensions)
 
@@ -95,7 +108,10 @@ class InFile:
             pdb_file = stinfo.Hydration.CL_PDB
         else:
             pdb_file = stinfo.Hydration.NA_PDB
-        self.__write_water_section(f_out, dimensions, pdb_file, 'ion')
+        self.__write_inp_sections(f_out,
+                                  dimensions.water_axis,
+                                  pdb_file,
+                                  dimensions.num_mols['ion'])
 
     def __check_odap(self,
                      f_out: typing.IO,  # The file to write into it
@@ -112,20 +128,19 @@ class InFile:
                          f'\tWrong number is set for the ODAP molecules!\n'
                          f'{bcolors.ENDC}')
             else:
-                self.__write_water_section(f_out,
-                                           dimensions,
-                                           stinfo.Hydration.ODAP_PDB,
-                                           'oda')
+                self.__write_inp_sections(f_out,
+                                          dimensions.water_axis,
+                                          stinfo.Hydration.ODAP_PDB,
+                                          dimensions.num_mols['oda'])
 
-    def __write_water_section(self,
-                              f_out: typing.IO,  # The file to write into it
-                              dimensions: boxd.BoxEdges,  # Num_moles, box dims
-                              pdb_file: str,  # Name of the pdb file to write
-                              molecules: str  # Name of the mols in "boxd"
-                              ) -> None:
+    def __write_inp_sections(self,
+                             f_out: typing.IO,  # The file to write into it
+                             dimens: dict[str, float],  # Section dimensions
+                             pdb_file: str,  # Name of the pdb file to write
+                             num_mol: int  # Number of the molecules in secti
+                             ) -> None:
         """write water section: which include the water, ions, and
         protonated ODA"""
-        num_mol: int = dimensions.num_mols[molecules]  # Num of mol
         tlr: float = stinfo.Hydration.TOLERANCE
         if num_mol == 0:
             pass
@@ -139,12 +154,12 @@ class InFile:
                 f_out.write(f'structure {pdb_file}\n')
                 f_out.write(f'\tnumber {num_mol}\n')
                 f_out.write('\tinside box ')
-                f_out.write(f'{dimensions.water_axis["x_lo"] - tlr : .2f} ')
-                f_out.write(f'{dimensions.water_axis["y_lo"] - tlr : .2f} ')
-                f_out.write(f'{dimensions.water_axis["z_lo"] - tlr : .2f} ')
-                f_out.write(f'{dimensions.water_axis["x_hi"] + tlr: .2f} ')
-                f_out.write(f'{dimensions.water_axis["y_hi"] + tlr: .2f} ')
-                f_out.write(f'{dimensions.water_axis["z_hi"] + tlr: .2f}\n')
+                f_out.write(f'{dimens["x_lo"] - tlr : .2f} ')
+                f_out.write(f'{dimens["y_lo"] - tlr : .2f} ')
+                f_out.write(f'{dimens["z_lo"] - tlr : .2f} ')
+                f_out.write(f'{dimens["x_hi"] + tlr : .2f} ')
+                f_out.write(f'{dimens["y_hi"] + tlr : .2f} ')
+                f_out.write(f'{dimens["z_hi"] + tlr : .2f}\n')
                 f_out.write(
                     f'\toutside sphere 0. 0. 0. {self.radius: .2f}\n')
                 f_out.write('end structure\n\n')
