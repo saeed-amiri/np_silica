@@ -266,7 +266,7 @@ class BoxEdges:
         z_w_lo: float  # Low limit water's section
         z_w_hi: float  # High limit water's section
         z_w_lo = -self.box_edges['box'].copy()['z_lim'] / 2
-        z_w_hi = self.box_edges['sol'].copy()['z_lim']
+        z_w_hi = -z_w_lo - self.box_edges['oil'].copy()['z_lim']
         self.water_axis['z_lo'] = z_w_lo
         self.water_axis['z_hi'] = z_w_hi
         if stinfo.Hydration.CONATCT_ANGLE > 0:
