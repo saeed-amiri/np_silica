@@ -151,6 +151,7 @@ class NumMols:
         """calculate the number of the water molecules int the volume"""
         lit_m3: float = 1e-24  # convert units
         m_water: float  # Mass of the water in the volume
+        print("cal", volume)
         m_water = volume * density * lit_m3
         sol_moles: float
         sol_moles = int(m_water * stinfo.Hydration.AVOGADRO /
@@ -183,12 +184,13 @@ class NumMols:
     def __box_volume(self,
                      radius: float  # Radius of the silanized nanoparticle
                      ) -> float:
+        """get the box volume with subtracting the volume of NP"""
         sphere_volume: float  # Volume of the sphere (NP apprx. with sphere)
         box_volume: float  # Volume of the final system's box
         sphere_volume = self.__get_sphere_volume(radius)
         self.box_edges['box'], box_volume = \
             self.__get_box_volume(sphere_volume)
-        return box_volume
+        return box_volume-sphere_volume
 
     def __get_box_volume(self,
                          sphere_volume: float  # Volume of the sphere
