@@ -49,6 +49,9 @@ class NumMols:
                     net_charge: float  # Charge of the silanized NP with sign!
                     ) -> None:
         """clculate the numbers of each moles if asked"""
+        print(f'{bcolors.OKCYAN}{self.__class__.__name__}:'
+              f'({bcolors.__module__}):'
+              f'{bcolors.ENDC}')
         box_volume: float  # Volume of the final system's box
         box_volume = self.__box_volume(radius)
         # !!!num_oda must be set before num_ioins!!!
@@ -57,6 +60,11 @@ class NumMols:
         if stinfo.Hydration.CONATCT_ANGLE < 0:
             self.__pure_water_system(box_volume)
         else:
+            print(f'{bcolors.OKCYAN}'
+                  f'\tThe contact angle is: `{stinfo.Hydration.CONATCT_ANGLE}`'
+                  ' [degree] which is: '
+                  f'"{np.radians(stinfo.Hydration.CONATCT_ANGLE):.4f}" '
+                  f'[rad] {bcolors.ENDC}')
             self.__oil_water_system(radius)
             self.moles_nums['odn'] = self.__get_odn_num()
 
@@ -156,8 +164,8 @@ class NumMols:
         oda_moles: int  # Number of oda molecules in the system
         # I will add the calculation later, but for now:
         oda_moles = stinfo.Hydration.N_ODAP
-        print(f'{bcolors.OKCYAN}{self.__class__.__name__}:'
-              f' ({self.__module__})\n\tNumber of ODAP is set to '
+        print(f'{bcolors.OKCYAN}'
+              '\tNumber of ODAP is set to '
               f'"{oda_moles}" with total charge of `{oda_moles}`'
               f'{bcolors.ENDC}')
         return oda_moles
@@ -258,15 +266,15 @@ class BoxEdges:
         """set limtations for the z axis in both water and oil"""
         z_w_lo: float  # Low limit water's section
         z_w_hi: float  # High limit water's section
-        z_w_lo = - num_mols.box_edges['box'].copy()['z_lim'] / 2
-        z_w_hi = num_mols.box_edges['sol'].copy()['z_lim'] + z_w_lo
+        z_w_lo = -num_mols.box_edges['box'].copy()['z_lim'] / 2
+        z_w_hi = num_mols.box_edges['sol'].copy()['z_lim']
         self.water_axis['z_lo'] = z_w_lo
         self.water_axis['z_hi'] = z_w_hi
         if stinfo.Hydration.CONATCT_ANGLE > 0:
             z_o_lo: float  # Low limit of the oil section
             z_o_hi: float  # High limit water's section
             z_o_lo = z_w_hi + stinfo.Hydration.TOLERANCE
-            z_o_hi = - z_w_lo + stinfo.Hydration.TOLERANCE
+            z_o_hi = -z_w_lo + stinfo.Hydration.TOLERANCE
             self.oil_axis['z_lo'] = z_o_lo
             self.oil_axis['z_hi'] = z_o_hi
 
@@ -290,9 +298,9 @@ class BoxEdges:
                       ) -> tuple[float, float]:
         """find the x and y lowe limitations of the box"""
         x_lo: float  # min of the axis in the x_axis
-        x_lo = - num_mols.box_edges['box'].copy()['x_lim'] / 2
+        x_lo = -num_mols.box_edges['box'].copy()['x_lim'] / 2
         y_lo: float  # min of the axis in the x_axis
-        y_lo = - num_mols.box_edges['box'].copy()['y_lim'] / 2
+        y_lo = -num_mols.box_edges['box'].copy()['y_lim'] / 2
         return x_lo, y_lo
 
     def print_info(self) -> None:
