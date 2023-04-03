@@ -248,27 +248,25 @@ class BoxEdges:
         self.water_axis: dict[str, float] = {}  # Limitation of the water part
         self.oil_axis: dict[str, float] = {}  # Limitation of the oil part
         num_mols = NumMols(radius, net_charge)
-        self.get_sections_edge(num_mols)
+        self.box_edges = num_mols.box_edges  # See NumMols class __init__
+        self.num_mols = num_mols.moles_nums  # See NumMols class __init__
+        self.get_sections_edge()
         self.print_info()
 
-    def get_sections_edge(self,
-                          num_mols: NumMols  # Number of each molecule or ion
-                          ) -> None:
+    def get_sections_edge(self) -> None:
         """set the limits of axis for each sections of the system box"""
         x_lo: float  # Low limit of the system box in x direction
         y_lo: float  # Low limit of the system box in y direction
-        x_lo, y_lo = self.__get_xy_lims(num_mols)
+        x_lo, y_lo = self.__get_xy_lims()
         self.__set_xy_lims(x_lo, y_lo)
-        self.__set_z_lims(num_mols)
+        self.__set_z_lims()
 
-    def __set_z_lims(self,
-                     num_mols: NumMols  # Number of each molecule or ion
-                     ) -> None:
+    def __set_z_lims(self) -> None:
         """set limtations for the z axis in both water and oil"""
         z_w_lo: float  # Low limit water's section
         z_w_hi: float  # High limit water's section
-        z_w_lo = -num_mols.box_edges['box'].copy()['z_lim'] / 2
-        z_w_hi = num_mols.box_edges['sol'].copy()['z_lim']
+        z_w_lo = -self.box_edges['box'].copy()['z_lim'] / 2
+        z_w_hi = self.box_edges['sol'].copy()['z_lim']
         self.water_axis['z_lo'] = z_w_lo
         self.water_axis['z_hi'] = z_w_hi
         if stinfo.Hydration.CONATCT_ANGLE > 0:
@@ -294,14 +292,12 @@ class BoxEdges:
             self.oil_axis['y_lo'] = y_lo
             self.oil_axis['y_hi'] = -y_lo
 
-    def __get_xy_lims(self,
-                      num_mols: NumMols  # Number of each molecule or ion
-                      ) -> tuple[float, float]:
+    def __get_xy_lims(self) -> tuple[float, float]:
         """find the x and y lowe limitations of the box"""
         x_lo: float  # min of the axis in the x_axis
-        x_lo = -num_mols.box_edges['box'].copy()['x_lim'] / 2
+        x_lo = -self.box_edges['box'].copy()['x_lim'] / 2
         y_lo: float  # min of the axis in the x_axis
-        y_lo = -num_mols.box_edges['box'].copy()['y_lim'] / 2
+        y_lo = -self.box_edges['box'].copy()['y_lim'] / 2
         return x_lo, y_lo
 
     def print_info(self) -> None:
