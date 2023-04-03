@@ -40,162 +40,66 @@ the water box based on the limitations.
 import sys
 import typing
 import subprocess
-import numpy as np
 import static_info as stinfo
+import box_dimensions as boxd
 from colors_text import TextColor as bcolors
-
-
-class NumberMols:
-    """Getting the number of water molecules in the volume"""
-    def __init__(self,
-                 radius: float  # Radius of the NP after silanization
-                 ) -> None:
-        self.prepare_input(radius)
-        self.print_info()
-
-    def prepare_input(self,
-                      radius: float  # Radius of the NP after silanization
-                      ) -> None:
-        """prepare the input file for the PACKMOL"""
-        self.edge_cube: float  # Edge of the box that inscibed the NP
-        self.number_mols: int  # Number of the molecules in the box
-        self.number_mols, self.edge_cube = self.__get_mols_num(radius)
-
-    def __get_mols_num(self,
-                       radius: float  # Radius of the NP after silanization
-                       ) -> tuple[int, float]:
-        """get numbers of molecules based on the volume of the water
-        box"""
-        sphere_volume: float = self.__get_sphere_volume(radius)
-        box_volume: float  # volume of the box
-        edge_cube: float  # Edge of the box that inscibed the NP
-        box_volume, edge_cube = self.__get_box_volume(sphere_volume)
-        net_volume: float = self.__check_volumes(box_volume, sphere_volume)
-        return self.__calc_mols_num(net_volume), edge_cube
-
-    def __calc_mols_num(self,
-                        volume: float  # Net volume of the water box
-                        ) -> int:
-        """return number of water molecules to get the density of
-        water"""
-        lit_m3: float = 1e-24  # convert units
-        m_water: float  # Mass of the water in the volume
-        m_water = volume * stinfo.Hydration.WATER_DENSITY * lit_m3
-        num_moles: float
-        num_moles = int(m_water * stinfo.Hydration.AVOGADRO /
-                        stinfo.Hydration.WATER_MOLAR_MASS) + 1
-        return num_moles
-
-    def __get_box_volume(self,
-                         sphere_volume: float,  # Volume of the sphere
-                         ) -> tuple[float, float]:
-        """calculate the volume of the box including sphere's area
-        For the largest possible sphere is inscribed in cube, the ratio
-        of volumes is: V_sphere/V_cube = pi/6"""
-        v_inscribed_box: float = 6*sphere_volume/np.pi
-        edge_cube: float  # Edge of the cube that inscribed the sphere
-        edge_cube = v_inscribed_box**(1/3)
-        x_lim: float = (stinfo.Hydration.X_MAX -
-                        stinfo.Hydration.X_MIN) + edge_cube
-        y_lim: float = (stinfo.Hydration.Y_MAX -
-                        stinfo.Hydration.Y_MIN) + edge_cube
-        z_lim: float = (stinfo.Hydration.Z_MAX -
-                        stinfo.Hydration.Z_MIN) + edge_cube
-        box_volume: float = x_lim*y_lim*z_lim
-        if box_volume <= 0:
-            sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}:\n'
-                     f'\tZero volume, there in problem in setting box '
-                     f'limitaion, box_volume is "{box_volume:.3f}"'
-                     f'{bcolors.ENDC}')
-        return box_volume, edge_cube
-
-    def __get_sphere_volume(self,
-                            radius: float  # Radius of the NP after silanizatio
-                            ) -> float:
-        """calculate the volume of the sphere for the NP"""
-        sphere_volume: float = 4*np.pi*(radius**3)/3
-        if sphere_volume <= 0:
-            sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}:\n'
-                     f'\tZero volume, there in problem in setting sphere '
-                     f'valume, it is "{sphere_volume:.3f}"'
-                     f'{bcolors.ENDC}')
-        return sphere_volume
-
-    def __check_volumes(self,
-                        box: float,  # Volume of the box
-                        sphere: float  # Volume of the sphere
-                        ) -> float:
-        """check wether the box volume is bigger then the sphere volume"""
-        if box - sphere <= 0:
-            sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}: '
-                     f'({self.__module__})\n'
-                     '\tVolume of the Sphere is less or equal to the '
-                     'Volume of the Box'
-                     f'{bcolors.ENDC}\n')
-        return box - sphere
-
-    def print_info(self) -> None:
-        """print infos"""
-        print(f'{bcolors.OKCYAN}{self.__class__.__name__}: ('
-              f'{self.__module__}):\n'
-              f'\tThe number of water molecules before adding ions is '
-              f'"{self.number_mols}"'
-              f'{bcolors.ENDC}')
 
 
 class InFile:
     """preparing input file for the PACKMOL execution"""
     def __init__(self,
                  radius: float,  # Radius of the NP
-                 num_mols: int,  # Number of the molecules in the water volume
-                 edge: float,  # Edge of the inscribed cube
-                 net_charge: float  # Net charge of the NP
+                 dimensions: boxd.BoxEdges  # Number of moles & dims of the box
                  ) -> None:
-        self.edge: float = edge
-        self.num_ion: int  # Number of ions with sign
-        self.num_water: int = self.write_file(radius, num_mols, net_charge)
+        self.radius: float = radius  # Radius of the silanized NP
+        self.num_water: int = dimensions.num_mols['sol']
+        self.write_file(dimensions)
         self.print_info()
 
     def write_file(self,
-                   radius: float,  # Radius of the NP
-                   num_mols: int,  # Number of the molecules in the water volum
-                   net_charge: float  # Net charge of the NP
-                   ) -> int:
+                   dimensions: boxd.BoxEdges  # Number of moles & dimensions
+                   ) -> None:
         """write the input file for the PACKMOL, Subtract the number of
         water atoms so can fit the number of ions into box"""
-        num_ions: int  # Number of required ions
-        water_moles: int  # Number of water molecules after adding ions
-        num_odap: int  # Number of ODAP molecues
-
-        # For now, the scripts take the -1 total charge of ODAp in itp
+        # For now, the scripts take the +1 as total charge of ODAp in itp
         # to be true, later it should it be checked by the scripts
-        num_odap = self.__get_surfactants()
-        num_ions, water_moles = self.__get_num_ions(net_charge,
-                                                    num_mols,
-                                                    num_odap)
-        out_file: str = 'water_box.pdb'
         with open(stinfo.Hydration.INP_FILE, 'w', encoding="utf8") as f_out:
             f_out.write('# Input file for PACKMOL, Water box for a NP ')
-            f_out.write(f'with the radius of {radius}\n\n')
+            f_out.write(f'with the radius of {self.radius}\n\n')
             f_out.write(f'tolerance {stinfo.Hydration.TOLERANCE}\n\n')
-            self.__write_water(f_out, water_moles, radius)
-            self.__write_ions(f_out, num_ions, radius)
-            self.__write_odap(f_out, num_odap, radius)
-            f_out.write(f'output {out_file}\n\n')
-        return water_moles
+            self.__water_section(f_out, dimensions)
 
-    def __get_surfactants(self) -> int:
-        """return the number of the ODAP and ODA (later!)"""
-        n_odap: int = stinfo.Hydration.N_ODAP
-        return n_odap
+    def __water_section(self,
+                        f_out: typing.IO,  # The file to write into it
+                        dimensions: boxd.BoxEdges  # Num_moles, dims of box
+                        ) -> None:
+        """set the data for mols in water section"""
+        self.__write_water_section(f_out,
+                                   dimensions,
+                                   stinfo.Hydration.WATER_PDB,
+                                   'sol')
+        self.__check_ions(f_out, dimensions)
+        self.__check_odap(f_out, dimensions)
 
-    def __write_odap(self,
+    def __check_ions(self,
                      f_out: typing.IO,  # The file to write into it
-                     num_odap: int,  # Number of the ODAP moles
-                     radius: float  # Radius of the nanoparticle
+                     dimensions: boxd.BoxEdges  # Num_moles, dims of box
                      ) -> None:
-        """write the ODAP section in the inp file"""
-        tlr: float = stinfo.Hydration.TOLERANCE
+        """check ions charges and write it part"""
+        pdb_file: str  # Name of the pdbfile based on the charge of the system
+        num_ions: int = dimensions.num_mols['ion']
+        if num_ions > 0:
+            pdb_file = stinfo.Hydration.CL_PDB
+        else:
+            pdb_file = stinfo.Hydration.NA_PDB
+        self.__write_water_section(f_out, dimensions, pdb_file, 'ion')
+
+    def __check_odap(self,
+                     f_out: typing.IO,  # The file to write into it
+                     dimensions: boxd.BoxEdges  # Num_moles, dims of box
+                     ) -> None:
+        """check odap and write them if needed"""
+        num_odap: int = dimensions.num_mols['oda']
         if num_odap == 0:
             pass
         else:
@@ -205,95 +109,41 @@ class InFile:
                          f'\tWrong number is set for the ODAP molecules!\n'
                          f'{bcolors.ENDC}')
             else:
-                f_out.write(f'structure {stinfo.Hydration.ODAP_PDB}\n')
-                f_out.write(f'\tnumber {num_odap}\n')
-                f_out.write('\tinside box ')
-                f_out.write(
-                    f'{-self.edge/2 + stinfo.Hydration.X_MIN - tlr: .2f} ')
-                f_out.write(
-                    f'{-self.edge/2 + stinfo.Hydration.Y_MIN - tlr: .2f} ')
-                f_out.write(
-                    f'{-self.edge/2 + stinfo.Hydration.Z_MIN - tlr: .2f} ')
-                f_out.write(
-                    f'{self.edge/2 + stinfo.Hydration.X_MAX + tlr: .2f} ')
-                f_out.write(
-                    f'{self.edge/2 + stinfo.Hydration.Y_MAX + tlr: .2f} ')
-                f_out.write(
-                    f'{self.edge/2 + stinfo.Hydration.Z_MAX + tlr: .2f}\n')
-                f_out.write(
-                    f'\toutside sphere 0. 0. 0. {radius: .2f}\n')
-                f_out.write('end structure\n\n')
+                self.__write_water_section(f_out,
+                                           dimensions,
+                                           stinfo.Hydration.ODAP_PDB,
+                                           'oda')
 
-    def __write_ions(self,
-                     f_out: typing.IO,  # The file to write into it
-                     ion_mols: int,  # Number of the moles in the volume
-                     radius: float  # Radius of the nanoparticle
-                     ) -> None:
-        """write the ions section in the box"""
-        tlr: float = stinfo.Hydration.TOLERANCE
-        if ion_mols == 0:
+    def __write_water_section(self,
+                              f_out: typing.IO,  # The file to write into it
+                              dimensions: boxd.BoxEdges,  # Num_moles, box dims
+                              pdb_file: str,  # Name of the pdb file to write
+                              molecules: str  # Name of the mols in "boxd"
+                              ) -> None:
+        """write water section: which include the water, ions, and
+        protonated ODA"""
+        num_mol: int = dimensions.num_mols[molecules]  # Num of mol
+        if num_mol == 0:
             pass
         else:
-            if ion_mols > 0:
-                f_out.write(f'structure {stinfo.Hydration.CL_PDB}\n')
+            if num_mol < 0:
+                sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}: '
+                         f'({self.__module__})\n'
+                         f'\tWrong number is set for the {num_mol} molecules!'
+                         f'{bcolors.ENDC}\n')
             else:
-                f_out.write(f'structure {stinfo.Hydration.NA_PDB}\n')
-            f_out.write(f'\tnumber {int(np.abs(ion_mols))}\n')
-            f_out.write('\tinside box ')
-            f_out.write(f'{-self.edge/2 + stinfo.Hydration.X_MIN - tlr: .2f} ')
-            f_out.write(f'{-self.edge/2 + stinfo.Hydration.Y_MIN - tlr: .2f} ')
-            f_out.write(f'{-self.edge/2 + stinfo.Hydration.Z_MIN - tlr: .2f} ')
-            f_out.write(f'{self.edge/2 + stinfo.Hydration.X_MAX + tlr: .2f} ')
-            f_out.write(f'{self.edge/2 + stinfo.Hydration.Y_MAX + tlr: .2f} ')
-            f_out.write(f'{self.edge/2 + stinfo.Hydration.Z_MAX + tlr: .2f}\n')
-            f_out.write(f'\toutside sphere 0. 0. 0. {radius: .2f}\n')
-            f_out.write('end structure\n\n')
-
-    def __write_water(self,
-                      f_out: typing.IO,  # The file to write into it
-                      water_mols: int,  # Number of the moles in the volume
-                      radius: float  # Radius of the nanoparticle
-                      ) -> None:
-        """write the water box section in the packmol inputfile"""
-        tlr: float = stinfo.Hydration.TOLERANCE
-        f_out.write(f'structure {stinfo.Hydration.WATER_PDB}\n')
-        f_out.write(f'\tnumber {water_mols}\n')
-        f_out.write('\tinside box ')
-        f_out.write(f'{-self.edge/2 + stinfo.Hydration.X_MIN - tlr: .2f} ')
-        f_out.write(f'{-self.edge/2 + stinfo.Hydration.Y_MIN - tlr: .2f} ')
-        f_out.write(f'{-self.edge/2 + stinfo.Hydration.Z_MIN - tlr: .2f} ')
-        f_out.write(f'{self.edge/2 + stinfo.Hydration.X_MAX + tlr: .2f} ')
-        f_out.write(f'{self.edge/2 + stinfo.Hydration.Y_MAX + tlr: .2f} ')
-        f_out.write(f'{self.edge/2 + stinfo.Hydration.Z_MAX + tlr: .2f}\n')
-        f_out.write(f'\toutside sphere 0. 0. 0. {radius: .2f}\n')
-        f_out.write('end structure\n\n')
-
-    def __get_num_ions(self,
-                       net_charge: float,  # Net charge of the NP
-                       num_mols: int,  # Number of water molecules before ions
-                       num_odap: int  # Number of ODAp molecuels, each with +1
-                       ) -> tuple[int, int]:
-        """return the number of ions, with sign"""
-        charge_floor: float = np.floor(np.abs(net_charge))
-        num_ions: int = int(np.sign(net_charge)*charge_floor) + num_odap
-        if charge_floor != np.abs(net_charge):
-            print(f'{bcolors.CAUTION}{self.__class__.__name__}" '
-                  f'({self.__module__}):\n'
-                  f'\tNet charge is not a complete number! "{net_charge}"\n'
-                  f'{bcolors.ENDC}')
-        if num_ions > 0:
-            print(f'{bcolors.CAUTION}'
-                  f'\tTotal charge of the system is `{charge_floor}`\n'
-                  f'\tNumber of ODAP is set to `{num_odap}` with total '
-                  f'charge of `{num_odap}`\n'
-                  f'\tThe number of ions is set to "{num_ions}"'
-                  f'{bcolors.ENDC}')
-        water_moles: int = num_mols - num_ions
-        print(f'{bcolors.OKCYAN}\tThe number water molecules is now set'
-              f' to "{water_moles}", and number of counter ions is '
-              f'"{num_ions}"{bcolors.ENDC}')
-        self.num_ion = int(np.sign(net_charge)*num_ions)
-        return np.sign(net_charge)*num_ions, water_moles
+                f_out.write(f'structure {pdb_file}\n')
+                f_out.write(f'\tnumber {num_mol}\n')
+                f_out.write('\tinside box ')
+                f_out.write(f'{-dimensions.water_axis["x_lo"]: .2f} ')
+                f_out.write(f'{-dimensions.water_axis["y_lo"]: .2f} ')
+                f_out.write(f'{-dimensions.water_axis["z_lo"]: .2f} ')
+                f_out.write(f'{dimensions.water_axis["x_hi"]: .2f} ')
+                f_out.write(f'{dimensions.water_axis["y_hi"]: .2f} ')
+                f_out.write(f'{dimensions.water_axis["z_hi"]: .2f}\n')
+                f_out.write(
+                    f'\toutside sphere 0. 0. 0. {self.radius: .2f}\n')
+                f_out.write('end structure\n\n')
 
     def print_info(self) -> None:
         """print infos"""
@@ -339,9 +189,8 @@ class RunPackMol:
 
 
 if __name__ == "__main__":
-    moles = NumberMols(radius=50)
-    in_file = InFile(radius=50,
-                     num_mols=moles.number_mols,
-                     edge=moles.edge_cube,
-                     net_charge=0)
-    water_box = RunPackMol()
+    dims = boxd.BoxEdges(radius=50, net_charge=10)
+    print(dims.num_mols)
+    in_file = InFile(radius=50, dimensions=dims)
+
+    # water_box = RunPackMol()
