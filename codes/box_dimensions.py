@@ -106,7 +106,6 @@ class NumMols:
         """return the volume of the oil and water phases"""
         box_volume: float  # Volume of the box with the area of NP in it
         box_volume = edges['x_lim']*edges['y_lim']*edges['z_lim']
-        print('box_volume ', section, box_volume, 'net_vol', end=': ')
         net_volume: float  # Net volume of the asked section
         sphere_volume: float = self.__get_sphere_volume(radius)
         sphere_in_water: float  # Volume in water section
@@ -117,8 +116,6 @@ class NumMols:
             net_volume = box_volume - sphere_in_water
         elif section == 'oil':
             net_volume = box_volume - sphere_in_oil
-        print(net_volume)
-        print(sphere_in_water, sphere_in_oil)
         return net_volume
 
     def __set_oil_water_edges(self,
