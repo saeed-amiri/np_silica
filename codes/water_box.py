@@ -148,6 +148,7 @@ class InFile:
         """write water section: which include the water, ions, and
         protonated ODA"""
         tlr: float = stinfo.Hydration.TOLERANCE
+        expend_edg: float = 5 * tlr # To expand the edges, fasting the test run
         if num_mol == 0:
             pass
         else:
@@ -160,11 +161,11 @@ class InFile:
                 f_out.write(f'structure {pdb_file}\n')
                 f_out.write(f'\tnumber {num_mol}\n')
                 f_out.write('\tinside box ')
-                f_out.write(f'{dimens["x_lo"] - tlr : .2f} ')
-                f_out.write(f'{dimens["y_lo"] - tlr : .2f} ')
+                f_out.write(f'{dimens["x_lo"] - expend_edg : .2f} ')
+                f_out.write(f'{dimens["y_lo"] - expend_edg : .2f} ')
                 f_out.write(f'{dimens["z_lo"] : .2f} ')
-                f_out.write(f'{dimens["x_hi"] + tlr : .2f} ')
-                f_out.write(f'{dimens["y_hi"] + tlr : .2f} ')
+                f_out.write(f'{dimens["x_hi"] + expend_edg : .2f} ')
+                f_out.write(f'{dimens["y_hi"] + expend_edg : .2f} ')
                 f_out.write(f'{dimens["z_hi"] : .2f}\n')
                 f_out.write(
                     f'\toutside sphere 0. 0. 0. {self.radius + tlr: .2f}\n')
