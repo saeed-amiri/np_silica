@@ -242,11 +242,12 @@ class BoxEdges:
     """make the calculation for system box based on the contact angle"""
     def __init__(self,
                  radius: float,  # Radius of NP after silanization
-                 num_mols: NumMols  # Number of each molecule or ion
+                 net_charge: float  # Total charge of the NP with sign!
                  ) -> None:
         self.radius: float = radius  # To have it as attribute for later use
         self.water_axis: dict[str, float] = {}  # Limitation of the water part
         self.oil_axis: dict[str, float] = {}  # Limitation of the oil part
+        num_mols = NumMols(radius, net_charge)
         self.get_sections_edge(num_mols)
         self.print_info()
 
@@ -308,6 +309,4 @@ class BoxEdges:
 
 
 if __name__ == '__main__':
-    # sys_box = BoxEdges(radius=25)
-    mole_nums = NumMols(radius=25, net_charge=10)
-    axis_limits = BoxEdges(radius=25, num_mols=mole_nums)
+    axis_limits = BoxEdges(radius=25,  net_charge=10)
