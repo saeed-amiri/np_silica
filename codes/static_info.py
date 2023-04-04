@@ -100,7 +100,7 @@ class Hydration:
     # Contact angle, it defeins how much of the nanoparticle should be
     # in the oil phase, in case there is oil phase the APTES on the oil
     # phase are unprotonated
-    CONATCT_ANGLE: float = 90  # In degree; If negetive -> no oil phase
+    CONATCT_ANGLE: float = 120  # In degree; If negetive -> no oil, MAX depends!
     # Box dimensions
     # x
     X_MIN: float = -20.0
@@ -127,14 +127,16 @@ class Hydration:
     # PACKMOL files
     WATER_PDB: str = os.path.join(SOURCE_DIR, 'water.pdb')
     ODAP_PDB: str = os.path.join(SOURCE_DIR, 'ODAp.pdb')
+    ODAN_PDB: str = os.path.join(SOURCE_DIR, 'ODAn.pdb')
     NA_PDB: str = os.path.join(SOURCE_DIR, 'Na.pdb')
     CL_PDB: str = os.path.join(SOURCE_DIR, 'Cl.pdb')
-    D10_PDB: str = os.path.join(SOURCE_DIR, 'D10.pdb')
+    OIL_PDB: str = os.path.join(SOURCE_DIR, 'D10.pdb')
     ADD_ION: bool = False  # if True it will add the ion to the itp file
     NA_ITP: str = os.path.join(SOURCE_DIR, 'Na.itp')
     CL_ITP: str = os.path.join(SOURCE_DIR, 'Cl.itp')
     ODAP_ITP: str = os.path.join(SOURCE_DIR, 'ODAp.itp')
-    D10_ITP: str = os.path.join(SOURCE_DIR, 'D10.itp')
+    ODAN_ITP: str = os.path.join(SOURCE_DIR, 'ODAn.itp')
+    OIL_ITP: str = os.path.join(SOURCE_DIR, 'D10.itp')
     INP_FILE: str = 'water_box.inp'
     OUT_FILE: str = 'water_box.pdb'
     WS_INP: str = 'water_silica.inp'  # Input for final water & silanized file
@@ -143,8 +145,8 @@ class Hydration:
     PACKMOL: str = '/home/saeed/Downloads/packmol/packmol'
     # Number or concentration of ODAP and ODN (in case later wanted)
     # It is used in the write_water and lmp_itp_pdb
-    N_ODAP: int = 16  # Protonated ODA
-    N_ODN: int = 0  # Unprotonated ODA
+    N_ODAP: int = 16  # Protonated ODA will add to water section
+    N_ODN: int = 0  # Unprotonated ODA will add to if oil section
 
 
 class PosRes:
