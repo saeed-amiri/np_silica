@@ -8,6 +8,7 @@
 
 import sys
 import typing
+import my_tools
 import numpy as np
 import pandas as pd
 import pick_out_si as pickSi
@@ -56,7 +57,30 @@ class GetSiGroups:
         df = self.__get_sphere_coord(df)
         # Drop atom outside the shell:
         df = self.__apply_radius(df, max_radius)
+        # Set Phase for each Si (if there is any oil)
+        df = self.__phase_selection(df, max_radius-stinfo.Hydration.TOLERANCE)
         return df
+
+    def __phase_selection(self,
+                          df: pd.DataFrame,  # Worked df to label oil or water
+                          radius: float  # Maximum radius of the NP
+                          ) -> pd.DataFrame:
+        """label Si based on the their z value, if are in water or oil
+        phase"""
+        df_c: pd.DataFrame = df.copy()
+        if stinfo.Hydration.CONATCT_ANGLE > 0:
+            oil_depth: float  # Depth of NP in oil phase based on contact angle
+            oil_depth = my_tools.oil_depth(radius=radius)
+            interface: float  # Z value of the interface
+            interface = radius - oil_depth
+            for item, row in df.iterrows():
+                if row['z'] > interface:
+                    df_c.at[item, 'phase'] = 'oil'
+                else:
+                    df_c.at[item, 'phase'] = 'water'
+        else:
+            df_c['phase'] = ['water' for _ in df.index]
+        return df_c
 
     def __check_si_id(self,
                       df: pd.DataFrame  # Silcons in the silica
@@ -64,7 +88,7 @@ class GetSiGroups:
         """Check if index of Si is less then 17: the number of atoms in
         amino atoms, as workaround for similar index problem"""
         df_: pd.DataFrame = df[df['atom_id'] > stinfo.Constants.Num_amino]
-        print(f'{bcolors.CAUTION}{self.__class__.__name__}:'
+        print(f'{bcolors.CAUTION}{self.__class__.__name__}: '
               f'({self.__module__}):\n'
               f'\t"{len(df)-len(df_)}" of selected Si atoms are dropped'
               f' due to the small atom_id of Si in df (less then '
@@ -119,7 +143,7 @@ class GetSiGroups:
         x_max: float = Atoms['x'].abs().max()
         y_max: float = Atoms['y'].abs().max()
         z_max: float = Atoms['z'].abs().max()
-        return np.max([x_max, y_max, z_max])
+        return np.mean([x_max, y_max, z_max])
 
     def __get_sphere_coord(self,
                            df: pd.DataFrame  # The selected Si group
