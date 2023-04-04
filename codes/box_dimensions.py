@@ -7,6 +7,7 @@ is no oil phase in the system.
 """
 
 import sys
+import my_tools
 import numpy as np
 import static_info as stinfo
 from colors_text import TextColor as bcolors
@@ -73,7 +74,7 @@ class NumMols:
                            ) -> None:
         """set the data for the system with oil and water"""
         oil_depth: float  # Depth of the oil phase on the NP
-        oil_depth = self.set_oil_depth(radius)
+        oil_depth = my_tools.oil_depth(radius)
         self.__set_oil_water_edges(oil_depth)
         self.__get_oil_water_numbers(radius, oil_depth)
 
@@ -247,14 +248,8 @@ class NumMols:
                      f'{bcolors.ENDC}')
         return sphere_volume
 
-    def set_oil_depth(self,
-                      radius: float  # Radius of the NP after silanization
-                      ) -> float:
-        """calculate and return the the depth of oil phase `h` in system
-        box"""
-        angle_rad: float  # Contact angle in radian
-        angle_rad = np.radians(stinfo.Hydration.CONATCT_ANGLE)
-        return radius * np.tan(angle_rad/2)
+    def print_info(self) -> None:
+        """pylint"""
 
 
 class BoxEdges:
