@@ -1,6 +1,6 @@
 """Sparse the Grafting on the top of the nanoparticles, randomly
-    or with any other method.
-    Right now it only uses the random sparsing!"""
+or with any other method.
+Right now it only uses the random sparsing!"""
 
 
 import sys
@@ -18,12 +18,12 @@ class PickSi:
                  diameter: float  # The diameter of the Nanoparticles
                  ) -> None:
         self.__method: str = 'random'  # random or area
-        self.si_df: pd.DataFrame = self.__set_coverage(si_df, diameter)
+        self.si_df: pd.DataFrame = self.set_coverage(si_df, diameter)
 
-    def __set_coverage(self,
-                       si_df: pd.DataFrame,  # All the non-body Si in the radiu
-                       diameter: float  # The diameter of the Nanoparticles
-                       ) -> pd.DataFrame:
+    def set_coverage(self,
+                     si_df: pd.DataFrame,  # All the non-body Si in the radius
+                     diameter: float  # The diameter of the Nanoparticles
+                     ) -> pd.DataFrame:
         """select the method of randomly setting the coverage by
         eliminating some of the Si from the data frame or based on the
         area method."""
@@ -75,9 +75,13 @@ class PickSi:
                       si_df: pd.DataFrame  # Si df
                       ) -> list[int]:
         """return atom_id of the Si which thier Ox is not OD
-        To make sure all the OD will be replaced with Amine chain"""
+        To make sure all the OD will be replaced with Amine chain
+        Also, for small angle want to make sure all the chains in oil
+        remain. since for low angle the numbers in the oil is very low
+        """
         return [item for item in si_df['atom_id'] if
-                si_df['Ox_drop_name'][item] != 'OD']
+                (si_df['Ox_drop_name'][item] != 'OD' and
+                 si_df['phase'][item] != 'oil')]
 
     def __set_lables(self,
                      si_df: pd.DataFrame  # All the non-body Si in the radius
@@ -116,3 +120,6 @@ class PickSi:
         """return number of Si for desire coverage of chains on the np"""
         return int(np.floor(
                    np.pi*stinfo.Constants.Coverage*diameter*diameter)) + 1
+
+    def print_info(self) -> None:
+        """pylint"""
