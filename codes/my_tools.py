@@ -2,6 +2,8 @@
 get_radius: find the the radius of the silanized or pure nano partilces
 """
 
+import os
+import sys
 import typing
 import numpy as np
 import pandas as pd
@@ -40,3 +42,24 @@ def drop_duplicate(l_to_set: list[typing.Any]
     seen: set[str] = set()
     seen_add = seen.add
     return [x for x in l_to_set if not (x in seen or seen_add(x))]
+
+
+def check_file(c_file: str,  # Name of the out put of PACKMOL
+               delete: bool = False  # Keep the file or not
+               ) -> int:
+    """check if a file exist, if delete"""
+    pack_flag: int = -1  # Check if exist
+    if os.path.isfile(c_file):
+        print(f'{bcolors.CAUTION}\t'
+              f'`{sys.modules[__name__]}:`\n'
+              f'\t\tAn old "{c_file}" exists'
+              f'{bcolors.ENDC}')
+        if delete:
+            print(f'{bcolors.CAUTION}'
+                  f'\t\tThe old "{c_file}" is deleted'
+                  f'{bcolors.ENDC}')
+            os.remove(c_file)
+    else:
+        if os.path.isfile(c_file):
+            pack_flag = 0
+    return pack_flag
