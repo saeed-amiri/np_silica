@@ -39,6 +39,7 @@ the water box based on the limitations.
 
 import sys
 import typing
+import my_tools
 import run_packmol as pakml
 import static_info as stinfo
 import box_dimensions as boxd
@@ -64,10 +65,14 @@ class InFile:
         # For now, the scripts take the +1 as total charge of ODAp in itp
         # to be true, later it should it be checked by the scripts
         out_file: str = stinfo.Hydration.OUT_FILE
-        with open(stinfo.Hydration.INP_FILE, 'w', encoding="utf8") as f_out:
+        inp_file: str = stinfo.Hydration.INP_FILE
+        my_tools.check_file(out_file, delete=True)
+        my_tools.check_file(inp_file, delete=True)
+        with open(inp_file, 'w', encoding="utf8") as f_out:
             f_out.write('# Input file for PACKMOL, Water box for a NP ')
-            f_out.write(f'with the radius of {self.radius}\n\n')
-            f_out.write('filetype pdb\n')
+            f_out.write(f'with the radius of {self.radius}\n')
+            f_out.write(f'# Contact angle: {stinfo.Hydration.CONATCT_ANGLE}\n')
+            f_out.write('\nfiletype pdb\n')
             f_out.write(f'tolerance {stinfo.Hydration.TOLERANCE}\n')
             f_out.write(f'output {out_file}\n\n')
             self.__water_section(f_out, dimensions)
