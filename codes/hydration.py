@@ -14,12 +14,12 @@ import water_box as wbox
 import write_lmp as wrlmp
 import combine_pdb as cpdb
 import run_packmol as pakml
+import lmp_itp_pdb as itpdb
 import combine_all as merge
 import static_info as stinfo
 import read_lmp_data as rdlmp
 import read_water_box as rbox
 import box_dimensions as boxd
-import lmp_itp_pdb as itpdb
 
 
 if __name__ == '__main__':
