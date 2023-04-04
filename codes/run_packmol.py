@@ -46,7 +46,7 @@ class RunPackMol:
         pack_flag: int = -1  # Check if PACKMOL executed successfully
         if delete:
             if os.path.isfile(out_file):
-                print(f'{bcolors.CAUTION}{self.__class__.__name__} '
+                print(f'{bcolors.CAUTION}{self.__class__.__name__}: '
                       f'({self.__module__})\n'
                       f'\tAn old "{out_file}" exists, it will be deleted'
                       f'{bcolors.ENDC}')
