@@ -7,6 +7,7 @@ import sys
 import typing
 import numpy as np
 import pandas as pd
+import static_info as stinfo
 from colors_text import TextColor as bcolors
 
 
@@ -63,3 +64,12 @@ def check_file(c_file: str,  # Name of the out put of PACKMOL
         if os.path.isfile(c_file):
             pack_flag = 0
     return pack_flag
+
+
+def oil_depth(radius: float  # Radius of the NP
+              ) -> float:
+    """calculate and return the the depth of oil phase `h` in system
+    box"""
+    angle_rad: float  # Contact angle in radian
+    angle_rad = np.radians(stinfo.Hydration.CONATCT_ANGLE)
+    return radius * np.tan(angle_rad/2)
