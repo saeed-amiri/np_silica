@@ -110,7 +110,7 @@ class NumMols:
         sphere_volume: float = self.__get_sphere_volume(radius)
         sphere_in_water: float  # Volume in water section
         sphere_in_oil: float  # Volume in oil section
-        sphere_in_oil = (1/3)*np.pi*(oil_depth**3)*(3*radius-oil_depth)
+        sphere_in_oil = (1/3)*np.pi*(oil_depth**2)*(3*radius-oil_depth)
         sphere_in_water = sphere_volume - sphere_in_oil
         if section == 'sol':
             net_volume = box_volume - sphere_in_water
