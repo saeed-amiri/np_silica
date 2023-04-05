@@ -16,8 +16,10 @@ from colors_text import TextColor as bcolors
 class GetAmino(rdlmp.ReadData):
     """read the main Aminopropyle coordinates and put the Si position
     to zero"""
-    def __init__(self) -> None:
-        fname: str = stinfo.DataFile.APTES
+    def __init__(self,
+                 fname: str  # Name of the file: APTES or APTUN
+                 ) -> None:
+        # fname: str = stinfo.DataFile.APTES
         super().__init__(fname)
         self.__set_attr()
         self.Si = stinfo.Constants.SI_amino
@@ -118,17 +120,19 @@ class PrepareAmino:
         """
     def __init__(self,
                  update: upcord.UpdateCoords,  # All the information of silica
-                 amino: GetAmino  # Information about one aminos
+                 amino_pro: GetAmino,  # Information about one PATES
+                 amino_unp: GetAmino  # Information about one PATUN
                  ) -> None:
         """apply the position update to the aminos' SI & OM"""
         self.Si = stinfo.Constants.SI_amino
         self.OM = stinfo.Constants.OM_amino
-        self.__update_aminos(update, amino)
+        self.__update_aminos(update, amino_pro, amino_unp)
         self.__write_infos(update.si_df)
 
     def __update_aminos(self,
                         update: upcord.UpdateCoords,  # Information of silica
-                        amino0: GetAmino  # Information about one aminos
+                        amino_pro: GetAmino,  # Information about one APTES
+                        amino_unp: GetAmino  # Information about one APTUN
                         ) -> None:
         """do"""
         si_df: pd.DataFrame  # Si groups with rotation angles
@@ -139,13 +143,20 @@ class PrepareAmino:
         Angles_list: list[pd.DataFrame] = []  # Keep all the aminos to concate
         Dihedrals_list: list[pd.DataFrame] = []  # Keep all the aminos> concate
         si_df = self.__order_si_df(si_df)
-        for item, row in si_df.iterrows():
+        atom_level: int = 0  # Atom id increase
+        last_atom_index: int  # Index of the last atom updated df
+        OM_n = stinfo.Constants.OM_n
+
+        for si_count, (item, row) in enumerate(si_df.iterrows()):
             # Si from amino will be deleted later, so the rest of
             # atoms must start on lower id
             # I made a mistake here in working with the attributes of
             # an external class; as a workaround, I used another class
             # to avoid re-reading data many times.
-            amino = OriginAmino(amino0)
+            if row['phase'] == 'water':
+                amino = OriginAmino(amino_pro)
+            else:
+                amino = OriginAmino(amino_unp)
 
             # Update the type of the atoms before anything
             amino_masses: pd.DataFrame  # To update the atom index in masse
@@ -161,9 +172,13 @@ class PrepareAmino:
                 self.__update_boandi_types(update.Dihedrals_df,
                                            amino.Dihedrals_df)
             # calculate the level ups for Aminopropyl
-            OM_n = stinfo.Constants.OM_n
-            atom_level: int  # Atom id increase
-            atom_level = (item - 1) * (amino.NAtoms - OM_n) + update.NAtoms
+            if si_count == 0:
+                atom_level = (item - 1) * (amino.NAtoms - OM_n) + update.NAtoms
+                last_atom_index = atom_level + amino.NAtoms - OM_n
+            else:
+                # atom_level = last_atom_index + amino.NAtoms - OM_n
+                atom_level = last_atom_index
+                last_atom_index = atom_level + amino.NAtoms - OM_n
             mol_level: int = item - 1 + update.Nmols
 
             # Replace the Si atom in Aminopropyl with the proper one
