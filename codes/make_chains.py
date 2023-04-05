@@ -146,7 +146,19 @@ class PrepareAmino:
         atom_level: int = 0  # Atom id increase
         last_atom_index: int  # Index of the last atom updated df
         OM_n = stinfo.Constants.OM_n
-
+        amino_masses: pd.DataFrame  # To update the atom index in masse
+        # masses_list: list[pd.DataFrame]  # list of the masses df to update
+        # if stinfo.Hydration.CONATCT_ANGLE > 0:
+            # masses_list = [amino_pro.Masses_df, amino_unp.Masses_df]
+            # amino_masses = self.update_mass_index(update.Masses_df,
+                                #    masses_list=masses_list,
+                                #    oil=True)
+        # else:
+        amino_masses = self.__update_mass_index(update.Masses_df,
+                                                amino_pro.Masses_df)
+            # masses_list = [amino_pro.Masses_df]
+            # amino_masses = self.update_mass_index(update.Masses_df,
+                                #    masses_list=masses_list)
         for si_count, (item, row) in enumerate(si_df.iterrows()):
             # Si from amino will be deleted later, so the rest of
             # atoms must start on lower id
@@ -159,9 +171,6 @@ class PrepareAmino:
                 amino = OriginAmino(amino_unp)
 
             # Update the type of the atoms before anything
-            amino_masses: pd.DataFrame  # To update the atom index in masse
-            amino_masses = self.__update_mass_index(update.Masses_df,
-                                                    amino.Masses_df)
             Atoms_df = self.__update_atom_types(amino.Atoms_df,
                                                 amino_masses)
             amino.Bonds_df = self.__update_boandi_types(update.Bonds_df,
@@ -234,6 +243,51 @@ class PrepareAmino:
               f', {len(self.All_amino_angles)} angles'
               f', {len(self.All_amino_dihedrals)} dihedrals'
               f' is updated{bcolors.ENDC}')
+
+    def update_mass_index(self,
+                          silica_masses: pd.DataFrame,  # Masses of silica
+                          masses_list: list[pd.DataFrame], # All APT masses df
+                          oil: bool = False  # Flag if there is oil
+                          ) -> pd.DataFrame:
+        """this module updates the masses section and looks if APTES
+        and APTUN have different atoms in their masses unit. The atoms
+        must be the same, but for a sanity check, there is a need to
+        do this."""
+        silica_ind: int = np.max(silica_masses['typ'])
+        df_c: pd.DataFrame  # Copy of the dataframe
+        if oil:
+            df_c = self.__get_black_sheeps(masses_list, silica_ind)
+        else:
+            df_c = masses_list[0].copy()
+        df_c['old_typ'] = df_c['typ']
+        for item, _ in masses_list[0].iterrows():
+            df_c.at[item, 'typ'] += silica_ind
+        return df_c
+
+    def __get_black_sheeps(self,
+                           masses_list: list[pd.DataFrame],  # Masses of APTs
+                           silica_final: int  #  Last index in silica masses
+                           ) -> pd.DataFrame:
+        df_pro = masses_list[0].copy()
+        df_unp = masses_list[1].copy()
+        aptes_max: int  # Max ind of the aptes without root atoms
+        aptes_max = np.max(df_pro.loc[(df_pro['name'] != self.Si) &
+                                      (df_pro['name'] != self.OM)]['typ'])
+        df_diff = pd.concat([df_pro,df_unp]).drop_duplicates(keep=False)
+        if not df_diff.empty:
+            df_sheep: pd.DataFrame = pd.merge(df_unp,df_diff)
+        sheeps_ind: int = aptes_max + silica_final
+        black_sheeps: list[int] = []  # Index of the extera atoms
+        for item, row in df_sheep.iterrows():
+            if row['name'] in list(df_unp['name']):
+                black_sheeps.append(item)
+        for count, item in enumerate(black_sheeps):
+            df_unp.at[item+1, 'typ'] = int(sheeps_ind + count + item + 1)
+        df_merged = pd.concat([df_pro,df_unp], 
+                              ignore_index=True).drop_duplicates(keep='first')
+        df_merged.index += 1
+        return df_merged
+
 
     def __check_boandi_name(self,
                             Atoms_df: pd.DataFrame,  # Updated atoms df
