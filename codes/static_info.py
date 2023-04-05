@@ -60,7 +60,7 @@ class UpdateCharge:
 class Constants:
     """The constants which are used in the script"""
     # The desire coverage for grafting on NP
-    Coverage: float = 3.0
+    Coverage: float = 1.0
     # The thickness of the shell from surface to look for Si atoms
     Shell_radius: float = 6.0
     # calculate the level ups for Aminopropyl
@@ -88,7 +88,10 @@ class AtomGroup:
 
 class DataFile:
     """Get data directory which are used in the script"""
+    # Prtonated data of the APTES
     APTES: str = os.path.join(SOURCE_DIR, 'aminopropyl_pro.data')
+    # Unprtonated data of the APTES
+    APTUN: str = os.path.join(SOURCE_DIR, 'aminopropyl_unpro.data')
     SI_DF: str = 'SI_DF'  # File with selected info of si atom in adding APTES
     SI_XYZ: str = 'SI_XYZ'  # File with  info of si atom in adding APTES
 
@@ -100,7 +103,7 @@ class Hydration:
     # Contact angle, it defeins how much of the nanoparticle should be
     # in the oil phase, in case there is oil phase the APTES on the oil
     # phase are unprotonated
-    CONATCT_ANGLE: float = 120  # In degree; If negetive -> no oil, MAX depends!
+    CONATCT_ANGLE: float = 40  # In degree; If negetive -> no oil, MAX depends!
     # Box dimensions
     # x
     X_MIN: float = -20.0
