@@ -198,7 +198,8 @@ class ConcatAll:
         """write si_df to the file to keep track of SI information"""
         si_df.to_csv(stinfo.DataFile.SI_DF, sep=' ', index=True)
         columns: list[str]  # Columns to write to a different file
-        columns = ['atom_id', 'mol', 'typ', 'charge', 'x', 'y', 'z', 'name']
+        columns = ['atom_id', 'mol', 'typ', 'charge',
+                   'x', 'y', 'z', 'name', 'phase']
         si_df.to_csv(stinfo.DataFile.SI_XYZ,
                      sep=' ',
                      index=False,
@@ -210,8 +211,9 @@ class ConcatAll:
 if __name__ == '__main__':
     F_NAME = sys.argv[1]
     update = upcord.UpdateCoords(F_NAME)  # Updated data for silica
-    amino = mkchin.GetAmino()
-    up_aminos = mkchin.PrepareAmino(update, amino)
+    amino_pro = mkchin.GetAmino(stinfo.DataFile.APTES)
+    amino_unp = mkchin.GetAmino(stinfo.DataFile.APTUN)
+    up_aminos = mkchin.PrepareAmino(update, amino_pro, amino_unp)
     silanized_data = ConcatAll(update, up_aminos)
     CHECK_BOND: bool = False  # To check the bonds
     if CHECK_BOND:
