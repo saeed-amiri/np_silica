@@ -305,71 +305,87 @@ class BoAnDi:
     BONDS = {
              'OMH_HO': {'r': 0.09500,
                         'k': 533549.0,
+                        'funct': 2,
                         'source': 'doi.org/10.1021/la504178g'},
 
              'SU_OB': {'r': 0.16300,
                        'k': 323984.0,
+                       'funct': 2,
                        'source': 'doi.org/10.1021/la504178g',
                        'note': '1 times of value of the source'},
 
              'SD_OD': {'r': 0.16300,
                        'k': 323984.0,
+                       'funct': 2,
                        'source': 'doi.org/10.1021/la504178g',
                        'note': '1 times of value of the source'},
 
              'SD_OMH': {'r': 0.16300,
                         'k': 323984.0,
+                        'funct': 2,
                         'source': 'doi.org/10.1021/la504178g',
                         'note': '1 times of value of the source'},
 
              'SI_OB': {'r': 0.16300,
                        'k': 323984.0,
+                       'funct': 2,
                        'source': 'doi.org/10.1021/la504178g',
                        'note': '1 times of value of the source'},
 
              'SI_OH': {'r': 0.16300,
                        'k': 323984.0,
+                       'funct': 2,
                        'source': 'doi.org/10.1021/la504178g',
                        'note': '1 times of value of the source'},
 
              'OH_HO': {'r': 0.09500,
                        'k': 533549.0,
+                       'funct': 2,
                        'source': 'doi.org/10.1021/la504178g'},
 
              'SD_OM': {'r': 0.16300,
                        'k': 323984.0,
+                       'funct': 2,
                        'source': 'doi.org/10.1021/la504178g'},
 
              'SI_OM': {'r': 0.16300,
                        'k': 323984.0,
+                       'funct': 2,
                        'source': 'doi.org/10.1021/la504178g'},
 
              'CH_HC': {'r': 0.10900,
                        'k': 284512.0,
+                       'funct': 2,
                        'source': 'doi.org/10.1021/la504178g'},
 
              'CN_HC': {'r': 0.10900,
                        'k': 284512.0,
+                       'funct': 2,
                        'source': 'doi.org/10.1021/la504178g'},
 
              'N_HN': {'r': 0.10100,
                       'k': 363171,
+                      'funct': 2,
                       'source': 'ODA from lammps'},
 
-             'SI_CH': {'r': 0.18400,
-                       'k': 100000.0,
-                       'source': 'doi.org/10.1021/la504178g'},
+             'SI_CH': {'r': 0.1800,
+                       'k':418400,
+                       'funct': 2,
+                       'source': 'see chatGpt file'},
 
              'CH_CH': {'r': 0.15290,
                        'k': 224262.4,
+                       'funct': 2,
                        'source': 'doi.org/10.1021/la504178g'},
 
              'CH_CN': {'r': 0.15290,
                        'k': 224262.4,
+                       'funct': 2,
                        'source': 'doi.org/10.1021/la504178g'},
 
              'CN_N': {'r': 0.14480,
                       'k': 319658,
+                      'funct': 2,
                       'source': 'ODA from lammps'}
 
              }
@@ -377,108 +393,134 @@ class BoAnDi:
     ANGLES = {
               'SI_OM_SD': {'theta': 144.00,
                            'cth': 209.60,
+                           'funct': 2,
                            'source': 'doi.org/10.1021/la504178g'},
 
               'SI_OB_SI': {'theta': 144.00,
                            'cth': 209.60,
+                           'funct': 2,
                            'source': 'doi.org/10.1021/la504178g'},
 
               'SD_OMH_HO': {'theta': 119.52,
                             'cth': 228.84,
+                            'funct': 2,
                             'source': 'doi.org/10.1021/la504178g'},
 
               'SU_OB_SI': {'theta': 144.00,
                            'cth': 209.60,
+                           'funct': 2,
                            'source': 'doi.org/10.1021/la504178g'},
 
               'SI_OH_HO': {'theta': 119.52,
                            'cth': 228.84,
+                           'funct': 2,
                            'source': 'doi.org/10.1021/la504178g'},
 
               'SD_OM_SI': {'theta': 144.00,
                            'cth': 209.60,
+                           'funct': 2,
                            'source': 'doi.org/10.1021/la504178g'},
 
               'SI_OB_SU': {'theta': 144.00,
                            'cth': 209.60,
+                           'funct': 2,
                            'source': 'doi.org/10.1021/la504178g'},
 
-              'SI_CH_CH': {'theta': 109.45,
-                           'cth': 482.30,
-                           'source': 'doi.org/10.1021/la504178g'},
+              'SI_CH_CH': {'theta': 120.00,
+                           'cth': 403.20,
+                           'funct': 2,
+                           'source': 'see the chatGpt'},
 
-              'SD_CH_CH': {'theta': 109.45,
-                           'cth': 482.30,
-                           'source': 'doi.org/10.1021/la504178g'},
+              'SD_CH_CH': {'theta': 120.00,
+                           'cth': 403.20,
+                           'funct': 2,
+                           'source': 'see the chatGpt'},
 
               'CH_CN_N': {'theta': 109.47,
                           'cth': 470.2816,
+                          'funct': 2,
                           'source': 'doi.org/10.1021/la504178g'},
 
               'CH_CH_CN': {'theta': 112.70,
                            'cth': 488.2728,
+                           'funct': 2,
                            'source': 'ODA from lammps'},
 
               'HN_N_HN': {'theta': 106.4,
                           'cth': 364.8448,
+                          'funct': 2,
                           'source': 'ODA from lammps'},
 
               'HC_CH_HC': {'theta': 107.80,
                            'cth': 276.144,
+                           'funct': 2,
                            'source': 'doi.org/10.1021/la504178g'},
 
               'HC_CN_HC': {'theta': 107.80,
                            'cth': 276.144,
+                           'funct': 2,
                            'source': 'doi.org/10.1021/la504178g'},
 
-              'SD_CH_HC': {'theta': 109.45,
-                           'cth': 482.30,
-                           'source': 'doi.org/10.1021/la504178g'},
+              'SD_CH_HC': {'theta': 120.00,
+                           'cth': 403.20,
+                           'funct': 2,
+                           'source': 'see the chatGpt'},
 
-              'SI_CH_HC': {'theta': 111,
-                           'cth': 0.000,
-                           'source': 'doi.org/10.1021/la504178g'},
+              'SI_CH_HC': {'theta': 109.5,
+                           'cth': 37.50,
+                           'funct': 2,
+                           'source': 'see the chatGpt'},
 
               'HC_CN_N': {'theta': 109.5,
                           'cth': 292.88,
+                          'funct': 2,
                           'source': 'ODA from lammps'},
 
-              'OB_SI_CH': {'theta': 109.47,
-                           'cth': 469.72,
-                           'source': 'doi.org/10.1021/la504178g'},
+              'OB_SI_CH': {'theta': 120.00,
+                           'cth': 424.24,
+                           'funct': 2,
+                           'source': 'see chatGpt'},
 
-              'OM_SI_CH': {'theta': 109.47,
-                           'cth': 469.72,
-                           'source': 'doi.org/10.1021/la504178g'},
+              'OM_SI_CH': {'theta': 120.00,
+                           'cth': 424.24,
+                           'funct': 2,
+                           'source': 'see chatGpt'},
 
-              'OM_SD_CH': {'theta': 109.47,
-                           'cth': 469.72,
-                           'source': 'doi.org/10.1021/la504178g'},
+              'OM_SD_CH': {'theta': 120.00,
+                           'cth': 424.24,
+                           'funct': 2,
+                           'source': 'see chatGpt'},
 
               'CN_N_HN': {'theta': 109.47,
                           'cth': 292.88,
+                          'funct': 2,
                           'source': 'ODA from lammps'},
 
               'CH_CH_HC': {'theta': 110.70,
                            'cth': 313.800,
+                           'funct': 2,
                            'source': 'doi.org/10.1021/la504178g'},
 
               'HC_CH_CH': {'theta': 110.70,
                            'cth': 313.800,
+                           'funct': 2,
                            'source': 'doi.org/10.1021/la504178g'},
 
               'CH_CN_HC': {'theta': 110.70,
                            'cth': 313.800,
+                           'funct': 2,
                            'source': 'doi.org/10.1021/la504178g'},
 
               'HC_CH_CN': {'theta': 110.70,
                            'cth': 313.800,
+                           'funct': 2,
                            'source': 'doi.org/10.1021/la504178g'}
 
               }
     DIHEDRLAS: dict[str, typing.Any]  # Dihedrals names and parameters
     DIHEDRLAS = {
-                 'SI_CH_CH_CN': {'C0': 6.00000,
+                 'SI_CH_CH_CN': {'funct': 1,
+                                 'C0': 6.00000,
                                  'C1': 0,
                                  'C2': 0,
                                  'C3': 0,
@@ -486,7 +528,8 @@ class BoAnDi:
                                  'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
-                 'SD_CH_CH_CN': {'C0': 6.00000,
+                 'SD_CH_CH_CN': {'funct': 1,
+                                 'C0': 6.00000,
                                  'C1': 0,
                                  'C2': 0,
                                  'C3': 0,
@@ -494,7 +537,8 @@ class BoAnDi:
                                  'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
-                 'CH_CH_CN_N': {'C0': 6.00000,
+                 'CH_CH_CN_N': {'funct': 1,
+                                'C0': 6.00000,
                                 'C1': 0,
                                 'C2': 0,
                                 'C3': 0,
@@ -502,7 +546,8 @@ class BoAnDi:
                                 'C5': 0,
                                 'source': 'doi.org/10.1021/la504178g'},
 
-                 'SI_CH_CH_HC': {'C0': 6.00000,
+                 'SI_CH_CH_HC': {'funct': 1,
+                                 'C0': 6.00000,
                                  'C1': 0,
                                  'C2': 0,
                                  'C3': 0,
@@ -510,7 +555,8 @@ class BoAnDi:
                                  'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
-                 'SD_CH_CH_HC': {'C0': 6.00000,
+                 'SD_CH_CH_HC': {'funct': 1,
+                                 'C0': 6.00000,
                                  'C1': 0,
                                  'C2': 0,
                                  'C3': 0,
@@ -518,7 +564,8 @@ class BoAnDi:
                                  'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
-                 'HC_CH_CN_N': {'C0': 6.00000,
+                 'HC_CH_CN_N': {'funct': 1,
+                                'C0': 6.00000,
                                 'C1': 0,
                                 'C2': 0,
                                 'C3': 0,
@@ -526,7 +573,8 @@ class BoAnDi:
                                 'C5': 0,
                                 'source': 'doi.org/10.1021/la504178g'},
 
-                 'OB_SI_CH_CH': {'C0': 6.00000,
+                 'OB_SI_CH_CH': {'funct': 1,
+                                 'C0': 6.00000,
                                  'C1': 0,
                                  'C2': 0,
                                  'C3': 0,
@@ -534,7 +582,8 @@ class BoAnDi:
                                  'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
-                 'OM_SD_CH_CH': {'C0': 6.00000,
+                 'OM_SD_CH_CH': {'funct': 1,
+                                 'C0': 6.00000,
                                  'C1': 0,
                                  'C2': 0,
                                  'C3': 0,
@@ -542,7 +591,8 @@ class BoAnDi:
                                  'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
-                 'OM_SI_CH_CH': {'C0': 6.00000,
+                 'OM_SI_CH_CH': {'funct': 1,
+                                 'C0': 6.00000,
                                  'C1': 0,
                                  'C2': 0,
                                  'C3': 0,
@@ -550,7 +600,8 @@ class BoAnDi:
                                  'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
-                 'CH_CN_N_HN': {'C0': 6.00000,
+                 'CH_CN_N_HN': {'funct': 1,
+                                'C0': 6.00000,
                                 'C1': 0,
                                 'C2': 0,
                                 'C3': 0,
@@ -558,7 +609,8 @@ class BoAnDi:
                                 'C5': 0,
                                 'source': 'doi.org/10.1021/la504178g'},
 
-                 'CH_CH_CN_HC': {'C0': 0.62760,
+                 'CH_CH_CN_HC': {'funct': 3,
+                                 'C0': 0.62760,
                                  'C1': 1.88280,
                                  'C2': 0,
                                  'C3': -2.51040,
@@ -566,7 +618,8 @@ class BoAnDi:
                                  'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
-                 'HC_CH_CH_CN': {'C0': 0.62760,
+                 'HC_CH_CH_CN': {'funct': 3,
+                                 'C0': 0.62760,
                                  'C1': 1.88280,
                                  'C2': 0,
                                  'C3': -2.51040,
@@ -574,7 +627,8 @@ class BoAnDi:
                                  'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
-                 'OM_SI_CH_HC': {'C0': 6.00000,
+                 'OM_SI_CH_HC': {'funct': 1,
+                                 'C0': 6.00000,
                                  'C1': 0,
                                  'C2': 0,
                                  'C3': 0,
@@ -582,7 +636,8 @@ class BoAnDi:
                                  'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
-                 'OB_SI_CH_HC': {'C0': 6.00000,
+                 'OB_SI_CH_HC': {'funct': 1,
+                                 'C0': 6.00000,
                                  'C1': 0,
                                  'C2': 0,
                                  'C3': 0,
@@ -590,7 +645,8 @@ class BoAnDi:
                                  'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
-                 'OM_SD_CH_HC': {'C0': 6.00000,
+                 'OM_SD_CH_HC': {'funct': 1,
+                                 'C0': 6.00000,
                                  'C1': 0,
                                  'C2': 0,
                                  'C3': 0,
@@ -598,7 +654,8 @@ class BoAnDi:
                                  'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
-                 'HC_CN_N_HN': {'C0': 6.00000,
+                 'HC_CN_N_HN': {'funct': 1,
+                                 'C0': 6.00000,
                                 'C1': 0,
                                 'C2': 0,
                                 'C3': 0,
@@ -606,7 +663,8 @@ class BoAnDi:
                                 'C5': 0,
                                 'source': 'doi.org/10.1021/la504178g'},
 
-                 'HC_CH_CH_HC': {'C0': 0.62760,
+                 'HC_CH_CH_HC': {'funct': 3,
+                                 'C0': 0.62760,
                                  'C1': 1.88280,
                                  'C2': 0,
                                  'C3': -2.51040,
@@ -614,7 +672,8 @@ class BoAnDi:
                                  'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
-                 'HC_CH_CN_HC': {'C0': 0.62760,
+                 'HC_CH_CN_HC': {'funct': 3,
+                                 'C0': 0.62760,
                                  'C1': 1.88280,
                                  'C2': 0,
                                  'C3': -2.51040,
