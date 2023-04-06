@@ -103,7 +103,7 @@ class Itp:
         Bonds_df: pd.DataFrame = lmp.Bonds_df.copy().sort_values(by='ai')
         df_i['ai'] = Bonds_df['ai']
         df_i['aj'] = Bonds_df['aj']
-        df_i['funct'] = [1 for _ in df_i['ai']]
+        # df_i['funct'] = [1 for _ in df_i['ai']]
         try:
             df_i[' '] = [';' for _ in df_i['ai']]
             df_i['name'] = lmp.Bonds_df['name']
@@ -118,7 +118,7 @@ class Itp:
         if stinfo.BoAnDi.BONDS_FLAG:
             df_i = self.__get_boandi_para(df_i,
                                           stinfo.BoAnDi.BONDS,
-                                          ['r', 'k'])
+                                          ['r', 'k', 'funct'])
         if CHECK_RES:
             df_i['resname'], df_i['resnr'] = self.__get_bonds_res(lmp, df_i)
         return df_i
@@ -191,7 +191,7 @@ class Itp:
         if stinfo.BoAnDi.ANGLES_FLAG:
             df_i = self.__get_boandi_para(df_i,
                                           stinfo.BoAnDi.ANGLES,
-                                          ['theta', 'cth'])
+                                          ['theta', 'cth', 'funct'])
         if CHECK_RES:
             df_i['resname'], df_i['resnr'] = self.__get_angles_res(lmp, df_i)
         return df_i
@@ -278,7 +278,8 @@ class Itp:
         if stinfo.BoAnDi.DIHEDRALS_FLAG:
             df_i = self.__get_boandi_para(df_i,
                                           stinfo.BoAnDi.DIHEDRLAS,
-                                          ['C0', 'C1', 'C2', 'C3', 'C4', 'C5'])
+                                          ['C0', 'C1', 'C2', 'C3',
+                                           'C4', 'C5', 'funct'])
         if CHECK_RES:
             df_i['resname'], df_i['resnr'] =\
                 self.__get_dihedrals_res(lmp, df_i)
