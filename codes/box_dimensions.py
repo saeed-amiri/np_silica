@@ -17,8 +17,8 @@ class NumMols:
     """calculate the number of molecules for each of the system:
     Numbers of water molecules (In data files named as: SOL)
     Number of decane molecules (In data files named as: oil)
-    Numbers of ODAP molecules (In data files named as: ODA)
-    Numbers od ODA molecules (In data files named as: ODN)
+    Numbers of ODAP molecules (In data files named as: ODAP)
+    Numbers od ODA molecules (In data files named as: ODAN)
     Numbers of ION atoms (In data files named as: NA or CL)
     """
     def __init__(self,
@@ -193,8 +193,8 @@ class NumMols:
         """calculate the number of odn based on the concentration in oil"""
         odn_moles: int  # Number of oda molecules in the system
         # I will add the calculation later, but for now:
-        odn_moles = stinfo.Hydration.N_ODN
-        print(f'{bcolors.OKCYAN}\tNumber of ODN (unprotonated ODA) is '
+        odn_moles = stinfo.Hydration.N_ODAN
+        print(f'{bcolors.OKCYAN}\tNumber of ODAN (unprotonated ODA) is '
               f'set to "{odn_moles}" with total charge of `{odn_moles}`'
               f'{bcolors.ENDC}')
         return odn_moles

@@ -60,7 +60,7 @@ class UpdateCharge:
 class Constants:
     """The constants which are used in the script"""
     # The desire coverage for grafting on NP
-    Coverage: float = 1.0
+    Coverage: float = 3.0
     # The thickness of the shell from surface to look for Si atoms
     Shell_radius: float = 6.0
     # calculate the level ups for Aminopropyl
@@ -103,7 +103,7 @@ class Hydration:
     # Contact angle, it defeins how much of the nanoparticle should be
     # in the oil phase, in case there is oil phase the APTES on the oil
     # phase are unprotonated
-    CONATCT_ANGLE: float = 40  # In degree; If negetive -> no oil, MAX depends!
+    CONATCT_ANGLE: float = -1  # In degree; If negetive -> no oil, MAX depends!
     # Box dimensions
     # x
     X_MIN: float = -20.0
@@ -146,10 +146,11 @@ class Hydration:
     GRO_PDB: str = 'silica_water.pdb'  # File for GROMACS input
     # PACKMOL lib
     PACKMOL: str = '/home/saeed/Downloads/packmol/packmol'
-    # Number or concentration of ODAP and ODN (in case later wanted)
+    # Number or concentration of ODAP and ODAN (in case later wanted)
     # It is used in the write_water and lmp_itp_pdb
-    N_ODAP: int = 16  # Protonated ODA will add to water section
-    N_ODN: int = 0  # Unprotonated ODA will add to if oil section
+    N_ODAP: int = 0  # Protonated ODA will add to water section
+    N_ODAN: int = 0  # Unprotonated ODA will add to if oil section
+
 
 
 class PosRes:
@@ -237,6 +238,12 @@ class PdbMass:
                                 'RECORD': 'ATOM',
                                 'ff_type': 'opls_287'
                                 }
+    F: dict[str, typing.Any] = {'Atoms_names': 'F',
+                                'Residue': aptes_residue,
+                                'Element_symbol': 'F',
+                                'RECORD': 'ATOM',
+                                'ff_type': 'opls_287'
+                                }
     CH: dict[str, typing.Any] = {'Atoms_names': 'CH',
                                  'Residue': aptes_residue,
                                  'Element_symbol': 'C',
@@ -281,7 +288,8 @@ class PdbMass:
                                                'HC': HC,
                                                'CN': CN,
                                                'HN': HN,
-                                               'C': C
+                                               'C': C,
+                                               'F': F
                                                }
     MOLECULES: dict[str, typing.Any]  # Contains all the molecules' atoms info
 

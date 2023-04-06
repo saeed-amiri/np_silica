@@ -503,7 +503,7 @@ class Call:
             self.copy_itps(stinfo.Hydration.ODAP_ITP)
         if stinfo.Hydration.CONATCT_ANGLE > 0:
             self.copy_itps(stinfo.Hydration.OIL_ITP)
-            if stinfo.Hydration.N_ODN > 0:
+            if stinfo.Hydration.N_ODAN > 0:
                 self.copy_itps(stinfo.Hydration.ODAN_ITP)
 
     def copy_itps(self,
