@@ -30,7 +30,8 @@ class NumMols:
                            'oil': 0,  # Number of decane molecues in the system
                            'oda': 0,  # Number of ODAp molecues in the system
                            'odn': 0,  # Number of ODA molecues in the system
-                           'ion': 0  # Number of ION atoms in the system
+                           'ion': 0,  # Number of ION atoms in the system
+                           'sal': 0  # Number of NaCl molecule in the system
                            }
         self.box_edges: dict[str, dict[str, float]]  # Edges of system's box
         self.box_edges = {'box': {'x_lim': 0.0,  # System's box
@@ -56,6 +57,7 @@ class NumMols:
         box_volume: float  # Volume of the final system's box
         box_volume = self.__box_volume(radius)
         # !!!num_oda must be set before num_ioins!!!
+        self.moles_nums['sal'] = int(self.__get_nacl_num())
         self.moles_nums['oda'] = self.__get_odap_num()
         self.moles_nums['ion'] = self.__get_ion_num(net_charge)
         if stinfo.Hydration.CONATCT_ANGLE < 0:
@@ -68,6 +70,12 @@ class NumMols:
                   f'[rad] {bcolors.ENDC}')
             self.__oil_water_system(radius)
             self.moles_nums['odn'] = self.__get_odn_num()
+
+    def __get_nacl_num(self) -> float:
+        """return the number of NaCl molecules based on the concente-
+        ration."""
+        nacl = SaltSum()
+        return nacl.n_nacl
 
     def __oil_water_system(self,
                            radius: float  # Radius of the silanized NP
@@ -251,6 +259,37 @@ class NumMols:
     def print_info(self) -> None:
         """pylint"""
 
+
+class SaltSum:
+    """get the number of NaCl molecules based on the concentration
+    that asked in the input."""
+    def __init__(self) -> None:
+        self.n_nacl: int  # Number of the NaCl molecules
+        self.get_salt()
+
+    def get_salt(self) -> None:
+        """check the input data and select the module to call"""
+        style: str  # The type of the concentration
+        amount: float  # The amount which is asked for
+        style = stinfo.Hydration.N_NACL['sty']
+        amount = stinfo.Hydration.N_NACL['sum']
+        print(amount)
+        if amount > 0:
+            pass
+        else:
+            self.n_nacl = int(amount)
+
+    def get_molal(self) -> int:
+        """calculate the number based on the molality of the salt
+        number of NaCl molecules = b x N / (rho x 1000) x 6.022 x 10^23
+        where:
+        b (amount) is the molality of the solution in mol/kg
+        N (n_sol) is the number of water molecules
+        rho is the density of water in g/cm^3
+        1000 is the conversion factor from grams to kilograms
+        6.022 x 10^23 is Avogadro's number
+        """
+        
 
 class BoxEdges:
     """make the calculation for system box based on the contact angle"""
