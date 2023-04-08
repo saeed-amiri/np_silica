@@ -150,7 +150,13 @@ class Hydration:
     # It is used in the write_water and lmp_itp_pdb
     N_ODAP: int = 0  # Protonated ODA will add to water section
     N_ODAN: int = 0  # Unprotonated ODA will add to if oil section
-
+    # Salt (NaCl) parameters
+    # Need a tuple type of concentration or molality
+    # For now it only supporrt molality
+    # Molal: Containing one mole of solute per kilogram of solvent.
+    # Molal should be in `MILIMOLAL`:  millimoles per kg !!!
+    N_NACL: dict[str, typing.Any]  # Type of concenteration and amount
+    N_NACL = {'sty': 'mmolal', 'sum': 5}
 
 
 class PosRes:
