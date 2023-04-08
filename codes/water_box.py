@@ -101,12 +101,25 @@ class InFile:
                                   dimensions.num_mols['sol'])
         self.__check_ions(f_out, dimensions)
         self.__check_oda(f_out, dimensions, 'oda')
+        self.__check_nacl(f_out, dimensions)
+
+    def __check_nacl(self,
+                     f_out: typing.IO,  # The file to write into it
+                     dimensions: boxd.BoxEdges  # Num_moles, dims of box
+                     ) -> None:
+        """check nacl charges and write its part"""
+        if dimensions.num_mols['sal'] > 0:
+            for pdb in [stinfo.Hydration.CL_PDB, stinfo.Hydration.NA_PDB]:
+                self.__write_inp_sections(f_out,
+                                          dimensions.water_axis,
+                                          pdb,
+                                          dimensions.num_mols['sal'])
 
     def __check_ions(self,
                      f_out: typing.IO,  # The file to write into it
                      dimensions: boxd.BoxEdges  # Num_moles, dims of box
                      ) -> None:
-        """check ions charges and write it part"""
+        """check ions charges and write its part"""
         pdb_file: str  # Name of the pdbfile based on the charge of the system
         num_ions: int = dimensions.num_mols['ion']
         if num_ions > 0:
@@ -116,7 +129,7 @@ class InFile:
         self.__write_inp_sections(f_out,
                                   dimensions.water_axis,
                                   pdb_file,
-                                  dimensions.num_mols['ion'])
+                                  num_ions)
 
     def __check_oda(self,
                     f_out: typing.IO,  # The file to write into it
