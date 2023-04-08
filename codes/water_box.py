@@ -105,7 +105,6 @@ class InFile:
         self.__print_header(f_out, ' Counter ions ')
         self.__check_ions(f_out, dimensions)
         self.__check_oda(f_out, dimensions, 'oda')
-        self.__print_header(f_out, ' NaCl ')
         self.__check_nacl(f_out, dimensions)
 
     def __check_nacl(self,
@@ -114,6 +113,7 @@ class InFile:
                      ) -> None:
         """check nacl charges and write its part"""
         if dimensions.num_mols['sal'] > 0:
+            self.__print_header(f_out, ' NaCl ')
             for pdb in [stinfo.Hydration.CL_PDB, stinfo.Hydration.NA_PDB]:
                 self.__write_inp_sections(f_out,
                                           dimensions.water_axis,
