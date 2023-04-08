@@ -70,7 +70,7 @@ class NumMols:
             self.__oil_water_system(radius)
             self.moles_nums['odn'] = self.__get_odn_num()
         # Obviously the number of water should be defined before hand
-        self.moles_nums['sal'] = self.__get_nacl_num().astype(int)
+        self.moles_nums['sal'] = int(self.__get_nacl_num())
 
     def __get_nacl_num(self) -> float:
         """return the number of NaCl molecules based on the concente-
