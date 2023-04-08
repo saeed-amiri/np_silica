@@ -84,6 +84,7 @@ class InFile:
                       ) -> None:
         """set the data for mols in water section"""
         if stinfo.Hydration.CONATCT_ANGLE > 0:
+            self.__print_header(f_out, ' Oil ')
             self.__write_inp_sections(f_out,
                                       dimensions.oil_axis,
                                       stinfo.Hydration.OIL_PDB,
@@ -95,12 +96,15 @@ class InFile:
                         dimensions: boxd.BoxEdges  # Num_moles, dims of box
                         ) -> None:
         """set the data for mols in water section"""
+        self.__print_header(f_out, ' Water ')
         self.__write_inp_sections(f_out,
                                   dimensions.water_axis,
                                   stinfo.Hydration.WATER_PDB,
                                   dimensions.num_mols['sol'])
+        self.__print_header(f_out, ' Counter ions ')
         self.__check_ions(f_out, dimensions)
         self.__check_oda(f_out, dimensions, 'oda')
+        self.__print_header(f_out, ' NaCl ')
         self.__check_nacl(f_out, dimensions)
 
     def __check_nacl(self,
@@ -148,9 +152,11 @@ class InFile:
                          f'{bcolors.ENDC}')
             else:
                 if style == 'oda':
+                    self.__print_header(f_out, ' Protonated Octadecylamine ')
                     pdb_file = stinfo.Hydration.ODAP_PDB
                     dimens = dimensions.water_axis
                 elif style == 'odn':
+                    self.__print_header(f_out, ' Unprotonated Octadecylamine ')
                     pdb_file = stinfo.Hydration.ODAN_PDB
                     dimens = dimensions.oil_axis
                 self.__write_inp_sections(f_out,
@@ -189,6 +195,14 @@ class InFile:
                 f_out.write(
                     f'\toutside sphere 0. 0. 0. {self.radius + tlr: .2f}\n')
                 f_out.write('end structure\n\n')
+
+    def __print_header(self,
+                       f_out: typing.IO,  # The file to write into it
+                       section: str  # Name of the section
+                       ) -> None:
+        """write the name of section in the inp file"""
+        row_length: int = 60
+        f_out.write(f'{section.center(row_length, "#")}\n')
 
     def print_info(self) -> None:
         """print infos"""
