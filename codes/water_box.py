@@ -66,8 +66,9 @@ class InFile:
         # to be true, later it should it be checked by the scripts
         out_file: str = stinfo.Hydration.OUT_FILE
         inp_file: str = stinfo.Hydration.INP_FILE
-        my_tools.check_file(out_file, delete=True)
-        my_tools.check_file(inp_file, delete=True)
+        if stinfo.Hydration.CHECK_WATER_PDB:
+            my_tools.check_file(out_file, delete=True)
+            my_tools.check_file(inp_file, delete=True)
         with open(inp_file, 'w', encoding="utf8") as f_out:
             f_out.write('# Input file for PACKMOL, Water box for a NP ')
             f_out.write(f'with the radius of {self.radius}\n')
