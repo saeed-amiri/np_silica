@@ -100,20 +100,22 @@ class Hydration:
     """set all the info for water box
     Limitation for the box are added to the maximum radius of the NP"""
     TOLERANCE: float = 2.0
+    # Check and delete files if they are exsit, True -> check and delete
+    CHECK_WATER_PDB: bool = False
     # Contact angle, it defeins how much of the nanoparticle should be
     # in the oil phase, in case there is oil phase the APTES on the oil
     # phase are unprotonated
-    CONATCT_ANGLE: float = -1  # In degree; If negetive -> no oil, MAX depends!
+    CONATCT_ANGLE: float = 90  # In degree; If negetive -> no oil, MAX depends!
     # Box dimensions
     # x
-    X_MIN: float = -20.0
-    X_MAX: float = 20.0
+    X_MIN: float = -30.0
+    X_MAX: float = 30.0
     # y
-    Y_MIN: float = -20.0
-    Y_MAX: float = 20.0
+    Y_MIN: float = -30.0
+    Y_MAX: float = 30.0
     # z
-    Z_MIN: float = -20.0
-    Z_MAX: float = 20.0
+    Z_MIN: float = -30.0
+    Z_MAX: float = 30.0
     # Constants
     WATER_DENSITY = 0.9998395  # g/ml
     WATER_MOLAR_MASS: float = 18.01528  # g/mol
@@ -149,14 +151,14 @@ class Hydration:
     # Number or concentration of ODAP and ODAN (in case later wanted)
     # It is used in the write_water and lmp_itp_pdb
     N_ODAP: int = 0  # Protonated ODA will add to water section
-    N_ODAN: int = 0  # Unprotonated ODA will add to if oil section
+    N_ODAN: int = 0 # Unprotonated ODA will add to if oil section
     # Salt (NaCl) parameters
     # Need a tuple type of concentration or molality
     # For now it only supporrt molality
     # Molal: Containing one mole of solute per kilogram of solvent.
     # Molal should be in `MILIMOLAL`:  millimoles per kg !!!
     N_NACL: dict[str, typing.Any]  # Type of concenteration and amount
-    N_NACL = {'sty': 'mmolal', 'sum': 5}
+    N_NACL = {'sty': 'mmolal', 'sum': 0}
 
 
 class PosRes:
