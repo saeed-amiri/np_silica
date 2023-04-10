@@ -56,12 +56,20 @@ class WriteTop:
                           ) -> None:
         """write the molecule section"""
         f_out.write('\n\n[ molecules ]\n')
-        f_out.write('; Compound\t\t#mols\n')
-        for key in mol_nums.keys():
+        f_out.write('; Compound\t\t\t#mols\n')
+        ordered_list: list[str]  # Order the list in order to appear in topol
+        ordered_list = ('sol', 'ion', 'oil', 'oda', 'odn')
+        for key in ordered_list:
             num = mol_nums[key]
             if num > 0:
                 if key == 'sol':
                     mol_name = stinfo.PdbMass.water_residue
+                    self.__write_mol_line(mol_name, num, f_out)
+                if key == 'ion':
+                    if 1 > 0:
+                        mol_name = stinfo.PdbMass.cl_residue
+                    else:
+                        mol_name = stinfo.PdbMass.na_residue
                     self.__write_mol_line(mol_name, num, f_out)
                 if key == 'oil':
                     mol_name = stinfo.PdbMass.oil_residue
@@ -73,7 +81,7 @@ class WriteTop:
                          f_out: typing.Any  # Output file
                          ) -> None:
         """write the line for molecule in topology file"""
-        f_out.write(f'{mol_name}\t\t{mol_num}\n')
+        f_out.write(f'{mol_name:<15}{mol_num:>10}\n')
 
 
 if __name__ == '__main__':
