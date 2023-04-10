@@ -105,17 +105,17 @@ class Hydration:
     # Contact angle, it defeins how much of the nanoparticle should be
     # in the oil phase, in case there is oil phase the APTES on the oil
     # phase are unprotonated
-    CONATCT_ANGLE: float = 90  # In degree; If negetive -> no oil, MAX depends!
+    CONATCT_ANGLE: float = -1  # In degree; If negetive -> no oil, MAX depends!
     # Box dimensions
     # x
-    X_MIN: float = -30.0
-    X_MAX: float = 30.0
+    X_MIN: float = -20.0
+    X_MAX: float = 20.0
     # y
-    Y_MIN: float = -30.0
-    Y_MAX: float = 30.0
+    Y_MIN: float = -20.0
+    Y_MAX: float = 20.0
     # z
-    Z_MIN: float = -30.0
-    Z_MAX: float = 30.0
+    Z_MIN: float = -20.0
+    Z_MAX: float = 20.0
     # Constants
     WATER_DENSITY = 0.9998395  # g/ml
     WATER_MOLAR_MASS: float = 18.01528  # g/mol
@@ -172,6 +172,13 @@ class PosRes:
     FY: int = 1000  # Force along y axis
     FZ: int = 1000  # Force along z axis
 
+
+class GroInp:
+    """info for writing inputs for the gromacs input"""
+    FORCEFIELD: str = 'oplsaa.ff/forcefield.itp'
+    WATERITP: str = 'oplsaa.ff/tip3p.itp'
+    IONITP: str = 'oplsaa.ff/ions.itp'
+    POSRE: bool = False  # True if want to set the restraints on NP
 
 class PdbMass:
     """information for the masses section in the output file of the
