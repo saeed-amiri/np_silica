@@ -105,7 +105,7 @@ class Hydration:
     # Contact angle, it defeins how much of the nanoparticle should be
     # in the oil phase, in case there is oil phase the APTES on the oil
     # phase are unprotonated
-    CONATCT_ANGLE: float = -1  # In degree; If negetive -> no oil, MAX depends!
+    CONATCT_ANGLE: float = 30  # In degree; If negetive -> no oil, MAX depends!
     # Box dimensions
     # x
     X_MIN: float = -20.0
@@ -150,8 +150,8 @@ class Hydration:
     PACKMOL: str = '/home/saeed/Downloads/packmol/packmol'
     # Number or concentration of ODAP and ODAN (in case later wanted)
     # It is used in the write_water and lmp_itp_pdb
-    N_ODAP: int = 0  # Protonated ODA will add to water section
-    N_ODAN: int = 0 # Unprotonated ODA will add to if oil section
+    N_ODAP: int = 12  # Protonated ODA will add to water section
+    N_ODAN: int = 10 # Unprotonated ODA will add to if oil section
     # Salt (NaCl) parameters
     # Need a tuple type of concentration or molality
     # For now it only supporrt molality
@@ -178,7 +178,10 @@ class GroInp:
     FORCEFIELD: str = 'oplsaa.ff/forcefield.itp'
     WATERITP: str = 'oplsaa.ff/tip3p.itp'
     IONITP: str = 'oplsaa.ff/ions.itp'
-    POSRE: bool = False  # True if want to set the restraints on NP
+    TOPFILE: str = 'topol.top'
+    NPPOSRES: bool = False  # True if want to set the restraints on NP
+    WATERPOSRES: bool = False  #True of want to set restraints on NP
+
 
 class PdbMass:
     """information for the masses section in the output file of the
@@ -187,6 +190,10 @@ class PdbMass:
     core_residue: str = 'COR'  # Name of the residue to apply the restraints
     aptes_residue: str = 'APT'  # Name of the residue for the APTES
     odap_residue: str = 'ODA'  # Name of the protenated ODA
+    odan_residue: str = 'ODN'  # Name of the unprotenated ODA
+    water_residue: str = 'SOL'  # Name of the water residue
+    cl_residue: str = 'CL'  # Name of the cl residue
+    na_residue: str = 'NA'  # Name of the na residue
     HO: dict[str, typing.Any] = {'Atoms_names': 'HO',
                                  'Residue': silica_residue,
                                  'Element_symbol': 'H',
