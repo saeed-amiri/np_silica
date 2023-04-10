@@ -20,6 +20,7 @@ class WriteTop:
                  silica_itp: str  # Name of the silica itp file
                  ) -> None:
         self.write_topo(mol_nums, net_charge, silica_itp)
+        self.print_info()
 
     def write_topo(self,
                    mol_nums: dict[str, int],  # Number of each molecule
@@ -44,7 +45,7 @@ class WriteTop:
                 itp_file = os.path.basename(stinfo.Hydration.ODAN_ITP)
                 self.__write_include(f'./{itp_file}', 'protonate ODA', f_out)
             silica_mol: str = silica_itp.split('.')[0]
-            self.__write_include(f'./{silica_itp}',silica_mol ,f_out)
+            self.__write_include(f'./{silica_itp}', silica_mol, f_out)
             self.__write_molecules(mol_nums, f_out, net_charge, silica_mol)
 
     def __write_include(self,
@@ -66,7 +67,7 @@ class WriteTop:
         f_out.write('\n\n[ molecules ]\n')
         f_out.write('; Compound\t\t\t#mols\n')
         ordered_list: list[str]  # Order the list in order to appear in topol
-        ordered_list = ('sol', 'ion', 'oil', 'oda', 'odn', 'sal')
+        ordered_list = ['sol', 'ion', 'sal', 'oda', 'oil', 'odn']
         for key in ordered_list:
             num = mol_nums[key]
             if num > 0:
@@ -105,6 +106,13 @@ class WriteTop:
                          ) -> None:
         """write the line for molecule in topology file"""
         f_out.write(f'{mol_name:<15}{mol_num:>10}\n')
+
+    def print_info(self) -> None:
+        """print info"""
+        print(f'{bcolors.OKCYAN}{self.__class__.__name__}: '
+              f'({self.__module__})\n'
+              f'\tThe topoloy file "{stinfo.GroInp.TOPFILE}" is written\n'
+              f'{bcolors.ENDC}')
 
 
 if __name__ == '__main__':
