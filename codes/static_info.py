@@ -192,6 +192,7 @@ class PdbMass:
     odap_residue: str = 'ODA'  # Name of the protenated ODA
     odan_residue: str = 'ODN'  # Name of the unprotenated ODA
     water_residue: str = 'SOL'  # Name of the water residue
+    oil_residue: str = 'D10'  # Name of the oil residue
     cl_residue: str = 'CL'  # Name of the cl residue
     na_residue: str = 'NA'  # Name of the na residue
     HO: dict[str, typing.Any] = {'Atoms_names': 'HO',
