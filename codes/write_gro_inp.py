@@ -5,6 +5,7 @@ For topology file it needs:
     - the number of the molecules in [ molecules ] section
 """
 
+import os
 import typing
 import static_info as stinfo
 import box_dimensions as boxd
@@ -27,6 +28,17 @@ class WriteTop:
             self.__write_include(stinfo.GroInp.FORCEFIELD, 'forcefiled', f_out)
             if mol_nums['sol'] > 0:
                 self.__write_include(stinfo.GroInp.WATERITP, 'water', f_out)
+            if mol_nums['ion'] > 0 or mol_nums['sal']:
+                self.__write_include(stinfo.GroInp.IONITP, 'ions', f_out)
+            if mol_nums['oil'] > 0:
+                itp_file = os.path.basename(stinfo.Hydration.OIL_ITP)
+                self.__write_include(f'./{itp_file}', 'oil', f_out)
+            if mol_nums['oda'] > 0:
+                itp_file = os.path.basename(stinfo.Hydration.ODAP_ITP)
+                self.__write_include(f'./{itp_file}', 'unprotonat ODA', f_out)
+            if mol_nums['odn'] > 0:
+                itp_file = os.path.basename(stinfo.Hydration.ODAN_ITP)
+                self.__write_include(f'./{itp_file}', 'protonate ODA', f_out)
 
     def __write_include(self,
                         itp_file: str,  # Path of the forcefield
