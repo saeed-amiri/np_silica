@@ -39,6 +39,7 @@ class WriteTop:
             if mol_nums['odn'] > 0:
                 itp_file = os.path.basename(stinfo.Hydration.ODAN_ITP)
                 self.__write_include(f'./{itp_file}', 'protonate ODA', f_out)
+            self.__write_molecules(mol_nums, f_out)
 
     def __write_include(self,
                         itp_file: str,  # Path of the forcefield
@@ -48,6 +49,31 @@ class WriteTop:
         """write the include section of the forcefiled"""
         f_out.write(f'\n; Include {molecule} topology\n')
         f_out.write(f'#include "{itp_file}"\n')
+
+    def __write_molecules(self,
+                          mol_nums: dict[str, int],  # Number of each molecule
+                          f_out: typing.IO  # Topology file
+                          ) -> None:
+        """write the molecule section"""
+        f_out.write('\n\n[ molecules ]\n')
+        f_out.write('; Compound\t\t#mols\n')
+        for key in mol_nums.keys():
+            num = mol_nums[key]
+            if num > 0:
+                if key == 'sol':
+                    mol_name = stinfo.PdbMass.water_residue
+                    self.__write_mol_line(mol_name, num, f_out)
+                if key == 'oil':
+                    mol_name = stinfo.PdbMass.oil_residue
+                    self.__write_mol_line(mol_name, num, f_out)
+
+    def __write_mol_line(self,
+                         mol_name: str,  # Name of the molecule in itp and pdb
+                         mol_num: int,  # Number of the molecules
+                         f_out: typing.Any  # Output file
+                         ) -> None:
+        """write the line for molecule in topology file"""
+        f_out.write(f'{mol_name}\t\t{mol_num}\n')
 
 
 if __name__ == '__main__':
