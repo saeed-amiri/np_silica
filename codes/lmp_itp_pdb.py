@@ -106,14 +106,15 @@ class WriteItp:
                  num_ions: int  # Numbers of ions with sign
                  ) -> None:
         """call functions"""
+        self.itp_name: str  # Name of the itp file making in the class
         self.__atoms_one: dict[int, int]  # Atoms index from one
-        self.write_itp(itp, num_ions)
+        self.itp_name = self.write_itp(itp, num_ions)
 
     def write_itp(self,
                   itp: lmpitp.Itp,  # Data frames restructerd from LAMMPS
                   num_ions: int  # Numbers of ions with sign
-                  ) -> None:
-        """write itp file for all the residues"""
+                  ) -> str:
+        """write itp file for all the residues, and return the name of itp"""
         moles: set[str]  # Names of each mol to make files
         moles = set(itp.atoms['resname'])
         itp_mols_name: str = self.mk_mole_name(moles, num_ions)  # Name of mol
@@ -132,6 +133,7 @@ class WriteItp:
             self.write_dihedrals(f_w, itp.dihedrals, num_ions)
         if stinfo.PosRes.POSRES:
             self.write_posres(df_atoms)
+        return fout
 
     def mk_mole_name(self,
                      moles: set[str],  # Name of the molecules in the system
@@ -480,6 +482,7 @@ class Call:
                  num_ions: int  # Number of counter ions with sign
                  ) -> None:
         self.pdb_file: str  # Name of the output pdb file
+        self.itp_file: str  # Mame of the itp file
         self.write_itpdb(fname, num_ions)
         self.other_itps()
         self.print_info()
@@ -494,7 +497,8 @@ class Call:
         w_pdb = WritePdb(pdb.pdb_df, fname)
         self.pdb_file = w_pdb.pdb_file
         itp = lmpitp.Itp(lmp, pdb.pdb_df)
-        WriteItp(itp, num_ions)
+        wrtitp = WriteItp(itp, num_ions)
+        self.itp_file = wrtitp.itp_name
 
     def other_itps(self) -> None:
         """To copy the source ITP files for other residues not involved
