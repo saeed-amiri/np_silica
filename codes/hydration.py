@@ -20,6 +20,7 @@ import static_info as stinfo
 import read_lmp_data as rdlmp
 import read_water_box as rbox
 import box_dimensions as boxd
+import write_gro_inp as groinp
 
 
 if __name__ == '__main__':
@@ -41,3 +42,6 @@ if __name__ == '__main__':
     write_pdb = cpdb.InFile(silaniz_pdb=silica_pdb.pdb_file)
     pakml.RunPackMol(inp_file=stinfo.Hydration.WS_INP,
                      out_file=stinfo.Hydration.GRO_PDB)
+    topp = groinp.WriteTop(dims.num_mols,
+                           nano_p.Net_charge,
+                           silica_itp=silica_pdb.itp_file)
