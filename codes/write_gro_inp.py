@@ -17,12 +17,14 @@ class WriteTop:
     def __init__(self,
                  mol_nums: dict[str, int],  # Number of each molecule in system
                  net_charge: int,  # Total charge of silica system with sign
+                 silica_itp: str  # Name of the silica itp file
                  ) -> None:
-        self.write_topo(mol_nums, net_charge)
+        self.write_topo(mol_nums, net_charge, silica_itp)
 
     def write_topo(self,
                    mol_nums: dict[str, int],  # Number of each molecule
                    net_charge: int,  # Total charge of silica system with sign
+                   silica_itp: str  # Name of the silica itp file
                    ) -> None:
         """writ the data"""
         with open(stinfo.GroInp.TOPFILE,  'w', encoding='utf8') as f_out:
@@ -41,7 +43,9 @@ class WriteTop:
             if mol_nums['odn'] > 0:
                 itp_file = os.path.basename(stinfo.Hydration.ODAN_ITP)
                 self.__write_include(f'./{itp_file}', 'protonate ODA', f_out)
-            self.__write_molecules(mol_nums, f_out, net_charge)
+            silica_mol: str = silica_itp.split('.')[0]
+            self.__write_include(f'./{silica_itp}',silica_mol ,f_out)
+            self.__write_molecules(mol_nums, f_out, net_charge, silica_mol)
 
     def __write_include(self,
                         itp_file: str,  # Path of the forcefield
@@ -55,7 +59,8 @@ class WriteTop:
     def __write_molecules(self,
                           mol_nums: dict[str, int],  # Number of each molecule
                           f_out: typing.IO,  # Topology file
-                           net_charge: int,  # Charge of silica with sign
+                          net_charge: int,  # Charge of silica with sign
+                          silica_mol: str  # Name of the silica molecule
                           ) -> None:
         """write the molecule section"""
         f_out.write('\n\n[ molecules ]\n')
@@ -76,14 +81,8 @@ class WriteTop:
                     else:
                         mol_name = stinfo.PdbMass.na_residue
                     self.__write_mol_line(mol_name, num, f_out)
-                if key == 'oil':
-                    mol_name = stinfo.PdbMass.oil_residue
-                    self.__write_mol_line(mol_name, num, f_out)
                 if key == 'oda':
                     mol_name = stinfo.PdbMass.odap_residue
-                    self.__write_mol_line(mol_name, num, f_out)
-                if key == 'odn':
-                    mol_name = stinfo.PdbMass.odan_residue
                     self.__write_mol_line(mol_name, num, f_out)
                 if key == 'sal':
                     mol_name = stinfo.PdbMass.na_residue
@@ -91,6 +90,13 @@ class WriteTop:
                     if mol_nums['ion'] == 0:
                         mol_name = stinfo.PdbMass.cl_residue
                         self.__write_mol_line(mol_name, num, f_out)
+                if key == 'oil':
+                    mol_name = stinfo.PdbMass.oil_residue
+                    self.__write_mol_line(mol_name, num, f_out)
+                if key == 'odn':
+                    mol_name = stinfo.PdbMass.odan_residue
+                    self.__write_mol_line(mol_name, num, f_out)
+        self.__write_mol_line(silica_mol, mol_num=1, f_out=f_out)
 
     def __write_mol_line(self,
                          mol_name: str,  # Name of the molecule in itp and pdb
@@ -103,4 +109,6 @@ class WriteTop:
 
 if __name__ == '__main__':
     axis_limits = boxd.BoxEdges(radius=25, net_charge=10)
-    topp = WriteTop(axis_limits.num_mols, net_charge=10)
+    topp = WriteTop(axis_limits.num_mols,
+                    net_charge=10,
+                    silica_itp='APT_COR_SIL.itp')
