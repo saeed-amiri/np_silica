@@ -60,7 +60,7 @@ class UpdateCharge:
 class Constants:
     """The constants which are used in the script"""
     # The desire coverage for grafting on NP
-    Coverage: float = 3.0
+    Coverage: float = 30.0
     # The thickness of the shell from surface to look for Si atoms
     Shell_radius: float = 6.0
     # calculate the level ups for Aminopropyl
@@ -105,7 +105,7 @@ class Hydration:
     # Contact angle, it defeins how much of the nanoparticle should be
     # in the oil phase, in case there is oil phase the APTES on the oil
     # phase are unprotonated
-    CONATCT_ANGLE: float = 30  # In degree; If negetive -> no oil, MAX depends!
+    CONATCT_ANGLE: float = -1  # In degree; If negetive -> no oil, MAX depends!
     # Box dimensions
     # x
     X_MIN: float = -20.0
@@ -150,8 +150,8 @@ class Hydration:
     PACKMOL: str = '/home/saeed/Downloads/packmol/packmol'
     # Number or concentration of ODAP and ODAN (in case later wanted)
     # It is used in the write_water and lmp_itp_pdb
-    N_ODAP: int = 12  # Protonated ODA will add to water section
-    N_ODAN: int = 10 # Unprotonated ODA will add to if oil section
+    N_ODAP: int = 0  # Protonated ODA will add to water section
+    N_ODAN: int = 0 # Unprotonated ODA will add to if oil section
     # Salt (NaCl) parameters
     # Need a tuple type of concentration or molality
     # For now it only supporrt molality
@@ -164,7 +164,7 @@ class Hydration:
 class PosRes:
     """write the psition restrians for atoms in the core of the silica
     nanoparticels"""
-    RESTRINS_GROUP: list[str] = ['COR', 'SIL']
+    RESTRINS_GROUP: list[str] = ['COR', 'SIL', 'APT']
     POSRES: bool = True  # if want to write it: True
     RES_FILE: str = 'STRONG_POSRES.itp'
     FUNCTION: int = 1  # Type of the function for the restrains
