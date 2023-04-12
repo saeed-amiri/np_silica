@@ -46,6 +46,7 @@ class WriteTop:
                 self.__write_include(f'./{itp_file}', 'protonate ODA', f_out)
             silica_mol: str = silica_itp.split('.')[0]
             self.__write_include(f'./{silica_itp}', silica_mol, f_out)
+            self.__write_system(f_out)
             self.__write_molecules(mol_nums, f_out, net_charge, silica_mol)
 
     def __write_include(self,
@@ -113,6 +114,14 @@ class WriteTop:
               f'({self.__module__})\n'
               f'\tThe topoloy file "{stinfo.GroInp.TOPFILE}" is written\n'
               f'{bcolors.ENDC}')
+
+    def __write_system(self,
+                       f_out: typing.IO  # Output file
+                       ) -> None:
+        """write system section"""
+        f_out.write('\n[ system ]\n')
+        f_out.write('; Name\n')
+        f_out.write(f'{stinfo.Hydration.GRO_PDB.split(".", maxsplit=1)[0]}\n')
 
 
 if __name__ == '__main__':
