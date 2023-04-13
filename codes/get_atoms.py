@@ -327,10 +327,8 @@ class GetOxGroups:
                  o_group: list[str]  # Name groups[O] to delete
                  ) -> None:
         self.o_delete: list[int]  # All the OD atoms to delete
-        self.o_delete, self.bonded_si, self.si_df = self.__get_oxgygen(silica,
-                                                                       si_om,
-                                                                       o_group,
-                                                                       si_df)
+        self.o_delete, self.bonded_si, self.si_df = \
+            self.__get_oxgygen(silica, si_om, o_group, si_df)
 
     def __get_oxgygen(self,
                       silica: rdlmp.ReadData,  # Atoms df in lammps full atom
@@ -344,10 +342,8 @@ class GetOxGroups:
         for item in o_group:
             o_list.append(Atoms[Atoms['name'] == item])
         df_o: pd.DataFrame = pd.concat(o_list)  # All the O atoms with names
-        o_delete, bonded_si, si_df = self.__get_o_delete(silica.Bonds_df,
-                                                         si_om,
-                                                         df_o,
-                                                         si_df)
+        o_delete, bonded_si, si_df = \
+            self.__get_o_delete(silica.Bonds_df, si_om, df_o, si_df)
         si_df = self.__set_ox_name(df_o, si_df, o_delete)
         pick = pickSi.PickSi(si_df, silica.diameter)
         si_df = pick.si_df
