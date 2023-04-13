@@ -178,9 +178,8 @@ class GetOmGroups:
                  ) -> None:
         self.replace_oxy: dict[int, list[int]]  # Si with bonded O to replace
         self.replace_oxy_name: dict[int, list[str]]  # Si with bonded OM names
-        self.replace_oxy, self.replace_oxy_name = self.__get_omgroups(silica,
-                                                                      si_df,
-                                                                      om_group)
+        self.replace_oxy, self.replace_oxy_name = \
+            self.__get_omgroups(silica, si_df, om_group)
         self.OM_list: list[int] = self.__get_om_list()  # All OM atoms
         self.si_df: pd.DataFrame  # Si df with droped unbonded Si
         si_df = self.__update_si_df(si_df)
