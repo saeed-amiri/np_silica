@@ -7,6 +7,7 @@ For topology file it needs:
 
 import os
 import typing
+import numpy as np
 import static_info as stinfo
 import box_dimensions as boxd
 from colors_text import TextColor as bcolors
@@ -33,7 +34,7 @@ class WriteTop:
             self.__write_include(stinfo.GroInp.FORCEFIELD, 'forcefiled', f_out)
             if mol_nums['sol'] > 0:
                 self.__write_include(stinfo.GroInp.WATERITP, 'water', f_out)
-            if mol_nums['ion'] > 0 or mol_nums['sal']:
+            if mol_nums['ion'] or mol_nums['sal']:
                 self.__write_include(stinfo.GroInp.IONITP, 'ions', f_out)
             if mol_nums['oil'] > 0:
                 itp_file = os.path.basename(stinfo.Hydration.OIL_ITP)
@@ -71,7 +72,7 @@ class WriteTop:
         ordered_list = ['sol', 'ion', 'sal', 'oda', 'oil', 'odn']
         for key in ordered_list:
             num = mol_nums[key]
-            if num > 0:
+            if num :
                 if key == 'sol':
                     mol_name = stinfo.PdbMass.water_residue
                     self.__write_mol_line(mol_name, num, f_out)
@@ -82,7 +83,7 @@ class WriteTop:
                             num += mol_nums['sal']
                     else:
                         mol_name = stinfo.PdbMass.na_residue
-                    self.__write_mol_line(mol_name, num, f_out)
+                    self.__write_mol_line(mol_name, np.abs(num), f_out)
                 if key == 'oda':
                     mol_name = stinfo.PdbMass.odap_residue
                     self.__write_mol_line(mol_name, num, f_out)
