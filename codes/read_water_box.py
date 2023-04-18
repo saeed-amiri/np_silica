@@ -276,7 +276,14 @@ class GetWaterDf:
         df_lmp['typ'] = self.__get_atom_type(atoms)
         df_lmp['cmt'] = ['#' for _ in atoms.index]
         df_lmp['name'] = atoms['atom_name']
+        self.__set_water_charge(df_lmp)
         return df_lmp
+
+    def __set_water_charge(self,
+                           df_lmp: pd.DataFrame  # lammps full atoms format
+                           ) -> pd.DataFrame:
+        """set charges for the hydrogen and oxygen in water molecules"""
+        df_c: pd.DataFrame = df_lmp.copy()
 
     def __get_atom_type(self,
                         atoms: pd.DataFrame  # Atoms df
