@@ -40,6 +40,7 @@ the water box based on the limitations.
 import sys
 import typing
 import my_tools
+import numpy as np
 import run_packmol as pakml
 import static_info as stinfo
 import box_dimensions as boxd
@@ -134,7 +135,7 @@ class InFile:
         self.__write_inp_sections(f_out,
                                   dimensions.water_axis,
                                   pdb_file,
-                                  num_ions)
+                                  np.abs(num_ions))
 
     def __check_oda(self,
                     f_out: typing.IO,  # The file to write into it
