@@ -258,31 +258,34 @@ class Itp:
                    'resnr',  # Nr. of the residue which atoms belonged to
                    ]
         df_i = pd.DataFrame(columns=columns)
-        Dihedrals_df: pd.DataFrame = lmp.Dihedrals_df.sort_values(by='ai')
-        df_i['ai'] = Dihedrals_df['ai']
-        df_i['aj'] = Dihedrals_df['aj']
-        df_i['ak'] = Dihedrals_df['ak']
-        df_i['ah'] = Dihedrals_df['ah']
-        df_i['funct'] = [3 for _ in df_i['ai']]
-        df_i[' '] = [';' for _ in df_i['ai']]
         try:
-            df_i['name'] = lmp.Dihedrals_df['name']
+            Dihedrals_df: pd.DataFrame = lmp.Dihedrals_df.sort_values(by='ai')
+            df_i['ai'] = Dihedrals_df['ai']
+            df_i['aj'] = Dihedrals_df['aj']
+            df_i['ak'] = Dihedrals_df['ak']
+            df_i['ah'] = Dihedrals_df['ah']
+            df_i['funct'] = [3 for _ in df_i['ai']]
+            df_i[' '] = [';' for _ in df_i['ai']]
+            try:
+                df_i['name'] = lmp.Dihedrals_df['name']
+            except KeyError:
+                df_i['name'] = self.__mk_boandi_name(df_i,
+                                                     ['ai', 'aj', 'ak', 'ah'],
+                                                     lmp.Atoms_df)
+                print(f'{bcolors.WARNING}{self.__class__.__name__}: '
+                      f'({self.__module__})\n'
+                      '\tGetting names for the dihedrals ...'
+                      f'{bcolors.ENDC}')
+            if stinfo.BoAnDi.DIHEDRALS_FLAG:
+                df_i = self.__get_boandi_para(df_i,
+                                              stinfo.BoAnDi.DIHEDRLAS,
+                                              ['C0', 'C1', 'C2', 'C3',
+                                               'C4', 'C5', 'funct'])
+            if CHECK_RES:
+                df_i['resname'], df_i['resnr'] =\
+                    self.__get_dihedrals_res(lmp, df_i)
         except KeyError:
-            df_i['name'] = self.__mk_boandi_name(df_i,
-                                                 ['ai', 'aj', 'ak', 'ah'],
-                                                 lmp.Atoms_df)
-            print(f'{bcolors.WARNING}{self.__class__.__name__}: '
-                  f'({self.__module__})\n'
-                  '\tGetting names for the dihedrals ...'
-                  f'{bcolors.ENDC}')
-        if stinfo.BoAnDi.DIHEDRALS_FLAG:
-            df_i = self.__get_boandi_para(df_i,
-                                          stinfo.BoAnDi.DIHEDRLAS,
-                                          ['C0', 'C1', 'C2', 'C3',
-                                           'C4', 'C5', 'funct'])
-        if CHECK_RES:
-            df_i['resname'], df_i['resnr'] =\
-                self.__get_dihedrals_res(lmp, df_i)
+            pass
         return df_i
 
     def __get_dihedrals_res(self,
@@ -343,15 +346,20 @@ class Itp:
         """try to get parameters for the bonds, angles, and dihedrals
         from static_info module"""
         df_c: pd.DataFrame = df_i.copy()
-        for item, row in df_i.iterrows():
-            try:
+        if not stinfo.Hydration.FFIELD == 'charmm':
+            for item, row in df_i.iterrows():
+                try:
+                    for col in columns:
+                        df_c.at[item, col] = data_dict.get(row['name'])[col]
+                except (TypeError, KeyError):
+                    print(f'{bcolors.CAUTION}{self.__class__.__name__}: '
+                          f'({self.__module__})\n'
+                          f'\tNo or bad info for the `{col}` with name: '
+                          f'{row["name"]}{bcolors.ENDC}')
+        else:
+            for item, row in df_i.iterrows():
                 for col in columns:
-                    df_c.at[item, col] = data_dict.get(row['name'])[col]
-            except (TypeError, KeyError):
-                print(f'{bcolors.CAUTION}{self.__class__.__name__}: '
-                      f'({self.__module__})\n'
-                      f'\tNo or bad info for the `{col}` with name: '
-                      f'{row["name"]}{bcolors.ENDC}')
+                    df_c.at[item, col] = ' '
         return df_c
 
     def __mk_boandi_name(self,
