@@ -359,7 +359,10 @@ class Itp:
         else:
             for item, row in df_i.iterrows():
                 for col in columns:
-                    df_c.at[item, col] = ' '
+                    if col == 'funct':
+                        df_c.at[item, col] = 1
+                    else:
+                        df_c.at[item, col] = ' '
         return df_c
 
     def __mk_boandi_name(self,
