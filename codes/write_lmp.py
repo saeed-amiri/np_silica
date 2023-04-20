@@ -69,18 +69,23 @@ class GetData:
         """get the angle information"""
         self.Nangle_types: int  # Number of angle types
         self.Nangles: int  # Return len of df = Number of angles
-
-        self.Nangle_types = np.max(df.typ)
-        self.Nangles = len(df)
+        if not df.empty:
+            self.Nangle_types = np.max(df.typ)
+            self.Nangles = len(df)
+        else:
+            self.Nangle_types = 0
+            self.Nangles = 0            
 
     def get_dihedrals(self, df: pd.DataFrame) -> None:
         """get the dihedrals information"""
         self.Ndihedral_types: int  # Number of dihedral types
         self.Ndihedrals: int  # Return len of df = Number of dihedrals
-
-        self.Ndihedral_types = np.max(df.typ)
-        self.Ndihedrals = len(df)
-
+        if not df.empty:
+            self.Ndihedral_types = np.max(df.typ)
+            self.Ndihedrals = len(df)
+        else:
+            self.Ndihedral_types = 0
+            self.Ndihedrals = 0
 
 class WriteLmp(GetData):
     """write data in LAMMPS in full atom style"""
@@ -155,16 +160,12 @@ class WriteLmp(GetData):
             f.write(f'{self.Nbond_types} bond types\n')
         except AttributeError:
             pass
-        try:
+        if self.Nangles > 0:
             f.write(f'{self.Nangles} angles\n')
             f.write(f'{self.Nangle_types} angle types\n')
-        except AttributeError:
-            pass
-        try:
+        if self.Ndihedral_types > 0:
             f.write(f'{self.Ndihedrals} dihedrals\n')
             f.write(f'{self.Ndihedral_types} dihedral types\n')
-        except AttributeError:
-            pass
         f.write('\n')
 
     def write_masses(self, df: pd.DataFrame, f: typing.TextIO) -> None:
@@ -339,11 +340,13 @@ class WriteLmp(GetData):
             f.write('\t\t"bonds": \n')
             f.write(f'\t\t{json.dumps(self.Bonds_param, indent = 4)}')
             f.write(',\n')
-            f.write('\t\t"angles": \n')
-            f.write(f'\t\t{json.dumps(self.Angles_param, indent = 4)}')
-            f.write(',\n')
-            f.write('\t\t"dihedrals": \n')
-            f.write(f'\t\t{json.dumps(self.Dihedrals_param, indent = 4)}')
+            if hasattr(self, 'Angles_param'):
+                f.write('\t\t"angles": \n')
+                f.write(f'\t\t{json.dumps(self.Angles_param, indent = 4)}')
+                f.write(',\n')
+            if hasattr(self, 'Dihedrals_param'):
+                f.write('\t\t"dihedrals": \n')
+                f.write(f'\t\t{json.dumps(self.Dihedrals_param, indent = 4)}')
             f.write('\t}}\n')
             f.write('\t\t\t]  \n')
             f.write('}}\n')
@@ -364,8 +367,11 @@ class WriteLmp(GetData):
             df1['name'] = df['name']
         df1.index -= 1
         # Remove duplicate by adding True and False column
-        m = ~pd.DataFrame(np.sort(df1[['name']], axis=1)).duplicated()
-        df1 = df1[m]
+        try:
+            m = ~pd.DataFrame(np.sort(df1[['name']], axis=1)).duplicated()
+            df1 = df1[m]
+        except pd.errors.IndexingError:
+            pass
         df1 = df1.sort_values(by=['typ'], axis=0)
         if char == 'bonds':
             df1['style'] = ''
