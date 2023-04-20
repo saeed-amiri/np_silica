@@ -106,14 +106,16 @@ class ConcatAll:
         columns = ['typ', 'ai', 'aj', 'ak']
         si_df = pd.DataFrame(columns=columns)
         amino_df = pd.DataFrame(columns=columns)
-        for col in columns:
-            si_df[col] = silica_angles[col]
-            amino_df[col] = aminos_angles[col]
-        df_i: pd.DataFrame  # All atoms dataframe
-        df_i = pd.concat([si_df, amino_df], ignore_index=True)
-        df_i.index += 1
-        del si_df
-        del amino_df
+        if not aminos_angles.empty:
+            for col in columns:
+                si_df[col] = silica_angles[col]
+                amino_df[col] = aminos_angles[col]
+            df_i: pd.DataFrame  # All atoms dataframe
+            df_i = pd.concat([si_df, amino_df], ignore_index=True)
+            df_i.index += 1
+            del si_df
+            del amino_df
+        df_i = silica_angles
         return df_i
 
     def __concate_dihedrals(self,
@@ -125,14 +127,16 @@ class ConcatAll:
         columns = ['typ', 'ai', 'aj', 'ak', 'ah']
         si_df = pd.DataFrame(columns=columns)
         amino_df = pd.DataFrame(columns=columns)
-        for col in columns:
-            si_df[col] = silica_dihedrals[col]
-            amino_df[col] = aminos_dihedrals[col]
-        df_i: pd.DataFrame  # All atoms dataframe
-        df_i = pd.concat([si_df, amino_df], ignore_index=True)
-        df_i.index += 1
-        del si_df
-        del amino_df
+        if not aminos_dihedrals.empty:
+            for col in columns:
+                si_df[col] = silica_dihedrals[col]
+                amino_df[col] = aminos_dihedrals[col]
+            df_i: pd.DataFrame  # All atoms dataframe
+            df_i = pd.concat([si_df, amino_df], ignore_index=True)
+            df_i.index += 1
+            del si_df
+            del amino_df
+        df_i = silica_dihedrals
         return df_i
 
     def __concate_masses(self,
@@ -143,6 +147,13 @@ class ConcatAll:
         columns: list[str] = ['typ', 'mass', 'cmt', 'name']
         df_silica = pd.DataFrame(columns=columns)
         df_amino = pd.DataFrame(columns=columns)
+        if 'name' not in silica_masses:
+            try:
+                silica_masses['name'] = silica_masses['names']
+            except KeyError:
+                  sys.exit(f'{bcolors.FAIL}\tError!\n There is `name` or '
+                           f'`names` column in `silica_masses`\n{bcolors.ENDC}'
+                           )  
         for col in columns:
             df_silica[col] = silica_masses[col]
             df_amino[col] = amino_masses[col]
@@ -170,12 +181,20 @@ class ConcatAll:
         self.Nmols = np.max(self.Atoms_df['mol'])
         self.NAtoms = len(self.Atoms_df)
         self.NBonds = len(self.Bonds_df)
-        self.NAngles = len(self.Angles_df)
-        self.NDihedrals = len(self.Dihedrals_df)
+        if not self.Angles_df.empty:
+            self.NAngles = len(self.Angles_df)
+            self.NAngleTyp = np.max(self.Angles_df['typ'])
+        else:
+            self.NAngles = 0
+            self.NAngleTyp = 0
+        if not self.Angles_df.empty:
+            self.NDihedrals = len(self.Dihedrals_df)
+            self.NDihedralTyp = np.max(self.Dihedrals_df['typ'])
+        else:
+            self.NDihedrals = 0
+            self.NDihedralTyp = 0
         self.NAtomTyp = np.max(self.Masses_df['typ'])
         self.NBondTyp = np.max(self.Bonds_df['typ'])
-        self.NAngleTyp = np.max(self.Angles_df['typ'])
-        self.NDihedralTyp = np.max(self.Dihedrals_df['typ'])
 
     def print_infos(self) -> None:
         """print info on the stderr"""
