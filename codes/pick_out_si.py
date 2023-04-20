@@ -17,7 +17,8 @@ class PickSi:
                  si_df: pd.DataFrame,  # All the non-body Si in the radius
                  diameter: float  # The diameter of the Nanoparticles
                  ) -> None:
-        self.__method: str = 'random'  # random or area
+        self.__method: str  # random or exact
+        self.__method = stinfo.AtomGroup.SPARSE_STY
         self.si_df: pd.DataFrame = self.set_coverage(si_df, diameter)
 
     def set_coverage(self,
@@ -29,6 +30,8 @@ class PickSi:
         area method."""
         si_coverage: float = self.__get_coverage(si_df, diameter)
         si_de_num: int = self.__get_si_num(diameter)
+        if self.__method == 'exact':
+            self.__exact_sparse(si_df, stinfo.AtomGroup.EXACT_NUM)
         if si_coverage <= stinfo.Constants.Coverage:
             print(f'\n{bcolors.WARNING}{self.__class__.__name__}:'
                   f' ({self.__module__})\n'
@@ -42,6 +45,13 @@ class PickSi:
             else:
                 self.__set_lables(si_df)
         return si_df
+
+    def __exact_sparse(self,
+                       si_df: pd.DataFrame,  # All the non-body Si in radius
+                       exact_num: int  # Exact number of the si to keep
+                       ) -> pd.DataFrame:
+        """keep exactly EXACT_NUM in si_df"""
+        return si_df.sample(exact_num)
 
     def __random_sparse(self,
                         si_df: pd.DataFrame,  # All the non-body Si in radius
