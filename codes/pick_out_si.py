@@ -31,19 +31,27 @@ class PickSi:
         si_coverage: float = self.__get_coverage(si_df, diameter)
         si_de_num: int = self.__get_si_num(diameter)
         if self.__method == 'exact':
-            self.__exact_sparse(si_df, stinfo.AtomGroup.EXACT_NUM)
-        if si_coverage <= stinfo.Constants.Coverage:
-            print(f'\n{bcolors.WARNING}{self.__class__.__name__}:'
-                  f' ({self.__module__})\n'
-                  f'\tGrafting all the Si gives "{si_coverage:.3f}" '
-                  f'less or equal to the desire coverage '
-                  f'"{stinfo.Constants.Coverage:.3f}"! Returns'
-                  f'{bcolors.ENDC}')
-        else:
-            if self.__method == 'random':
-                si_df = self.__random_sparse(si_df, si_de_num, si_coverage)
+            try:
+                si_df = self.__exact_sparse(si_df, stinfo.AtomGroup.EXACT_NUM)
+            except ValueError:
+                sys.exit(f'{bcolors.FAIL}Error!\n\tThe exact number '
+                         f'`{stinfo.AtomGroup.EXACT_NUM}` is bigger than num.'
+                         f' atoms in Ox group `{stinfo.AtomGroup.OxGroup}`\n'
+                         '\tThe number of available atoms on the shell is '
+                         f'"{len(si_df.index)}"'
+                         f'{bcolors.ENDC}')
+        elif self.__method == 'random':
+            if si_coverage <= stinfo.Constants.Coverage:
+                print(f'\n{bcolors.WARNING}{self.__class__.__name__}:'
+                      f' ({self.__module__})\n'
+                      f'\tGrafting all the Si gives "{si_coverage:.3f}" '
+                      f'less or equal to the desire coverage '
+                      f'"{stinfo.Constants.Coverage:.3f}"! Returns'
+                      f'{bcolors.ENDC}')
             else:
-                self.__set_lables(si_df)
+                si_df = self.__random_sparse(si_df, si_de_num, si_coverage)
+        else:
+            self.__set_lables(si_df)
         return si_df
 
     def __exact_sparse(self,
