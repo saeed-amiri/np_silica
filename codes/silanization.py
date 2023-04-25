@@ -115,7 +115,8 @@ class ConcatAll:
             df_i.index += 1
             del si_df
             del amino_df
-        df_i = silica_angles
+        else:
+            df_i = silica_angles
         return df_i
 
     def __concate_dihedrals(self,
@@ -136,7 +137,8 @@ class ConcatAll:
             df_i.index += 1
             del si_df
             del amino_df
-        df_i = silica_dihedrals
+        else:
+            df_i = silica_dihedrals
         return df_i
 
     def __concate_masses(self,
