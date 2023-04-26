@@ -360,7 +360,7 @@ class Itp:
             for item, row in df_i.iterrows():
                 for col in columns:
                     if col == 'funct':
-                        df_c.at[item, col] = 1
+                        df_c.at[item, col] = data_dict.get(row['name'])[col]
                     else:
                         df_c.at[item, col] = ' '
         return df_c
