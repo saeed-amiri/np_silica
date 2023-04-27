@@ -60,7 +60,7 @@ class UpdateCharge:
 class Constants:
     """The constants which are used in the script"""
     # The desire coverage for grafting on NP
-    Coverage: float = 30.0
+    Coverage: float = 10.0
     # The thickness of the shell from surface to look for Si atoms
     Shell_radius: float = 6.0
     # calculate the level ups for Aminopropyl
@@ -79,17 +79,24 @@ class AtomGroup:
     # Si groups to find them in shell and add APTES to them
     SiGroup: list[str] = ['SD', 'SI']
     # Oxygen groups which are bonded to Si on the shell, SHOULD NOT replace!
-    OMGroup: list[str] = ['OM', 'OB']
+    OMGroup: list[str] = ['OM', 'OB', 'OMH']
     # Oxygen groups bonded to Si on the shell to drop
-    OxGroup: list[str] = ['OD', 'OH', 'OMH']
+    OxGroup: list[str] = ['OH']
     # Hydrogen groups bonded to the Ox groups to drop
-    HyGroup: list[str] = ['HO']
+    HyGroup: list[str] = ['HO', 'OD', 'OMH', 'HR']
+    # if wanted the exact number of Ox group to be grafted:
+    # Sparse the si selected on the surface
+    # The optines are: 
+    # 'exact' -> must give a integer, otherwise it well stoped
+    # 'random' -> sparse the si randomly
+    SPARSE_STY: str = 'exact' 
+    EXACT_NUM: int = 7
 
 
 class DataFile:
     """Get data directory which are used in the script"""
     # Prtonated data of the APTES
-    APTES: str = os.path.join(SOURCE_DIR, 'aminopropyl_pro.data')
+    APTES: str = os.path.join(SOURCE_DIR, 'aminopropyl_unpro.data')
     # Unprtonated data of the APTES
     APTUN: str = os.path.join(SOURCE_DIR, 'aminopropyl_unpro.data')
     SI_DF: str = 'SI_DF'  # File with selected info of si atom in adding APTES
@@ -99,13 +106,15 @@ class DataFile:
 class Hydration:
     """set all the info for water box
     Limitation for the box are added to the maximum radius of the NP"""
+    # Forcefield type:
+    FFIELD: str = 'charmm'
     TOLERANCE: float = 2.0
     # Check and delete files if they are exsit, True -> check and delete
     CHECK_WATER_PDB: bool = False
     # Contact angle, it defeins how much of the nanoparticle should be
     # in the oil phase, in case there is oil phase the APTES on the oil
     # phase are unprotonated
-    CONATCT_ANGLE: float = 90  # In degree; If negetive -> no oil, MAX depends!
+    CONATCT_ANGLE: float = -1  # In degree; If negetive -> no oil, MAX depends!
     # Box dimensions
     # x
     X_MIN: float = -30.0
@@ -124,17 +133,54 @@ class Hydration:
     AVOGADRO: float = 6.0221408e+23  # 1/mol
     MASSES: dict[str, float] = {'HW': 1.0080,
                                 'OW': 15.9994,
+                                'OH': 15.9994,
+                                'OR': 15.9994,
                                 'CL': 35.453,
                                 'NA': 22.989769,
                                 'H': 1.00080,
                                 'C': 12.011,
-                                'N': 14.0067}
+                                'N': 14.0067,
+                                'POT': 39.0983,
+                                'CLA': 35.453}
+    # Water charges
+    # Type of each water model
+    WATER_CHARGE: dict[str, dict[str, float]]
+    NA_Q: int = +1  # Charge of the na ion
+    CL_Q: int = -1  # Charge of the cl ion
+    WATER_MODEL: str = 'charmm'  # The model to use in system
+    WATER_CHARGE = {'tip3p': {'OW': -0.834,
+                              'HW1': 0.417,
+                              'HW2': 0.417,
+                              'NA': NA_Q,
+                              'CL': CL_Q},
+                    'spce': {'OW': -0.8476,
+                             'HW1': 0.4238,
+                             'HW2': 0.4238,
+                             'NA': NA_Q,
+                             'CL': CL_Q},
+                    'spc': {'OW': -0.82,
+                            'HW1': 0.41,
+                            'HW2': 0.41,
+                            'NA': NA_Q,
+                            'CL': CL_Q},
+                    'tip4p': {'OW': 0.0,
+                              'HW1': 0.52,
+                              'HW2': 0.52,
+                              'MW': -1.04,
+                              'NA': NA_Q,
+                              'CL': CL_Q},
+                    'charmm': {'OH2': 0.0,
+                              'H1': 0.52,
+                              'H2': 0.52,
+                              'POT': NA_Q,
+                              'CLA': CL_Q}
+                    }
     # PACKMOL files
-    WATER_PDB: str = os.path.join(SOURCE_DIR, 'water.pdb')
+    WATER_PDB: str = os.path.join(SOURCE_DIR, 'water_charmm.pdb')
     ODAP_PDB: str = os.path.join(SOURCE_DIR, 'ODAp.pdb')
     ODAN_PDB: str = os.path.join(SOURCE_DIR, 'ODAn.pdb')
-    NA_PDB: str = os.path.join(SOURCE_DIR, 'Na.pdb')
-    CL_PDB: str = os.path.join(SOURCE_DIR, 'Cl.pdb')
+    NA_PDB: str = os.path.join(SOURCE_DIR, 'POT.pdb')
+    CL_PDB: str = os.path.join(SOURCE_DIR, 'CLA.pdb')
     OIL_PDB: str = os.path.join(SOURCE_DIR, 'D10.pdb')
     ADD_ION: bool = False  # if True it will add the ion to the itp file
     NA_ITP: str = os.path.join(SOURCE_DIR, 'Na.itp')
@@ -164,7 +210,7 @@ class Hydration:
 class PosRes:
     """write the psition restrians for atoms in the core of the silica
     nanoparticels"""
-    RESTRINS_GROUP: list[str] = ['COR', 'SIL', 'APT']
+    RESTRINS_GROUP: list[str] = ['COR', 'SIL']
     POSRES: bool = True  # if want to write it: True
     RES_FILE: str = 'STRONG_POSRES.itp'
     FUNCTION: int = 1  # Type of the function for the restrains
@@ -175,11 +221,11 @@ class PosRes:
 
 class GroInp:
     """info for writing inputs for the gromacs input"""
-    FORCEFIELD: str = 'oplsaa.ff/forcefield.itp'
-    WATERITP: str = 'oplsaa.ff/tip3p.itp'
-    IONITP: str = 'oplsaa.ff/ions.itp'
+    FORCEFIELD: str = 'force_field/forcefield.itp'
+    WATERITP: str = 'force_field/TIP3P.itp'
+    IONITP: str = 'force_field/ions.itp'
     TOPFILE: str = 'topol.top'
-    NPPOSRES: bool = False  # True if want to set the restraints on NP
+    NPPOSRES: bool = True  # True if want to set the restraints on NP
     WATERPOSRES: bool = False  #True of want to set restraints on NP
 
 
@@ -195,11 +241,13 @@ class PdbMass:
     oil_residue: str = 'D10'  # Name of the oil residue
     cl_residue: str = 'CL'  # Name of the cl residue
     na_residue: str = 'NA'  # Name of the na residue
+    pot_residue: str = 'POT'  # Name of the pot residue
+    cla_residue: str = 'CLA'  # Name of the cla residue
     HO: dict[str, typing.Any] = {'Atoms_names': 'HO',
                                  'Residue': silica_residue,
                                  'Element_symbol': 'H',
                                  'RECORD': 'ATOM',
-                                 'ff_type': 'opls_428'
+                                 'ff_type': 'HO'
                                  }
     H: dict[str, typing.Any] = {'Atoms_names': 'H',
                                 'Residue': odap_residue,
@@ -207,59 +255,77 @@ class PdbMass:
                                 'RECORD': 'ATOM',
                                 'ff_type': 'opls_140'
                                 }
+    HR: dict[str, typing.Any] = {'Atoms_names': 'HR',
+                                 'Residue': aptes_residue,
+                                 'Element_symbol': 'H',
+                                 'RECORD': 'ATOM',
+                                 'ff_type': 'HR'
+                                 }
     OB: dict[str, typing.Any] = {'Atoms_names': 'OB',
                                  'Residue': silica_residue,
                                  'Element_symbol': 'O',
                                  'RECORD': 'ATOM',
-                                 'ff_type': 'opls_018'
+                                 'ff_type': 'OB'
                                  }
     OH: dict[str, typing.Any] = {'Atoms_names': 'OH',
                                  'Residue': silica_residue,
                                  'Element_symbol': 'O',
                                  'RECORD': 'ATOM',
-                                 'ff_type': 'opls_018'
+                                 'ff_type': 'OH'
+                                 }
+    OR: dict[str, typing.Any] = {'Atoms_names': 'OR',
+                                 'Residue': aptes_residue,
+                                 'Element_symbol': 'O',
+                                 'RECORD': 'ATOM',
+                                 'ff_type': 'OR'
                                  }
     OM: dict[str, typing.Any] = {'Atoms_names': 'OM',
                                  'Residue': silica_residue,
                                  'Element_symbol': 'O',
                                  'RECORD': 'ATOM',
-                                 'ff_type': 'opls_018'
+                                 'ff_type': 'OM'
                                  }
     OMH: dict[str, typing.Any] = {'Atoms_names': 'OMH',
                                   'Residue': silica_residue,
                                   'Element_symbol': 'O',
                                   'RECORD': 'ATOM',
-                                  'ff_type': 'opls_018'
+                                  'ff_type': 'OMH'
                                   }
     OD: dict[str, typing.Any] = {'Atoms_names': 'OD',
                                  'Residue': silica_residue,
                                  'Element_symbol': 'O',
                                  'RECORD': 'ATOM',
-                                 'ff_type': 'opls_451'
+                                 'ff_type': 'OD'
                                  }
     SI: dict[str, typing.Any] = {'Atoms_names': 'SI',
                                  'Residue':  silica_residue,
                                  'Element_symbol': 'SI',
                                  'RECORD': 'ATOM',
-                                 'ff_type':  'OPXX_000'
+                                 'ff_type':  'SI'
                                  }
     SU: dict[str, typing.Any] = {'Atoms_names': 'SU',
                                  'Residue':  silica_residue,
                                  'Element_symbol': 'SI',
                                  'RECORD': 'ATOM',
-                                 'ff_type':  'OPXX_000'
+                                 'ff_type':  'SU'
                                  }
     SD: dict[str, typing.Any] = {'Atoms_names': 'SD',
                                  'Residue':  silica_residue,
                                  'Element_symbol': 'SI',
                                  'RECORD': 'ATOM',
-                                 'ff_type':  'OPXX_000'
+                                 'ff_type':  'SD'
                                  }
-    N: dict[str, typing.Any] = {'Atoms_names': 'N',
+    NH2: dict[str, typing.Any] = {'Atoms_names': 'N',
                                 'Residue': aptes_residue,
                                 'Element_symbol': 'N',
                                 'RECORD': 'ATOM',
-                                'ff_type': 'opls_287'
+                                'ff_type': 'NH2'
+                                }
+    NH3: dict[str, typing.Any] = {'Atoms_names': 'N',
+                                'Residue': aptes_residue,
+                                'Element_symbol': 'N',
+                                'RECORD': 'ATOM',
+                                'ff_type': 'NH3'
                                 }
     F: dict[str, typing.Any] = {'Atoms_names': 'F',
                                 'Residue': aptes_residue,
@@ -271,7 +337,7 @@ class PdbMass:
                                  'Residue': aptes_residue,
                                  'Element_symbol': 'C',
                                  'RECORD': 'ATOM',
-                                 'ff_type': 'opls_135'
+                                 'ff_type': 'CT2'
                                  }
     C: dict[str, typing.Any] = {'Atoms_names': 'C',
                                 'Residue': odap_residue,
@@ -283,21 +349,29 @@ class PdbMass:
                                  'Residue': aptes_residue,
                                  'Element_symbol': 'H',
                                  'RECORD': 'ATOM',
-                                 'ff_type': 'opls_140'
+                                 'ff_type': 'HA2'
                                  }
-    CN: dict[str, typing.Any] = {'Atoms_names': 'CN',
+    CN: dict[str, typing.Any] = {'Atoms_names': 'CT',
                                  'Residue': aptes_residue,
                                  'Element_symbol': 'C',
                                  'RECORD': 'ATOM',
-                                 'ff_type': 'opls_292'
+                                 'ff_type': 'CT2'
                                  }
-    HN: dict[str, typing.Any] = {'Atoms_names': 'HN',
+    HN2: dict[str, typing.Any] = {'Atoms_names': 'HN',
                                  'Residue': aptes_residue,
                                  'Element_symbol': 'H',
                                  'RECORD': 'ATOM',
-                                 'ff_type': 'opls_290'
+                                 'ff_type': 'HC'
                                  }
+    HN3: dict[str, typing.Any] = {'Atoms_names': 'HN',
+                                 'Residue': aptes_residue,
+                                 'Element_symbol': 'H',
+                                 'RECORD': 'ATOM',
+                                 'ff_type': 'HC'
+                                 }                                 
     ATOMS: dict[str, dict[str, typing.Any]] = {'HO': HO,
+                                               'HR': HR,
+                                               'OR': OR,
                                                'OB': OB,
                                                'OH': OH,
                                                'OM': OM,
@@ -306,11 +380,13 @@ class PdbMass:
                                                'SI': SI,
                                                'SU': SU,
                                                'SD': SD,
-                                               'N': N,
+                                               'NH2': NH2,
+                                               'NH3': NH3,
                                                'CH': CH,
                                                'HC': HC,
                                                'CN': CN,
-                                               'HN': HN,
+                                               'HN2': HN2,
+                                               'HN3': HN3,
                                                'C': C,
                                                'F': F
                                                }
@@ -326,224 +402,300 @@ class BoAnDi:
 
     BONDS: dict[str, dict[str, typing.Any]]  # Name and length(nm) and strength
     BONDS = {
-             'OMH_HO': {'r': 0.09500,
-                        'k': 533549.0,
-                        'funct': 2,
+             'OMH_HO': {'r': 0.09590,
+                        'k': 417560,
+                        'funct': 1,
                         'source': 'doi.org/10.1021/la504178g'},
 
-             'SU_OB': {'r': 0.16300,
-                       'k': 323984.0,
-                       'funct': 2,
-                       'source': 'doi.org/10.1021/la504178g',
+             'SU_OB': {'r': 0.151,
+                       'k': 417560,
+                       'funct': 1,
+                       'source': 'charmm from `top` scripts',
                        'note': '1 times of value of the source'},
 
-             'SD_OD': {'r': 0.16300,
-                       'k': 323984.0,
-                       'funct': 2,
-                       'source': 'doi.org/10.1021/la504178g',
+             'SD_OD': {'r': 0.151,
+                       'k': 417560,
+                       'funct': 1,
+                       'source': 'charmm from `top` scripts',
                        'note': '1 times of value of the source'},
 
-             'SD_OMH': {'r': 0.16300,
-                        'k': 323984.0,
-                        'funct': 2,
-                        'source': 'doi.org/10.1021/la504178g',
+             'SD_OMH': {'r': 0.151,
+                        'k': 417560,
+                        'funct': 1,
+                        'source': 'charmm from `top` scripts',
                         'note': '1 times of value of the source'},
 
-             'SI_OB': {'r': 0.16300,
-                       'k': 323984.0,
-                       'funct': 2,
-                       'source': 'doi.org/10.1021/la504178g',
+             'SI_OB': {'r': 0.151,
+                       'k': 417560,
+                       'funct': 1,
+                       'source': 'charmm from `top` scripts',
                        'note': '1 times of value of the source'},
 
-             'SI_OH': {'r': 0.16300,
-                       'k': 323984.0,
-                       'funct': 2,
-                       'source': 'doi.org/10.1021/la504178g',
+             'SI_OH': {'r': 0.151,
+                       'k': 417560,
+                       'funct': 1,
+                       'source': 'charmm from `top` scripts',
+                       'note': '1 times of value of the source'},
+            
+             'SI_OR': {'r': 0.151,
+                       'k': 417560,
+                       'funct': 1,
+                       'source': 'charmm from `top` scripts',
                        'note': '1 times of value of the source'},
 
-             'OH_HO': {'r': 0.09500,
-                       'k': 533549.0,
-                       'funct': 2,
+             'OH_HO': {'r': 0.09590,
+                       'k': 417560,
+                       'funct': 1,
                        'source': 'doi.org/10.1021/la504178g'},
 
-             'SD_OM': {'r': 0.16300,
-                       'k': 323984.0,
-                       'funct': 2,
+             'OR_HR': {'r': 0.09590,
+                       'k': 417560,
+                       'funct': 1,
+                       'source': 'doi.org/10.1021/la504178g'},
+             
+             'OR_HO': {'r': 0.09500,
+                       'k': 0.0,
+                       'funct': 1,
                        'source': 'doi.org/10.1021/la504178g'},
 
-             'SI_OM': {'r': 0.16300,
-                       'k': 323984.0,
-                       'funct': 2,
-                       'source': 'doi.org/10.1021/la504178g'},
+             'SD_OM': {'r': 0.151,
+                       'k': 417560,
+                       'funct': 1,
+                       'source': 'charmm from `top` scripts'},
+
+             'SD_OR': {'r': 0.151,
+                       'k': 417560,
+                       'funct': 1,
+                       'source': 'charmm from `top` scripts'},
+
+             'SI_OM': {'r': 0.151,
+                       'k': 417560,
+                       'funct': 1,
+                       'source': 'charmm from `top` scripts'},
+
+             'SI_OR': {'r': 0.151,
+                       'k': 417560,
+                       'funct': 1,
+                       'source': 'charmm from `top` scripts'},
 
              'CH_HC': {'r': 0.10900,
-                       'k': 284512.0,
-                       'funct': 2,
+                       'k': 0.0,
+                       'funct': 1,
                        'source': 'doi.org/10.1021/la504178g'},
 
              'CN_HC': {'r': 0.10900,
-                       'k': 284512.0,
-                       'funct': 2,
+                       'k': 0.0,
+                       'funct': 1,
                        'source': 'doi.org/10.1021/la504178g'},
 
              'N_HN': {'r': 0.10100,
-                      'k': 363171,
-                      'funct': 2,
+                      'k': 0,
+                      'funct': 1,
                       'source': 'ODA from lammps'},
 
              'SI_CH': {'r': 0.1800,
-                       'k':418400,
-                       'funct': 2,
+                       'k':0,
+                       'funct': 1,
                        'source': 'see chatGpt file'},
 
              'CH_CH': {'r': 0.15290,
-                       'k': 224262.4,
-                       'funct': 2,
+                       'k': 0.4,
+                       'funct': 1,
                        'source': 'doi.org/10.1021/la504178g'},
 
              'CH_CN': {'r': 0.15290,
-                       'k': 224262.4,
-                       'funct': 2,
+                       'k': 0.4,
+                       'funct': 1,
                        'source': 'doi.org/10.1021/la504178g'},
 
              'CN_N': {'r': 0.14480,
-                      'k': 319658,
-                      'funct': 2,
+                      'k': 0,
+                      'funct': 1,
+                      'source': 'ODA from lammps'},
+            
+            'CN_NH2': {'r': 0.14480,
+                      'k': 0,
+                      'funct': 1,
+                      'source': 'ODA from lammps'},
+            
+            'NH2_HN2': {'r': 0.14480,
+                      'k': 0,
+                      'funct': 1,
                       'source': 'ODA from lammps'}
 
              }
     ANGLES: dict[str, dict[str, typing.Any]]  # Angles names, rad, strength
     ANGLES = {
-              'SI_OM_SD': {'theta': 144.00,
-                           'cth': 209.60,
-                           'funct': 2,
-                           'source': 'doi.org/10.1021/la504178g'},
+              'SI_OM_SD': {'theta': 141.00,
+                           'cth': 450.50,
+                           'funct': 1,
+                           'source': 'charmm from `top` scripts'},
 
               'SI_OB_SI': {'theta': 144.00,
-                           'cth': 209.60,
-                           'funct': 2,
+                           'cth': 0.00,
+                           'funct': 1,
                            'source': 'doi.org/10.1021/la504178g'},
 
               'SD_OMH_HO': {'theta': 119.52,
-                            'cth': 228.84,
-                            'funct': 2,
+                            'cth': 0.00,
+                            'funct': 1,
                             'source': 'doi.org/10.1021/la504178g'},
 
               'SU_OB_SI': {'theta': 144.00,
-                           'cth': 209.60,
-                           'funct': 2,
+                           'cth': 0.00,
+                           'funct': 1,
                            'source': 'doi.org/10.1021/la504178g'},
 
               'SI_OH_HO': {'theta': 119.52,
-                           'cth': 228.84,
-                           'funct': 2,
+                           'cth': 0.00,
+                           'funct': 1,
                            'source': 'doi.org/10.1021/la504178g'},
 
               'SD_OM_SI': {'theta': 144.00,
-                           'cth': 209.60,
-                           'funct': 2,
+                           'cth': 0.00,
+                           'funct': 1,
                            'source': 'doi.org/10.1021/la504178g'},
 
               'SI_OB_SU': {'theta': 144.00,
-                           'cth': 209.60,
-                           'funct': 2,
+                           'cth': 0.00,
+                           'funct': 1,
                            'source': 'doi.org/10.1021/la504178g'},
 
               'SI_CH_CH': {'theta': 120.00,
-                           'cth': 403.20,
-                           'funct': 2,
+                           'cth': 0.00,
+                           'funct': 1,
                            'source': 'see the chatGpt'},
 
               'SD_CH_CH': {'theta': 120.00,
-                           'cth': 403.20,
-                           'funct': 2,
+                           'cth': 0.00,
+                           'funct': 1,
                            'source': 'see the chatGpt'},
 
               'CH_CN_N': {'theta': 109.47,
-                          'cth': 470.2816,
-                          'funct': 2,
+                          'cth': 0.00,
+                          'funct': 5,
                           'source': 'doi.org/10.1021/la504178g'},
 
               'CH_CH_CN': {'theta': 112.70,
-                           'cth': 488.2728,
-                           'funct': 2,
+                           'cth': 0.00,
+                           'funct': 1,
                            'source': 'ODA from lammps'},
-
+                
+              'CH_CH_CT': {'theta': 112.70,
+                           'cth': 0.00,
+                           'funct': 1,
+                           'source': 'ODA from lammps'},
+                
               'HN_N_HN': {'theta': 106.4,
-                          'cth': 364.8448,
-                          'funct': 2,
+                          'cth': 0.00,
+                          'funct': 5,
                           'source': 'ODA from lammps'},
 
               'HC_CH_HC': {'theta': 107.80,
-                           'cth': 276.144,
-                           'funct': 2,
+                           'cth': 0.00,
+                           'funct': 5,
                            'source': 'doi.org/10.1021/la504178g'},
 
               'HC_CN_HC': {'theta': 107.80,
-                           'cth': 276.144,
-                           'funct': 2,
+                           'cth': 0.00,
+                           'funct': 5,
                            'source': 'doi.org/10.1021/la504178g'},
 
               'SD_CH_HC': {'theta': 120.00,
-                           'cth': 403.20,
-                           'funct': 2,
+                           'cth': 0.00,
+                           'funct': 1,
                            'source': 'see the chatGpt'},
 
               'SI_CH_HC': {'theta': 109.5,
-                           'cth': 37.50,
-                           'funct': 2,
+                           'cth': 0.00,
+                           'funct': 1,
                            'source': 'see the chatGpt'},
 
               'HC_CN_N': {'theta': 109.5,
-                          'cth': 292.88,
-                          'funct': 2,
+                          'cth': 0.00,
+                          'funct': 5,
                           'source': 'ODA from lammps'},
 
               'OB_SI_CH': {'theta': 120.00,
-                           'cth': 424.24,
-                           'funct': 2,
+                           'cth': 0.00,
+                           'funct': 1,
                            'source': 'see chatGpt'},
 
               'OM_SI_CH': {'theta': 120.00,
-                           'cth': 424.24,
-                           'funct': 2,
+                           'cth': 0.00,
+                           'funct': 1,
                            'source': 'see chatGpt'},
 
               'OM_SD_CH': {'theta': 120.00,
-                           'cth': 424.24,
-                           'funct': 2,
+                           'cth': 0.00,
+                           'funct': 1,
+                           'source': 'see chatGpt'},
+
+              'OMH_SD_CH': {'theta': 120.00,
+                           'cth': 0.00,
+                           'funct': 1,
                            'source': 'see chatGpt'},
 
               'CN_N_HN': {'theta': 109.47,
-                          'cth': 292.88,
-                          'funct': 2,
+                          'cth': 0.00,
+                          'funct': 5,
+                          'source': 'ODA from lammps'},
+
+              'CT_N_HN': {'theta': 109.47,
+                          'cth': 0.00,
+                          'funct': 5,
                           'source': 'ODA from lammps'},
 
               'CH_CH_HC': {'theta': 110.70,
-                           'cth': 313.800,
-                           'funct': 2,
+                           'cth': 0.00,
+                           'funct': 5,
+                           'source': 'doi.org/10.1021/la504178g'},
+                
+              'CH_CT_HC': {'theta': 110.70,
+                           'cth': 0.00,
+                           'funct': 5,
                            'source': 'doi.org/10.1021/la504178g'},
 
               'HC_CH_CH': {'theta': 110.70,
-                           'cth': 313.800,
-                           'funct': 2,
+                           'cth': 0.00,
+                           'funct': 5,
+                           'source': 'doi.org/10.1021/la504178g'},
+                
+              'HC_CT_HC': {'theta': 110.70,
+                           'cth': 0.00,
+                           'funct': 5,
                            'source': 'doi.org/10.1021/la504178g'},
 
+              'HC_CT_N': {'theta': 110.70,
+                           'cth': 0.00,
+                           'funct': 5,
+                           'source': 'doi.org/10.1021/la504178g'}, 
+
               'CH_CN_HC': {'theta': 110.70,
-                           'cth': 313.800,
-                           'funct': 2,
+                           'cth': 0.00,
+                           'funct': 5,
                            'source': 'doi.org/10.1021/la504178g'},
 
               'HC_CH_CN': {'theta': 110.70,
-                           'cth': 313.800,
-                           'funct': 2,
+                           'cth': 0.00,
+                           'funct': 5,
+                           'source': 'doi.org/10.1021/la504178g'},
+                
+              'HC_CH_CT': {'theta': 110.70,
+                           'cth': 0.00,
+                           'funct': 5,
+                           'source': 'doi.org/10.1021/la504178g'},
+
+              'CH_CT_N': {'theta': 110.70,
+                           'cth': 0.00,
+                           'funct': 5,
                            'source': 'doi.org/10.1021/la504178g'}
 
               }
     DIHEDRLAS: dict[str, typing.Any]  # Dihedrals names and parameters
     DIHEDRLAS = {
                  'SI_CH_CH_CN': {'funct': 1,
-                                 'C0': 6.00000,
+                                 'C0': 0.00000,
                                  'C1': 0,
                                  'C2': 0,
                                  'C3': 0,
@@ -552,7 +704,7 @@ class BoAnDi:
                                  'source': 'doi.org/10.1021/la504178g'},
 
                  'SD_CH_CH_CN': {'funct': 1,
-                                 'C0': 6.00000,
+                                 'C0': 0.00000,
                                  'C1': 0,
                                  'C2': 0,
                                  'C3': 0,
@@ -561,7 +713,7 @@ class BoAnDi:
                                  'source': 'doi.org/10.1021/la504178g'},
 
                  'CH_CH_CN_N': {'funct': 1,
-                                'C0': 6.00000,
+                                'C0': 0.00000,
                                 'C1': 0,
                                 'C2': 0,
                                 'C3': 0,
@@ -570,7 +722,7 @@ class BoAnDi:
                                 'source': 'doi.org/10.1021/la504178g'},
 
                  'SI_CH_CH_HC': {'funct': 1,
-                                 'C0': 6.00000,
+                                 'C0': 0.00000,
                                  'C1': 0,
                                  'C2': 0,
                                  'C3': 0,
@@ -579,7 +731,7 @@ class BoAnDi:
                                  'source': 'doi.org/10.1021/la504178g'},
 
                  'SD_CH_CH_HC': {'funct': 1,
-                                 'C0': 6.00000,
+                                 'C0': 0.00000,
                                  'C1': 0,
                                  'C2': 0,
                                  'C3': 0,
@@ -587,8 +739,27 @@ class BoAnDi:
                                  'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
+                 'SD_CH_CH_CT': {'funct': 1,
+                                 'C0': 0.00000,
+                                 'C1': 0,
+                                 'C2': 0,
+                                 'C3': 0,
+                                 'C4': 0,
+                                 'C5': 0,
+                                 'source': 'doi.org/10.1021/la504178g'},
+
+                 'SI_CH_CH_CT': {'funct': 1,
+                                 'C0': 0.00000,
+                                 'C1': 0,
+                                 'C2': 0,
+                                 'C3': 0,
+                                 'C4': 0,
+                                 'C5': 0,
+                                 'source': 'doi.org/10.1021/la504178g'},
+
+
                  'HC_CH_CN_N': {'funct': 1,
-                                'C0': 6.00000,
+                                'C0': 0.00000,
                                 'C1': 0,
                                 'C2': 0,
                                 'C3': 0,
@@ -597,7 +768,7 @@ class BoAnDi:
                                 'source': 'doi.org/10.1021/la504178g'},
 
                  'OB_SI_CH_CH': {'funct': 1,
-                                 'C0': 6.00000,
+                                 'C0': 0.00000,
                                  'C1': 0,
                                  'C2': 0,
                                  'C3': 0,
@@ -606,7 +777,7 @@ class BoAnDi:
                                  'source': 'doi.org/10.1021/la504178g'},
 
                  'OM_SD_CH_CH': {'funct': 1,
-                                 'C0': 6.00000,
+                                 'C0': 0.00000,
                                  'C1': 0,
                                  'C2': 0,
                                  'C3': 0,
@@ -615,7 +786,25 @@ class BoAnDi:
                                  'source': 'doi.org/10.1021/la504178g'},
 
                  'OM_SI_CH_CH': {'funct': 1,
-                                 'C0': 6.00000,
+                                 'C0': 0.00000,
+                                 'C1': 0,
+                                 'C2': 0,
+                                 'C3': 0,
+                                 'C4': 0,
+                                 'C5': 0,
+                                 'source': 'doi.org/10.1021/la504178g'},
+
+                 'OMH_SD_CH_HC': {'funct': 1,
+                                 'C0': 0.00000,
+                                 'C1': 0,
+                                 'C2': 0,
+                                 'C3': 0,
+                                 'C4': 0,
+                                 'C5': 0,
+                                 'source': 'doi.org/10.1021/la504178g'},
+
+                 'OMH_SD_CH_CH': {'funct': 1,
+                                 'C0': 0.00000,
                                  'C1': 0,
                                  'C2': 0,
                                  'C3': 0,
@@ -624,7 +813,7 @@ class BoAnDi:
                                  'source': 'doi.org/10.1021/la504178g'},
 
                  'CH_CN_N_HN': {'funct': 1,
-                                'C0': 6.00000,
+                                'C0': 0.00000,
                                 'C1': 0,
                                 'C2': 0,
                                 'C3': 0,
@@ -632,7 +821,34 @@ class BoAnDi:
                                 'C5': 0,
                                 'source': 'doi.org/10.1021/la504178g'},
 
-                 'CH_CH_CN_HC': {'funct': 3,
+                 'CH_CN_CT_N': {'funct': 1,
+                                'C0': 0.00000,
+                                'C1': 0,
+                                'C2': 0,
+                                'C3': 0,
+                                'C4': 0,
+                                'C5': 0,
+                                'source': 'doi.org/10.1021/la504178g'},
+
+                 'CH_CN_CT_N': {'funct': 1,
+                                'C0': 0.00000,
+                                'C1': 0,
+                                'C2': 0,
+                                'C3': 0,
+                                'C4': 0,
+                                'C5': 0,
+                                'source': 'doi.org/10.1021/la504178g'},
+
+                 'CH_CH_CT_N': {'funct': 1,
+                                'C0': 0.00000,
+                                'C1': 0,
+                                'C2': 0,
+                                'C3': 0,
+                                'C4': 0,
+                                'C5': 0,
+                                'source': 'doi.org/10.1021/la504178g'},
+
+                 'CH_CH_CN_HC': {'funct': 9,
                                  'C0': 0.62760,
                                  'C1': 1.88280,
                                  'C2': 0,
@@ -641,7 +857,61 @@ class BoAnDi:
                                  'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
-                 'HC_CH_CH_CN': {'funct': 3,
+                 'CH_CH_CT_HC': {'funct': 9,
+                                 'C0': 0.62760,
+                                 'C1': 1.88280,
+                                 'C2': 0,
+                                 'C3': -2.51040,
+                                 'C4': 0,
+                                 'C5': 0,
+                                 'source': 'doi.org/10.1021/la504178g'},
+
+                 'HC_CH_CH_CN': {'funct': 9,
+                                 'C0': 0.62760,
+                                 'C1': 1.88280,
+                                 'C2': 0,
+                                 'C3': -2.51040,
+                                 'C4': 0,
+                                 'C5': 0,
+                                 'source': 'doi.org/10.1021/la504178g'},
+
+                 'HC_CH_CH_CT': {'funct': 9,
+                                 'C0': 0.62760,
+                                 'C1': 1.88280,
+                                 'C2': 0,
+                                 'C3': -2.51040,
+                                 'C4': 0,
+                                 'C5': 0,
+                                 'source': 'doi.org/10.1021/la504178g'},
+
+                 'CH_CT_N_HN': {'funct': 9,
+                                 'C0': 0.62760,
+                                 'C1': 1.88280,
+                                 'C2': 0,
+                                 'C3': -2.51040,
+                                 'C4': 0,
+                                 'C5': 0,
+                                 'source': 'doi.org/10.1021/la504178g'},
+
+                 'HC_CH_CT_N': {'funct': 9,
+                                 'C0': 0.62760,
+                                 'C1': 1.88280,
+                                 'C2': 0,
+                                 'C3': -2.51040,
+                                 'C4': 0,
+                                 'C5': 0,
+                                 'source': 'doi.org/10.1021/la504178g'},
+
+                 'HC_CH_CT_HC': {'funct': 9,
+                                 'C0': 0.62760,
+                                 'C1': 1.88280,
+                                 'C2': 0,
+                                 'C3': -2.51040,
+                                 'C4': 0,
+                                 'C5': 0,
+                                 'source': 'doi.org/10.1021/la504178g'},
+
+                 'HC_CT_N_HN': {'funct': 9,
                                  'C0': 0.62760,
                                  'C1': 1.88280,
                                  'C2': 0,
@@ -651,7 +921,7 @@ class BoAnDi:
                                  'source': 'doi.org/10.1021/la504178g'},
 
                  'OM_SI_CH_HC': {'funct': 1,
-                                 'C0': 6.00000,
+                                 'C0': 0.00000,
                                  'C1': 0,
                                  'C2': 0,
                                  'C3': 0,
@@ -660,7 +930,7 @@ class BoAnDi:
                                  'source': 'doi.org/10.1021/la504178g'},
 
                  'OB_SI_CH_HC': {'funct': 1,
-                                 'C0': 6.00000,
+                                 'C0': 0.00000,
                                  'C1': 0,
                                  'C2': 0,
                                  'C3': 0,
@@ -669,7 +939,7 @@ class BoAnDi:
                                  'source': 'doi.org/10.1021/la504178g'},
 
                  'OM_SD_CH_HC': {'funct': 1,
-                                 'C0': 6.00000,
+                                 'C0': 0.00000,
                                  'C1': 0,
                                  'C2': 0,
                                  'C3': 0,
@@ -678,7 +948,7 @@ class BoAnDi:
                                  'source': 'doi.org/10.1021/la504178g'},
 
                  'HC_CN_N_HN': {'funct': 1,
-                                 'C0': 6.00000,
+                                 'C0': 0.00000,
                                 'C1': 0,
                                 'C2': 0,
                                 'C3': 0,
@@ -686,7 +956,7 @@ class BoAnDi:
                                 'C5': 0,
                                 'source': 'doi.org/10.1021/la504178g'},
 
-                 'HC_CH_CH_HC': {'funct': 3,
+                 'HC_CH_CH_HC': {'funct': 9,
                                  'C0': 0.62760,
                                  'C1': 1.88280,
                                  'C2': 0,
@@ -695,7 +965,7 @@ class BoAnDi:
                                  'C5': 0,
                                  'source': 'doi.org/10.1021/la504178g'},
 
-                 'HC_CH_CN_HC': {'funct': 3,
+                 'HC_CH_CN_HC': {'funct': 9,
                                  'C0': 0.62760,
                                  'C1': 1.88280,
                                  'C2': 0,
