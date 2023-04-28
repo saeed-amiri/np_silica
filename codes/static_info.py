@@ -235,9 +235,9 @@ class PosRes:
 
 class GroInp:
     """info for writing inputs for the gromacs input"""
-    FORCEFIELD: str = 'force_field/forcefield.itp'
-    WATERITP: str = 'force_field/TIP3P.itp'
-    IONITP: str = 'force_field/ions.itp'
+    FORCEFIELD: str = '../force_field/charmm36_silica.itp'
+    WATERITP: str = '../force_field/TIP3P.itp'
+    IONITP: str = '../force_field/OPT.itp'
     TOPFILE: str = 'topol.top'
     NPPOSRES: bool = True  # True if want to set the restraints on NP
     WATERPOSRES: bool = False  #True of want to set restraints on NP
