@@ -85,7 +85,10 @@ class WriteTop:
                         mol_name = stinfo.PdbMass.na_residue
                     self.__write_mol_line(mol_name, np.abs(num), f_out)
                 if key == 'oda':
-                    mol_name = stinfo.PdbMass.odap_residue
+                    if stinfo.Hydration.ODAP_PROTONATION:
+                        mol_name = stinfo.PdbMass.odap_residue
+                    else:
+                        mol_name = stinfo.PdbMass.odan_residue
                     self.__write_mol_line(mol_name, num, f_out)
                 if key == 'sal':
                     mol_name = stinfo.PdbMass.na_residue
