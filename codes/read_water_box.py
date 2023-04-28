@@ -286,8 +286,13 @@ class GetWaterDf:
         df_c: pd.DataFrame = df_lmp.copy()
         model: str = stinfo.Hydration.WATER_MODEL
         for item, row in df_lmp.iterrows():
-            df_c.at[item, 'charge'] = \
-                stinfo.Hydration.WATER_CHARGE[model][row['name']]
+            try:
+                df_c.at[item, 'charge'] = \
+                    stinfo.Hydration.WATER_CHARGE[model][row['name']]
+            except KeyError:
+                if stinfo.Hydration.WATER_CHARGE[model].get(row['name'])\
+                     is None:
+                     pass
         return df_c
 
     def __get_atom_type(self,
