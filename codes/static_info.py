@@ -83,14 +83,14 @@ class AtomGroup:
     # Oxygen groups bonded to Si on the shell to drop
     OxGroup: list[str] = ['OH']
     # Hydrogen groups bonded to the Ox groups to drop
-    HyGroup: list[str] = ['HO', 'OD', 'OMH', 'HR']
+    HyGroup: list[str] = ['HO', 'OMH', 'HR']
     # if wanted the exact number of Ox group to be grafted:
     # Sparse the si selected on the surface
     # The optines are: 
     # 'exact' -> must give a integer, otherwise it well stoped
     # 'random' -> sparse the si randomly
     SPARSE_STY: str = 'exact' 
-    EXACT_NUM: int = 7
+    EXACT_NUM: int = 17
 
 
 class DataFile:
@@ -176,17 +176,18 @@ class Hydration:
                               'CLA': CL_Q}
                     }
     # PACKMOL files
+    
     WATER_PDB: str = os.path.join(SOURCE_DIR, 'water_charmm.pdb')
-    ODAP_PDB: str = os.path.join(SOURCE_DIR, 'ODAp.pdb')
-    ODAN_PDB: str = os.path.join(SOURCE_DIR, 'ODAn.pdb')
+    ODAP_PDB: str = os.path.join(SOURCE_DIR, 'ODAp_charmm.pdb')
+    ODAN_PDB: str = os.path.join(SOURCE_DIR, 'ODAn_charmm.pdb')
     NA_PDB: str = os.path.join(SOURCE_DIR, 'POT.pdb')
     CL_PDB: str = os.path.join(SOURCE_DIR, 'CLA.pdb')
     OIL_PDB: str = os.path.join(SOURCE_DIR, 'D10.pdb')
     ADD_ION: bool = False  # if True it will add the ion to the itp file
     NA_ITP: str = os.path.join(SOURCE_DIR, 'Na.itp')
     CL_ITP: str = os.path.join(SOURCE_DIR, 'Cl.itp')
-    ODAP_ITP: str = os.path.join(SOURCE_DIR, 'ODAp.itp')
-    ODAN_ITP: str = os.path.join(SOURCE_DIR, 'ODAn.itp')
+    ODAP_ITP: str = os.path.join(SOURCE_DIR, 'ODAp_charmm.itp')
+    ODAN_ITP: str = os.path.join(SOURCE_DIR, 'ODAn_charmm.itp')
     OIL_ITP: str = os.path.join(SOURCE_DIR, 'D10.itp')
     INP_FILE: str = 'water_box.inp'
     OUT_FILE: str = 'water_box.pdb'
@@ -196,7 +197,20 @@ class Hydration:
     PACKMOL: str = '/home/saeed/Downloads/packmol/packmol'
     # Number or concentration of ODAP and ODAN (in case later wanted)
     # It is used in the write_water and lmp_itp_pdb
-    N_ODAP: int = 0  # Protonated ODA will add to water section
+    # protonation of ODA in water:
+    # To protonate the ODA in water, remember to set ODAP_PROTONATION
+    # to True. Afterward, the script will use the data from ODAP.
+    # Be sure to specify the number of ODA in water using N_ODAP.
+    # The script will choose the appropriate file based on the
+    # protonation state in ODAP_PROTONATION. If you prefer the ODA to
+    # be in the oil phase, use N_ODAN. If you want the ODA in water to
+    # be protonated, set ODAP_PROTONATION to True, and the script will
+    # use the data from ODAP. However, remember to set the number of
+    # ODA in water still using N_ODAP. The script will select the file
+    # based on the protonation state in ODAP_PROTONATION, and N_ODAN
+    # should only be used if you want the ODA in the oil phase.
+    ODAP_PROTONATION: bool = False
+    N_ODAP: int = 1  # Protonated ODA will add to water section
     N_ODAN: int = 0 # Unprotonated ODA will add to if oil section
     # Salt (NaCl) parameters
     # Need a tuple type of concentration or molality
