@@ -154,8 +154,14 @@ class InFile:
                          f'{bcolors.ENDC}')
             else:
                 if style == 'oda':
-                    self.__print_header(f_out, ' Protonated Octadecylamine ')
-                    pdb_file = stinfo.Hydration.ODAP_PDB
+                    if stinfo.Hydration.ODAP_PROTONATION:
+                        self.__print_header(f_out,
+                            ' Protonated Octadecylamine ')
+                        pdb_file = stinfo.Hydration.ODAP_PDB
+                    else:
+                        self.__print_header(f_out,
+                            ' Unprotonated Octadecylamine in Water ')
+                        pdb_file = stinfo.Hydration.ODAN_PDB
                     dimens = dimensions.water_axis
                 elif style == 'odn':
                     self.__print_header(f_out, ' Unprotonated Octadecylamine ')
