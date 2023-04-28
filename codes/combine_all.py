@@ -3,9 +3,12 @@ It combines water_box with the nanoparticle, putting their origin at
 zero, for both thier origin must already be at zero.
 """
 
+import re
+import sys
 import my_tools
 import numpy as np
 import pandas as pd
+import static_info as stinfo
 from colors_text import TextColor as bcolors
 
 
@@ -152,6 +155,20 @@ class MergeAll:
         atom_names: list[str] = my_tools.drop_duplicate(water_atoms['name'])
         i_type: int  # Type of atom in the df
         df_c: pd.DataFrame = water_masses.copy()
+        undeifend_names: list[str]  # Names which masses were not defiend
+        undeifend_names = [item for item in atom_names if not
+                           re.sub(r'\d+$', '', item)]
+        atom_names = [item for item in atom_names
+                      if item not in undeifend_names]
+        print(f'{bcolors.CAUTION}\tMasses for folowing list of atoms'
+              f' is not defiend\n\t {undeifend_names}\n{bcolors.ENDC}')
+        if not atom_names:
+            sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}: '
+                     f'({self.__module__})\n'
+                     f'\tError! Informaton for (mass) cannot '
+                     f' be found in `{stinfo.Hydration.__name__}`'
+                     f' to update the masses class in `static_info` module\n'
+                     f'{bcolors.ENDC}')
         for item in atom_names:
             i_type = list(
                       set(water_atoms[water_atoms['name'] == item]['typ'])
