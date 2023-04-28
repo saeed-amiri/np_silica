@@ -35,6 +35,8 @@ class RunPackMol:
         pack_flag: int  # Check if PACKMOL executed successfully
         subprocess.call(f'{pack_mol} < {inp_file}>/dev/null',
                         shell=True, cwd='./')
+        print(f'{bcolors.CAUTION}\tPACKMOL is running ...\n'
+              f'{bcolors.ENDC}')
         pack_flag = self.__check_file(out_file, delete=False)
         return pack_flag
 
