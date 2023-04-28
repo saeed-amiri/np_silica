@@ -209,7 +209,7 @@ class InFile:
                        section: str  # Name of the section
                        ) -> None:
         """write the name of section in the inp file"""
-        row_length: int = 60
+        row_length: int = 66
         f_out.write(f'{section.center(row_length, "#")}\n')
 
     def print_info(self) -> None:
