@@ -214,7 +214,7 @@ class InFile:
 
     def print_info(self) -> None:
         """print infos"""
-        print(f'\n{bcolors.OKCYAN}{self.__class__.__name__}: '
+        print(f'{bcolors.OKCYAN}{self.__class__.__name__}: '
               f'({self.__module__}):\n'
               '\tThe input file for PACKMOL is written in: '
               f'"{stinfo.Hydration.INP_FILE}"\n'
