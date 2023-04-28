@@ -503,12 +503,19 @@ class Call:
     def other_itps(self) -> None:
         """To copy the source ITP files for other residues not involved
         in silanization."""
-        if stinfo.Hydration.N_ODAP > 0:
-            self.copy_itps(stinfo.Hydration.ODAP_ITP)
-        if stinfo.Hydration.CONATCT_ANGLE > 0:
-            self.copy_itps(stinfo.Hydration.OIL_ITP)
-            if stinfo.Hydration.N_ODAN > 0:
-                self.copy_itps(stinfo.Hydration.ODAN_ITP)
+        try:
+            if stinfo.Hydration.N_ODAP > 0:
+                if stinfo.Hydration.ODAP_PROTONATION:
+                    self.copy_itps(stinfo.Hydration.ODAP_ITP)
+                else:
+                    self.copy_itps(stinfo.Hydration.ODAN_ITP)
+            if stinfo.Hydration.CONATCT_ANGLE > 0:
+                self.copy_itps(stinfo.Hydration.OIL_ITP)
+                if stinfo.Hydration.N_ODAN > 0:
+                    self.copy_itps(stinfo.Hydration.ODAN_ITP)
+        except FileNotFoundError:
+            print(f'{bcolors.WARNING}\tAn ITP file was not found!\n'
+                  f'{bcolors.ENDC}')
 
     def copy_itps(self,
                   file_in_src: str  # Name of the file to make copy of in cwd
