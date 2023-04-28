@@ -191,10 +191,18 @@ class NumMols:
         """calculate the number of oda based on the concentration"""
         oda_moles: int  # Number of oda molecules in the system
         # I will add the calculation later, but for now:
+        state: str  # If ODA is protonated or not
+        charge: int  # Charge of the ODA
         oda_moles = stinfo.Hydration.N_ODAP
+        if stinfo.Hydration.ODAP_PROTONATION:
+            state = 'protonated'
+            charge = oda_moles
+        else:
+            state = 'unprotonated'
+            charge = 0
         print(f'{bcolors.OKCYAN}'
-              '\tNumber of ODAP is set to '
-              f'"{oda_moles}" with total charge of `{oda_moles}`'
+              f'\tNumber of {state} ODA in water is set to '
+              f'"{oda_moles}" with total charge of `{charge}`'
               f'{bcolors.ENDC}')
         return oda_moles
 
