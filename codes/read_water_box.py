@@ -291,8 +291,8 @@ class GetWaterDf:
                     stinfo.Hydration.WATER_CHARGE[model][row['name']]
             except KeyError:
                 if stinfo.Hydration.WATER_CHARGE[model].get(row['name'])\
-                     is None:
-                     pass
+                   is None:
+                    pass
         return df_c
 
     def __get_atom_type(self,
@@ -370,26 +370,32 @@ class GetWaterDf:
         i_type: int  # Type of atom in the df
         i_row: dict[str, typing.Any]  # Row per atom type
         row_list: list[dict[str, typing.Any]] = []  # All the row to convert
+        undeifend_names: list[str]  # Names which masses were not defiend
+        undeifend_names = [item for item in atom_names if not
+                           re.sub(r'\d+$', '', item)]
+        atom_names = [item for item in atom_names
+                      if item not in undeifend_names]
+        print(f'{bcolors.CAUTION}\tMasses for folowing list of atoms'
+              f' is not defiend\n\t {undeifend_names}\n{bcolors.ENDC}')
+        if not atom_names:
+            sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}: '
+                     f'({self.__module__})\n'
+                     f'\tError! Informaton (mass) cannot'
+                     f' be found in `{stinfo.Hydration.__name__}`'
+                     f' class in `static_info` module\n'
+                     f'{bcolors.ENDC}')
         for item in atom_names:
             name = re.sub(r'\d+$', '', item)
             if name not in row_list:
-                try:
-                    i_type = \
-                        list(set(self.Atoms_df[self.Atoms_df['name'] == item]
-                                 ['typ']))[0]
-                    i_row = {'mass': stinfo.Hydration.MASSES[name],
-                             'typ': i_type,
-                             'cmt': '#',
-                             'name': item,
-                             'b_name': item}
-                    row_list.append(i_row)
-                except KeyError:
-                    sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}: '
-                             f'({self.__module__})\n'
-                             f'\tError! Informaton (mass) for `{name}` cannot'
-                             f' be found in `{stinfo.Hydration.__name__}`'
-                             f' class in `static_info` module\n'
-                             f'{bcolors.ENDC}')
+                i_type = \
+                    list(set(self.Atoms_df[self.Atoms_df['name'] == item]
+                             ['typ']))[0]
+                i_row = {'mass': stinfo.Hydration.MASSES[name],
+                         'typ': i_type,
+                         'cmt': '#',
+                         'name': item,
+                         'b_name': item}
+                row_list.append(i_row)
         df_m = pd.DataFrame(row_list)
         return df_m
 
