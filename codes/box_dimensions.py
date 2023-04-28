@@ -52,7 +52,7 @@ class NumMols:
                     ) -> None:
         """clculate the numbers of each moles if asked"""
         print(f'{bcolors.OKCYAN}{self.__class__.__name__}:'
-              f'({bcolors.__module__}):'
+              f'({self.__module__}):'
               f'{bcolors.ENDC}')
         box_volume: float  # Volume of the final system's box
         box_volume = self.__box_volume(radius)
@@ -143,7 +143,7 @@ class NumMols:
                             ) -> None:
         """set the data for system with pure water"""
         self.moles_nums['oil'] = 0  # No oil in the system
-        self.moles_nums['odn'] = 0  # ODA must be protonated
+        self.moles_nums['odn'] = 0  # ODA could be protonated or not
         self.moles_nums['sol'] = \
             self.__solution_mol_num(box_volume,
                                     stinfo.Hydration.WATER_DENSITY,
