@@ -157,7 +157,10 @@ class NumMols:
         """return the number of ions, with sign"""
         num_odap: int = self.moles_nums['oda']  # Number of ODAp
         charge_floor: float = np.floor(np.abs(net_charge))
-        num_ions: int = int(np.sign(net_charge)*charge_floor) + num_odap
+        if stinfo.Hydration.ODAP_PROTONATION:
+            num_ions: int = int(np.sign(net_charge)*charge_floor) + num_odap
+        else:
+            num_ions: int = int(np.sign(net_charge)*charge_floor)
         if charge_floor != np.abs(net_charge):
             print(f'{bcolors.CAUTION}{self.__class__.__name__}" '
                   f'({self.__module__}):\n'
