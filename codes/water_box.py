@@ -163,6 +163,7 @@ class InFile:
                             ' Unprotonated Octadecylamine in Water ')
                         pdb_file = stinfo.Hydration.ODAN_PDB
                     dimens = dimensions.water_axis
+                    print(self.__odap_interface(dimensions))
                 elif style == 'odn':
                     self.__print_header(f_out, ' Unprotonated Octadecylamine ')
                     pdb_file = stinfo.Hydration.ODAN_PDB
@@ -176,6 +177,16 @@ class InFile:
                          dimensions: boxd.BoxEdges  # Num_moles, dims of box
                          ) -> dict[str, float]:
         """check if the ODAP should be at the interface"""
+        dimes: dict[str, float]  # The dimension of the box for ODAP
+        # if there is an interface:
+        if stinfo.Hydration.CONATCT_ANGLE < 0:
+            dimes = dimensions.water_axis
+        else:
+            if not stinfo.Hydration.ODAP_INTERFACE:
+                dimes = dimensions.water_axis
+            else:
+                pass
+        return dimes
 
     def __write_inp_sections(self,
                              f_out: typing.IO,  # The file to write into it
