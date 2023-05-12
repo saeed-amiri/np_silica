@@ -163,7 +163,7 @@ class InFile:
                             ' Unprotonated Octadecylamine in Water ')
                         pdb_file = stinfo.Hydration.ODAN_PDB
                     dimens = dimensions.water_axis
-                    print(self.__odap_interface(dimensions))
+                    self.__odap_interface(dimensions)
                 elif style == 'odn':
                     self.__print_header(f_out, ' Unprotonated Octadecylamine ')
                     pdb_file = stinfo.Hydration.ODAN_PDB
@@ -182,11 +182,11 @@ class InFile:
         if stinfo.Hydration.CONATCT_ANGLE < 0:
             dimes = dimensions.water_axis
         else:
+            # If they should be at the interface
             if not stinfo.Hydration.ODAP_INTERFACE:
                 dimes = dimensions.water_axis
             else:
-                dimes = dimensions.water_axis
-                self.__get_odap_area(dimensions)
+                dimes = self.__get_odap_area(dimensions)
         return dimes
 
     def __get_odap_area(self,
@@ -202,11 +202,16 @@ class InFile:
         that, it should try to solve it with a warning or exit with an
         error.
         """
-        self.__check_oda_box(dimensions)
+        oda_length: float = self.__check_oda_box(dimensions)
+        oda_box: dict[str, float]  # Edges of the box for the interface
+        oda_box = dimensions.water_axis
+        oda_box['z_lo'] = dimensions.water_axis['z_hi'] - oda_length / 2
+        oda_box['z_hi'] = dimensions.oil_axis['z_hi'] - oda_length / 2
+        return oda_box
 
     def __check_oda_box(self,
                         dimensions: boxd.BoxEdges  # Num_moles, dims of box
-                        ) -> dict[str, float]:
+                        ) -> float:
         """check if the length of the selected area for the ODAP can
         be put in the system box"""
         oda_length: float = stinfo.Constants.ODA_length + 1
@@ -219,6 +224,7 @@ class InFile:
                          f'({self.__module__})\n\tThe are of the interface '
                          f' cannot suit into the system {box}: {oda_length} >'
                          f' {box_z} {bcolors.ENDC}')
+        return oda_length
 
     def __write_inp_sections(self,
                              f_out: typing.IO,  # The file to write into it
