@@ -206,7 +206,7 @@ class InFile:
         oda_box: dict[str, float]  # Edges of the box for the interface
         oda_box = dimensions.water_axis
         oda_box['z_lo'] = dimensions.water_axis['z_hi'] - oda_length / 2
-        oda_box['z_hi'] = dimensions.oil_axis['z_hi'] - oda_length / 2
+        oda_box['z_hi'] = dimensions.oil_axis['z_lo'] + oda_length / 2
         return oda_box
 
     def __check_oda_box(self,
@@ -276,7 +276,7 @@ class InFile:
 
 
 if __name__ == "__main__":
-    dims = boxd.BoxEdges(radius=20, net_charge=10)
-    in_file = InFile(radius=20, dimensions=dims)
-    # water_b = pakml.RunPackMol(inp_file=stinfo.Hydration.INP_FILE,
-                            #    out_file=stinfo.Hydration.OUT_FILE)
+    dims = boxd.BoxEdges(radius=10, net_charge=10)
+    in_file = InFile(radius=10, dimensions=dims)
+    water_b = pakml.RunPackMol(inp_file=stinfo.Hydration.INP_FILE,
+                               out_file=stinfo.Hydration.OUT_FILE)
