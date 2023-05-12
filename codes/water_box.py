@@ -172,6 +172,11 @@ class InFile:
                                           pdb_file,
                                           dimensions.num_mols[style])
 
+    def __odap_interface(self,
+                         dimensions: boxd.BoxEdges  # Num_moles, dims of box
+                         ) -> dict[str, float]:
+        """check if the ODAP should be at the interface"""
+
     def __write_inp_sections(self,
                              f_out: typing.IO,  # The file to write into it
                              dimens: dict[str, float],  # Section dimensions
@@ -224,5 +229,5 @@ class InFile:
 if __name__ == "__main__":
     dims = boxd.BoxEdges(radius=20, net_charge=10)
     in_file = InFile(radius=20, dimensions=dims)
-    water_b = pakml.RunPackMol(inp_file=stinfo.Hydration.INP_FILE,
-                               out_file=stinfo.Hydration.OUT_FILE)
+    # water_b = pakml.RunPackMol(inp_file=stinfo.Hydration.INP_FILE,
+                            #    out_file=stinfo.Hydration.OUT_FILE)
