@@ -188,6 +188,20 @@ class InFile:
                 pass
         return dimes
 
+    def __get_odap_area(self,
+                        dimensions: boxd.BoxEdges  # Num_moles, dims of box
+                        ) -> dict[str, float]:
+        """calculate the area for the ODAP in the interface.
+        Empirically the ODAP tail is entirely in the oil phase, and its
+        head (NH3) is in the water phase. However, here, they will give
+        an area bigger than their length in the interface since it is
+        faster for PACKMOL to run. 
+        The area for the ODAP is split equally between the oil and water
+        phase, but if the length of oil, water, or system cannot take
+        that, it should try to solve it with a warning or exit with an
+        error.
+        """
+
     def __write_inp_sections(self,
                              f_out: typing.IO,  # The file to write into it
                              dimens: dict[str, float],  # Section dimensions
