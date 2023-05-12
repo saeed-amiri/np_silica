@@ -60,7 +60,7 @@ class UpdateCharge:
 class Constants:
     """The constants which are used in the script"""
     # The desire coverage for grafting on NP
-    Coverage: float = 10.0
+    Coverage: float = 3.5
     # The thickness of the shell from surface to look for Si atoms
     Shell_radius: float = 6.0
     # calculate the level ups for Aminopropyl
@@ -89,14 +89,14 @@ class AtomGroup:
     # The optines are: 
     # 'exact' -> must give a integer, otherwise it well stoped
     # 'random' -> sparse the si randomly
-    SPARSE_STY: str = 'exact' 
-    EXACT_NUM: int = 17
+    SPARSE_STY: str = 'random' 
+    EXACT_NUM: int = 17  # If SPARSE_STY is `exact`
 
 
 class DataFile:
     """Get data directory which are used in the script"""
     # Prtonated data of the APTES
-    APTES: str = os.path.join(SOURCE_DIR, 'aminopropyl_unpro.data')
+    APTES: str = os.path.join(SOURCE_DIR, 'aminopropyl_pro.data')
     # Unprtonated data of the APTES
     APTUN: str = os.path.join(SOURCE_DIR, 'aminopropyl_unpro.data')
     SI_DF: str = 'SI_DF'  # File with selected info of si atom in adding APTES
@@ -117,14 +117,14 @@ class Hydration:
     CONATCT_ANGLE: float = -1  # In degree; If negetive -> no oil, MAX depends!
     # Box dimensions
     # x
-    X_MIN: float = -30.0
-    X_MAX: float = 30.0
+    X_MIN: float = -50.0
+    X_MAX: float = 50.0
     # y
-    Y_MIN: float = -30.0
-    Y_MAX: float = 30.0
+    Y_MIN: float = -50.0
+    Y_MAX: float = 50.0
     # z
-    Z_MIN: float = -30.0
-    Z_MAX: float = 30.0
+    Z_MIN: float = -50.0
+    Z_MAX: float = 50.0
     # Constants
     WATER_DENSITY = 0.9998395  # g/ml
     WATER_MOLAR_MASS: float = 18.01528  # g/mol
@@ -198,23 +198,18 @@ class Hydration:
     # Number or concentration of ODAP and ODAN (in case later wanted)
     # It is used in the write_water and lmp_itp_pdb
     # protonation of ODA in water:
-    # To protonate the ODA in water, remember to set ODAP_PROTONATION
-    # to True. Afterward, the script will use the data from ODAP.
-    # Be sure to specify the number of ODA in water using N_ODAP.
-    # The script will choose the appropriate file based on the
-    # protonation state in ODAP_PROTONATION. If you prefer the ODA to
-    # be in the oil phase, use N_ODAN. If you want the ODA in water to
+    # If you want the ODA in water to ODA
     # be protonated, set ODAP_PROTONATION to True, and the script will
     # use the data from ODAP. However, remember to set the number of
     # ODA in water still using N_ODAP. The script will select the file
     # based on the protonation state in ODAP_PROTONATION, and N_ODAN
     # should only be used if you want the ODA in the oil phase.
-    ODAP_PROTONATION: bool = False
-    N_ODAP: int = 1  # Protonated ODA will add to water section
+    ODAP_PROTONATION: bool = True
+    N_ODAP: int = 20  # Protonated ODA will add to water section
     N_ODAN: int = 0 # Unprotonated ODA will add to if oil section
     # Salt (NaCl) parameters
     # Need a tuple type of concentration or molality
-    # For now it only supporrt molality
+    # For now it only support molality
     # Molal: Containing one mole of solute per kilogram of solvent.
     # Molal should be in `MILIMOLAL`:  millimoles per kg !!!
     N_NACL: dict[str, typing.Any]  # Type of concenteration and amount
@@ -237,7 +232,7 @@ class GroInp:
     """info for writing inputs for the gromacs input"""
     FORCEFIELD: str = '../force_field/charmm36_silica.itp'
     WATERITP: str = '../force_field/TIP3P.itp'
-    IONITP: str = '../force_field/OPT.itp'
+    IONITP: str = '../force_field/POT.itp'
     TOPFILE: str = 'topol.top'
     NPPOSRES: bool = True  # True if want to set the restraints on NP
     WATERPOSRES: bool = False  #True of want to set restraints on NP
@@ -506,6 +501,12 @@ class BoAnDi:
                       'k': 0,
                       'funct': 1,
                       'source': 'ODA from lammps'},
+             
+
+             'N_HN3': {'r': 0.10100,
+                      'k': 0,
+                      'funct': 1,
+                      'source': 'ODA from lammps'},
 
              'SI_CH': {'r': 0.1800,
                        'k':0,
@@ -532,11 +533,20 @@ class BoAnDi:
                       'funct': 1,
                       'source': 'ODA from lammps'},
             
+            'CN_NH3': {'r': 0.14480,
+                      'k': 0,
+                      'funct': 1,
+                      'source': 'ODA from lammps'},
+            
             'NH2_HN2': {'r': 0.14480,
                       'k': 0,
                       'funct': 1,
-                      'source': 'ODA from lammps'}
+                      'source': 'ODA from lammps'},
 
+            'NH3_HN3': {'r': 0.14480,
+                      'k': 0,
+                      'funct': 1,
+                      'source': 'ODA from lammps'}
              }
     ANGLES: dict[str, dict[str, typing.Any]]  # Angles names, rad, strength
     ANGLES = {
@@ -597,7 +607,7 @@ class BoAnDi:
                 
               'CH_CH_CT': {'theta': 112.70,
                            'cth': 0.00,
-                           'funct': 1,
+                           'funct': 5,
                            'source': 'ODA from lammps'},
                 
               'HN_N_HN': {'theta': 106.4,
