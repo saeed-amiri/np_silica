@@ -185,7 +185,8 @@ class InFile:
             if not stinfo.Hydration.ODAP_INTERFACE:
                 dimes = dimensions.water_axis
             else:
-                pass
+                dimes = dimensions.water_axis
+                self.__get_odap_area(dimensions)
         return dimes
 
     def __get_odap_area(self,
@@ -195,12 +196,29 @@ class InFile:
         Empirically the ODAP tail is entirely in the oil phase, and its
         head (NH3) is in the water phase. However, here, they will give
         an area bigger than their length in the interface since it is
-        faster for PACKMOL to run. 
+        faster for PACKMOL to run.
         The area for the ODAP is split equally between the oil and water
         phase, but if the length of oil, water, or system cannot take
         that, it should try to solve it with a warning or exit with an
         error.
         """
+        self.__check_oda_box(dimensions)
+
+    def __check_oda_box(self,
+                        dimensions: boxd.BoxEdges  # Num_moles, dims of box
+                        ) -> dict[str, float]:
+        """check if the length of the selected area for the ODAP can
+        be put in the system box"""
+        oda_length: float = stinfo.Constants.ODA_length + 1
+        box_z: float = dimensions.box_edges['box']['z_lim']/2
+        oil_z: float = dimensions.box_edges['oil']['z_lim']
+        sol_z: float = dimensions.box_edges['sol']['z_lim']
+        for item, box in zip([box_z, oil_z, sol_z], ['box', 'oil', 'water']):
+            if oda_length/2 > item:
+                sys.exit(f'{bcolors.WARNING}{self.__class__.__name__}: '
+                         f'({self.__module__})\n\tThe are of the interface '
+                         f' cannot suit into the system {box}: {oda_length} >'
+                         f' {box_z} {bcolors.ENDC}')
 
     def __write_inp_sections(self,
                              f_out: typing.IO,  # The file to write into it
