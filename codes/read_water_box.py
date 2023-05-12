@@ -375,8 +375,9 @@ class GetWaterDf:
                            re.sub(r'\d+$', '', item)]
         atom_names = [item for item in atom_names
                       if item not in undeifend_names]
-        print(f'{bcolors.CAUTION}\tMasses for folowing list of atoms'
-              f' is not defiend\n\t {undeifend_names}\n{bcolors.ENDC}')
+        if undeifend_names:                      
+            print(f'{bcolors.CAUTION}\tMasses for folowing list of atoms'
+                  f' is not defiend\n\t {undeifend_names}\n{bcolors.ENDC}')
         if not atom_names:
             sys.exit(f'{bcolors.FAIL}{self.__class__.__name__}: '
                      f'({self.__module__})\n'
