@@ -72,6 +72,8 @@ class Constants:
     OM_amino: str = 'OM'
     # total number of atoms in aminoproyl file
     Num_amino: int = 17
+    # Length of the ODAP is around 10.9372292106925 but I set to 11
+    ODA_length: float = 11
 
 
 class AtomGroup:
@@ -114,17 +116,17 @@ class Hydration:
     # Contact angle, it defeins how much of the nanoparticle should be
     # in the oil phase, in case there is oil phase the APTES on the oil
     # phase are unprotonated
-    CONATCT_ANGLE: float = -1  # In degree; If negetive -> no oil, MAX depends!
+    CONATCT_ANGLE: float = 90  # In degree; If negetive -> no oil, MAX depends!
     # Box dimensions
     # x
-    X_MIN: float = -50.0
-    X_MAX: float = 50.0
+    X_MIN: float = -75.0
+    X_MAX: float = 75.0
     # y
-    Y_MIN: float = -50.0
-    Y_MAX: float = 50.0
+    Y_MIN: float = -75.0
+    Y_MAX: float = 75.0
     # z
-    Z_MIN: float = -50.0
-    Z_MAX: float = 50.0
+    Z_MIN: float = -75.0
+    Z_MAX: float = 75.0
     # Constants
     WATER_DENSITY = 0.9998395  # g/ml
     WATER_MOLAR_MASS: float = 18.01528  # g/mol
@@ -188,7 +190,7 @@ class Hydration:
     CL_ITP: str = os.path.join(SOURCE_DIR, 'Cl.itp')
     ODAP_ITP: str = os.path.join(SOURCE_DIR, 'ODAp_charmm.itp')
     ODAN_ITP: str = os.path.join(SOURCE_DIR, 'ODAn_charmm.itp')
-    OIL_ITP: str = os.path.join(SOURCE_DIR, 'D10.itp')
+    OIL_ITP: str = os.path.join(SOURCE_DIR, 'D10_charmm.itp')
     INP_FILE: str = 'water_box.inp'
     OUT_FILE: str = 'water_box.pdb'
     WS_INP: str = 'water_silica.inp'  # Input for final water & silanized file
@@ -198,15 +200,18 @@ class Hydration:
     # Number or concentration of ODAP and ODAN (in case later wanted)
     # It is used in the write_water and lmp_itp_pdb
     # protonation of ODA in water:
-    # If you want the ODA in water to ODA
+    # If you want the ODA in water to
     # be protonated, set ODAP_PROTONATION to True, and the script will
     # use the data from ODAP. However, remember to set the number of
     # ODA in water still using N_ODAP. The script will select the file
     # based on the protonation state in ODAP_PROTONATION, and N_ODAN
     # should only be used if you want the ODA in the oil phase.
     ODAP_PROTONATION: bool = True
-    N_ODAP: int = 20  # Protonated ODA will add to water section
+    N_ODAP: int = 50  # Protonated ODA will add to water section
     N_ODAN: int = 0 # Unprotonated ODA will add to if oil section
+    # If the protonated ODA should be at the interface at the beginning,
+    # set the following to True:
+    ODAP_INTERFACE: bool = True
     # Salt (NaCl) parameters
     # Need a tuple type of concentration or molality
     # For now it only support molality
@@ -230,9 +235,9 @@ class PosRes:
 
 class GroInp:
     """info for writing inputs for the gromacs input"""
-    FORCEFIELD: str = '../force_field/charmm36_silica.itp'
-    WATERITP: str = '../force_field/TIP3P.itp'
-    IONITP: str = '../force_field/POT.itp'
+    FORCEFIELD: str = '../../force_field/charmm36_silica.itp'
+    WATERITP: str = '../../force_field/TIP3.itp'
+    IONITP: str = '../../force_field/CLA.itp'
     TOPFILE: str = 'topol.top'
     NPPOSRES: bool = True  # True if want to set the restraints on NP
     WATERPOSRES: bool = False  #True of want to set restraints on NP
