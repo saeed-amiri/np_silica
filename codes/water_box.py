@@ -185,9 +185,22 @@ class InFile:
             # If they should be at the interface
             if stinfo.Hydration.ODAP_INTERFACE == 'INTERFACE':
                 dimes = self.__get_odap_area(dimensions)
+            elif stinfo.Hydration.ODAP_INTERFACE == 'WATERTOP':
+                dimes = self.__oda_water_top(dimensions.water_axis)
+            elif stinfo.Hydration.ODAP_INTERFACE == 'OILDOWN':
+                pass
             else:
                 dimes = dimensions.water_axis
         return dimes
+
+    def __oda_water_top(self,
+                        water_dims: dict[str, float]  # Dims of water box
+                        ) -> dict[str, float]:
+        """set the oda box to the top edge of the water sections"""
+        oda_length: float = stinfo.Constants.ODA_length + 1
+        oda_box: dict[str, float] = water_dims
+        oda_box['z_lo'] = water_dims['x_hi'] - oda_length
+        return oda_box
 
     def __get_odap_area(self,
                         dimensions: boxd.BoxEdges  # Num_moles, dims of box
