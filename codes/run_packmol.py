@@ -37,7 +37,7 @@ class RunPackMol:
         print(f'{bcolors.CAUTION}\tPACKMOL is running ...\n'
               f'{bcolors.ENDC}')
         start_time: time = time.time()
-        subprocess.call(f'{pack_mol} < {inp_file}>/dev/null',
+        subprocess.call(f'{pack_mol} < {inp_file}>./packmol_null',
                         shell=True, cwd='./')
         elapsed_time: time = time.time() - start_time
         print(f'{bcolors.CAUTION}\tPACKMOL run time is {elapsed_time:.2f}'
