@@ -4,6 +4,7 @@ surfactants"""
 
 import os
 import sys
+import time
 import subprocess
 import static_info as stinfo
 from colors_text import TextColor as bcolors
@@ -33,11 +34,16 @@ class RunPackMol:
         """call the subprocess and run the input file"""
         self.__check_file(out_file, delete=True)
         pack_flag: int  # Check if PACKMOL executed successfully
-        subprocess.call(f'{pack_mol} < {inp_file}>/dev/null',
-                        shell=True, cwd='./')
         print(f'{bcolors.CAUTION}\tPACKMOL is running ...\n'
               f'{bcolors.ENDC}')
+        start_time: time = time.time()
+        subprocess.call(f'{pack_mol} < {inp_file}>/dev/null',
+                        shell=True, cwd='./')
+        elapsed_time: time = time.time() - start_time
+        print(f'{bcolors.CAUTION}\tPACKMOL run time is {elapsed_time:.2f}'
+              f' minutes\n{bcolors.ENDC}')
         pack_flag = self.__check_file(out_file, delete=False)
+
         return pack_flag
 
     def __check_file(self,
