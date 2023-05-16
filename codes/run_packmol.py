@@ -34,13 +34,14 @@ class RunPackMol:
         """call the subprocess and run the input file"""
         self.__check_file(out_file, delete=True)
         pack_flag: int  # Check if PACKMOL executed successfully
-        print(f'{bcolors.CAUTION}\tPACKMOL is running ...\n'
-              f'{bcolors.ENDC}')
         start_time: time = time.time()
+        print(f'{bcolors.CAUTION}\tPACKMOL is running ...\n'
+              f'\tstart time is: {time}'
+              f'{bcolors.ENDC}')
         subprocess.call(f'{pack_mol} < {inp_file}>./packmol_null',
                         shell=True, cwd='./')
         elapsed_time: time = time.time() - start_time
-        print(f'{bcolors.CAUTION}\tPACKMOL run time is {elapsed_time:.2f}'
+        print(f'{bcolors.CAUTION}\tPACKMOL run time is {elapsed_time/60:.2f}'
               f' minutes\n{bcolors.ENDC}')
         pack_flag = self.__check_file(out_file, delete=False)
 
