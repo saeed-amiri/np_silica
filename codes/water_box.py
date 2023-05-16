@@ -183,10 +183,10 @@ class InFile:
             dimes = dimensions.water_axis
         else:
             # If they should be at the interface
-            if not stinfo.Hydration.ODAP_INTERFACE:
-                dimes = dimensions.water_axis
-            else:
+            if stinfo.Hydration.ODAP_INTERFACE == 'INTERFACE':
                 dimes = self.__get_odap_area(dimensions)
+            else:
+                dimes = dimensions.water_axis
         return dimes
 
     def __get_odap_area(self,
