@@ -210,8 +210,10 @@ class Hydration:
     N_ODAP: int = 50  # Protonated ODA will add to water section
     N_ODAN: int = 0 # Unprotonated ODA will add to if oil section
     # If the protonated ODA should be at the interface at the beginning,
-    # set the following to True:
-    ODAP_INTERFACE: bool = True
+    # set the following to INTERFACE or if they shoud be in the edge of
+    # the oil phase set it to `OILDOWN` and in water edge put it to
+    # `WATERTOP`:
+    ODAP_INTERFACE: bool = 'OILDOWN'
     # Salt (NaCl) parameters
     # Need a tuple type of concentration or molality
     # For now it only support molality
