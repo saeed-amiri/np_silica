@@ -35,13 +35,15 @@ class RunPackMol:
         self.__check_file(out_file, delete=True)
         pack_flag: int  # Check if PACKMOL executed successfully
         start_time: time = time.time()
-        print(f'{bcolors.CAUTION}\tPACKMOL is running ...\n'
-              f'\tstart time is: {time}'
+        current_time: time = time.strftime("%Y-%m-%d %H:%M:%S",
+                                           time.localtime())
+        print(f'{bcolors.CAUTION}\tPACKMOL is running ... :-| \n'
+              f'\tstart time is: {current_time}'
               f'{bcolors.ENDC}')
         subprocess.call(f'{pack_mol} < {inp_file}>./packmol_null',
                         shell=True, cwd='./')
         elapsed_time: time = time.time() - start_time
-        print(f'{bcolors.CAUTION}\tPACKMOL run time is {elapsed_time/60:.2f}'
+        print(f'{bcolors.CAUTION}\tPACKMOL run-time: "{elapsed_time/60:.2f}"'
               f' minutes\n{bcolors.ENDC}')
         pack_flag = self.__check_file(out_file, delete=False)
 
