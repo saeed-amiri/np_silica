@@ -155,8 +155,9 @@ class InFile:
             else:
                 if style == 'oda':
                     if stinfo.Hydration.ODAP_PROTONATION:
-                        self.__print_header(f_out,
-                            ' Protonated Octadecylamine ')
+                        title = ' Protonated Octadecylamine at '
+                        title += stinfo.Hydration.ODAP_INTERFACE
+                        self.__print_header(f_out, title)
                         pdb_file = stinfo.Hydration.ODAP_PDB
                     else:
                         self.__print_header(f_out,
