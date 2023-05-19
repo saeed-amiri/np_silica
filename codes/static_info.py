@@ -213,7 +213,7 @@ class Hydration:
     # set the following to INTERFACE or if they shoud be in the edge of
     # the oil phase set it to `OILDOWN` and in water edge put it to
     # `WATERTOP`:
-    ODAP_INTERFACE: bool = 'OILDOWN'
+    ODAP_INTERFACE: bool = 'WATERTOP'
     # Salt (NaCl) parameters
     # Need a tuple type of concentration or molality
     # For now it only support molality
