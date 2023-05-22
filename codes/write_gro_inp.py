@@ -47,6 +47,7 @@ class WriteTop:
                 self.__write_include(f'./{itp_file}', 'protonate ODA', f_out)
             silica_mol: str = silica_itp.split('.')[0]
             self.__write_include(f'./{silica_itp}', silica_mol, f_out)
+            self.__write_posres(f_out)
             self.__write_system(f_out)
             self.__write_molecules(mol_nums, f_out, net_charge, silica_mol)
 
@@ -72,7 +73,7 @@ class WriteTop:
         ordered_list = ['sol', 'ion', 'sal', 'oda', 'oil', 'odn']
         for key in ordered_list:
             num = mol_nums[key]
-            if num :
+            if num:
                 if key == 'sol':
                     mol_name = stinfo.PdbMass.water_residue
                     self.__write_mol_line(mol_name, num, f_out)
@@ -126,6 +127,16 @@ class WriteTop:
         f_out.write('\n[ system ]\n')
         f_out.write('; Name\n')
         f_out.write(f'{stinfo.Hydration.GRO_PDB.split(".", maxsplit=1)[0]}\n')
+
+    def __write_posres(self,
+                       f_out: typing.IO  # Output file
+                       ) -> None:
+        """write posrestrins section"""
+        if stinfo.GroInp.NPPOSRES:
+            f_out.write('\n; Restraints on NP\n')
+            f_out.write('#ifdef STRONG_POSRES\n')
+            f_out.write(f'#include "{stinfo.PosRes.RES_FILE}"\n')
+            f_out.write('#endif\n')
 
 
 if __name__ == '__main__':
