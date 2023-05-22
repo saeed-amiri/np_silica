@@ -76,15 +76,11 @@ class WriteTop:
             if num:
                 if key == 'sol':
                     mol_name = stinfo.PdbMass.water_residue
-                    self.__write_mol_line(mol_name, num, f_out)
+                    self.__write_mol_line(mol_name, net_charge, num)
                 if key == 'ion':
-                    if net_charge > 0:
-                        mol_name = stinfo.PdbMass.cl_residue
-                        if mol_nums['sal'] > 0:
-                            num += mol_nums['sal']
-                    else:
-                        mol_name = stinfo.PdbMass.na_residue
+                    mol_name = self.__check_ion(mol_name, net_charge, num)
                     self.__write_mol_line(mol_name, np.abs(num), f_out)
+                    continue
                 if key == 'oda':
                     if stinfo.Hydration.ODAP_PROTONATION:
                         mol_name = stinfo.PdbMass.odap_residue
@@ -104,6 +100,20 @@ class WriteTop:
                     mol_name = stinfo.PdbMass.odan_residue
                     self.__write_mol_line(mol_name, num, f_out)
         self.__write_mol_line(silica_mol, mol_num=1, f_out=f_out)
+
+    def __check_ion(self,
+                    mol_nums: dict[str, int],  # Number of each molecule
+                    net_charge: int,  # Charge of silica with sign
+                    num: int  # Number of the moles for each molecule
+                    ) -> str:
+        """check the key: ion for the writing and returning the name"""
+        if net_charge > 0:
+            mol_name = stinfo.PdbMass.cl_residue
+            if mol_nums['sal'] > 0:
+                num += mol_nums['sal']
+        else:
+            mol_name = stinfo.PdbMass.na_residue
+        return mol_name
 
     def __write_mol_line(self,
                          mol_name: str,  # Name of the molecule in itp and pdb
