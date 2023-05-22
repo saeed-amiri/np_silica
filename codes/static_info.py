@@ -116,7 +116,7 @@ class Hydration:
     # Contact angle, it defeins how much of the nanoparticle should be
     # in the oil phase, in case there is oil phase the APTES on the oil
     # phase are unprotonated
-    CONATCT_ANGLE: float = 90  # In degree; If negetive -> no oil, MAX depends!
+    CONATCT_ANGLE: float = 30  # In degree; If negetive -> no oil, MAX depends!
     # Box dimensions
     # x
     X_MIN: float = -75.0
