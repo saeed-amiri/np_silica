@@ -191,8 +191,9 @@ class Pdb:
         records: list[str] = []  # Records of each atom, e.g., ATOM, HATOM etc
         ff_type: list[str] = []  # Type of the atom in the FF, e.g., opls_XXX
         atoms_masses: list[float] = []  # Masses of the atoms
-        # set columns of the df
-        residues_index: list[int] = list(self.__read_si_df(col='mol'))
+        # set columns of the df, if wanted to seperate SIL sections!!!!
+        # residues_index: list[int] = list(self.__read_si_df(col='mol'))
+        residues_index = []
         try:
             for _, row in Atoms_df.iterrows():
                 item: int = row['typ']
