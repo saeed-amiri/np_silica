@@ -60,7 +60,7 @@ class UpdateCharge:
 class Constants:
     """The constants which are used in the script"""
     # The desire coverage for grafting on NP
-    Coverage: float = 3.5
+    Coverage: float = 10
     # The thickness of the shell from surface to look for Si atoms
     Shell_radius: float = 6.0
     # calculate the level ups for Aminopropyl
@@ -116,14 +116,14 @@ class Hydration:
     # Contact angle, it defeins how much of the nanoparticle should be
     # in the oil phase, in case there is oil phase the APTES on the oil
     # phase are unprotonated
-    CONATCT_ANGLE: float = 30  # In degree; If negetive -> no oil, MAX depends!
+    CONATCT_ANGLE: float = 90  # In degree; If negetive -> no oil, MAX depends!
     # Box dimensions
     # x
-    X_MIN: float = -75.0
-    X_MAX: float = 75.0
+    X_MIN: float = -35.0
+    X_MAX: float = 35.0
     # y
-    Y_MIN: float = -75.0
-    Y_MAX: float = 75.0
+    Y_MIN: float = -35.0
+    Y_MAX: float = 35.0
     # z
     Z_MIN: float = -75.0
     Z_MAX: float = 75.0
@@ -227,12 +227,13 @@ class PosRes:
     """write the psition restrians for atoms in the core of the silica
     nanoparticels"""
     RESTRINS_GROUP: list[str] = ['COR', 'SIL']
+    RESTRINS_ATOMS: list[str] = ['SD', 'SI', 'SU']
     POSRES: bool = True  # if want to write it: True
     RES_FILE: str = 'STRONG_POSRES.itp'
     FUNCTION: int = 1  # Type of the function for the restrains
     FX: int = 1000  # Force along x axis
     FY: int = 1000  # Force along y axis
-    FZ: int = 1000  # Force along z axis
+    FZ: int = 5000  # Force along z axis
 
 
 class GroInp:
