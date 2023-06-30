@@ -428,26 +428,29 @@ class WriteItp:
             df_res.to_csv(f_w, sep=' ', index=False)
 
     def get_posres_atoms(self,
-                         df_atoms: pd.DataFrame  # Atoms section of the ITP
+                         df_atoms: pd.DataFrame  # Atoms section of ITP
                          ) -> pd.DataFrame:
         """get the atoms for the asked group to write the POSRES"""
-        df_core: pd.DataFrame  # All the Atoms belong the CORE section
-        df_list: list[pd.DataFrame] = []  # All of the reidues for the posres
-        for item in stinfo.PosRes.RESTRINS_GROUP:
-            if item not in set(df_atoms['resname']):
-                print(f'{bcolors.WARNING}\tThe asked residue `{item}` '
-                      f'does not exist in the atoms section')
-            else:
-                df_list.append(df_atoms[df_atoms['resname'] == item])
-        if not df_list:
-            df_list.append(
-                df_atoms[df_atoms['resname'] == stinfo.PdbMass.core_residue])
-            print(f'{bcolors.CAUTION}\tNone of The selected group for psition '
-                  f'restrains in `{stinfo.PosRes.RESTRINS_GROUP}` exist\n'
-                  f'\t`{stinfo.PosRes.RES_FILE}` is written for '
+        valid_residues: pd.DataFrame = \
+            df_atoms[df_atoms['resname'].isin(stinfo.PosRes.RESTRINS_GROUP) &
+                     df_atoms['atomname'].isin(stinfo.PosRes.RESTRINS_ATOMS)]
+        missing_residues: set[str] = \
+            set(stinfo.PosRes.RESTRINS_GROUP) - set(valid_residues['resname'])
+
+        for item in missing_residues:
+            print(f'{bcolors.WARNING}\tThe asked residue `{item}` does'
+                  f' not exist in the atoms section')
+
+        if valid_residues.empty:
+            valid_residues = \
+                df_atoms[df_atoms['resname'] == stinfo.PdbMass.core_residue]
+            print(f'{bcolors.CAUTION}\tNone of the selected groups for'
+                  f' position restraints in `{stinfo.PosRes.RESTRINS_GROUP}`'
+                  'exist.')
+            print(f'\t`{stinfo.PosRes.RES_FILE}` is written for '
                   f'`{stinfo.PdbMass.core_residue}`{bcolors.ENDC}')
-        df_core = pd.concat(df_list)
-        df_core.sort_values(by=['atomnr'], inplace=True)
+
+        df_core: pd.DataFrame = valid_residues.sort_values(by='atomnr')
         return df_core
 
     def make_posres_df(self,
@@ -540,4 +543,4 @@ class Call:
 
 if __name__ == '__main__':
     lmpf_name: str = sys.argv[1]  # Input file name
-    call = Call(lmpf_name, num_ions=147)
+    call = Call(lmpf_name, num_ions=0)
