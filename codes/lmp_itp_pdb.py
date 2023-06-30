@@ -135,8 +135,8 @@ class WriteItp:
             self.write_posres(df_atoms)
         return fout
 
-    def mk_mole_name(self,
-                     moles: set[str],  # Name of the molecules in the system
+    @staticmethod
+    def mk_mole_name(moles: set[str],  # Name of the molecules in the system
                      num_ions: int  # Number of ions with sign
                      ) -> str:
         """make the molecule name for the itp file and if ion should
@@ -154,8 +154,8 @@ class WriteItp:
         itp_mols: str = '_'.join(sorted(moles))
         return itp_mols
 
-    def write_molecule(self,
-                       f_w: typing.Any,  # The out put file
+    @staticmethod
+    def write_molecule(f_w: typing.Any,  # The out put file
                        mol: str  # Name of the molecule to write into file
                        ) -> None:
         """write section of the itp file"""
@@ -236,8 +236,8 @@ class WriteItp:
             df_atoms = df_i.copy()
         return df_atoms
 
-    def __read_ion(self,
-                   num_ions: int  # Number of ions with sign
+    @staticmethod
+    def __read_ion(num_ions: int  # Number of ions with sign
                    ) -> str:
         """read ion file and return the data line as a whole"""
         f_ion: str  # Name of the ion file based on the need
@@ -256,8 +256,8 @@ class WriteItp:
                     break
         return ion_line
 
-    def __mk_ion_df(self,
-                    ion_line: str,  # Data of ion in the pdb file
+    @staticmethod
+    def __mk_ion_df(ion_line: str,  # Data of ion in the pdb file
                     columns: list[str],  # columns of the dataframe
                     num_ions: int  # Numbers of the ions with sign
                     ) -> pd.DataFrame:
@@ -427,8 +427,8 @@ class WriteItp:
             f_w.write(';')
             df_res.to_csv(f_w, sep=' ', index=False)
 
-    def get_posres_atoms(self,
-                         df_atoms: pd.DataFrame  # Atoms section of ITP
+    @staticmethod
+    def get_posres_atoms(df_atoms: pd.DataFrame  # Atoms section of ITP
                          ) -> pd.DataFrame:
         """get the atoms for the asked group to write the POSRES"""
         valid_residues: pd.DataFrame = \
@@ -453,8 +453,8 @@ class WriteItp:
         df_core: pd.DataFrame = valid_residues.sort_values(by='atomnr')
         return df_core
 
-    def make_posres_df(self,
-                       df_core: pd.DataFrame  # Core atoms informations
+    @staticmethod
+    def make_posres_df(df_core: pd.DataFrame  # Core atoms informations
                        ) -> pd.DataFrame:
         """make a dataframe for the posres section"""
         columns: list[str] = ['atomnr',
@@ -519,8 +519,8 @@ class Call:
             print(f'{bcolors.WARNING}\tAn ITP file was not found!\n'
                   f'{bcolors.ENDC}')
 
-    def copy_itps(self,
-                  file_in_src: str  # Name of the file to make copy of in cwd
+    @staticmethod
+    def copy_itps(file_in_src: str  # Name of the file to make copy of in cwd
                   ) -> None:
         """check and copy other needed ITP files from source to current
         working directory"""
