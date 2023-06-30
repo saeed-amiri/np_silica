@@ -465,14 +465,13 @@ class WriteItp:
                               'cmt',
                               'element',
                               'resname']
-        df_res: pd.DataFrame  # Df in the asked format
-        df_res = pd.DataFrame(columns=columns)
+        df_res = pd.DataFrame(columns=columns)  # Df in the asked format
         df_res['atomnr'] = df_core['atomnr']
-        df_res['funct'] = [stinfo.PosRes.FUNCTION for _ in df_res['atomnr']]
-        df_res['fx'] = [stinfo.PosRes.FX for _ in df_res['atomnr']]
-        df_res['fy'] = [stinfo.PosRes.FY for _ in df_res['atomnr']]
-        df_res['fz'] = [stinfo.PosRes.FZ for _ in df_res['atomnr']]
-        df_res['cmt'] = [';' for _ in df_res['atomnr']]
+        df_res['funct'] = [stinfo.PosRes.FUNCTION] * len(df_res)
+        df_res['fx'] = [stinfo.PosRes.FX] * len(df_res)
+        df_res['fy'] = [stinfo.PosRes.FY] * len(df_res)
+        df_res['fz'] = [stinfo.PosRes.FZ] * len(df_res)
+        df_res['cmt'] = [';'] * len(df_res)
         df_res['element'] = df_core['element']
         df_res['resname'] = df_core['resname']
         return df_res
