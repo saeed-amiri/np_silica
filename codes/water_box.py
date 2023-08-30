@@ -156,12 +156,12 @@ class InFile:
                 if style == 'oda':
                     if stinfo.Hydration.ODAP_PROTONATION:
                         title = ' Protonated Octadecylamine at '
-                        title += stinfo.Hydration.ODAP_INTERFACE
+                        title += str(stinfo.Hydration.ODAP_INTERFACE)
                         self.__print_header(f_out, title)
                         pdb_file = stinfo.Hydration.ODAP_PDB
                     else:
-                        self.__print_header(f_out,
-                            ' Unprotonated Octadecylamine in Water ')
+                        self.__print_header(
+                            f_out, ' Unprotonated Octadecylamine in Water ')
                         pdb_file = stinfo.Hydration.ODAN_PDB
                     dimens = self.__odap_interface(dimensions)
                 elif style == 'odn':
@@ -203,8 +203,8 @@ class InFile:
         return oda_box
 
     def __oda_oil_down(self,
-                        oil_dims: dict[str, float]  # Dims of oil box
-                        ) -> dict[str, float]:
+                       oil_dims: dict[str, float]  # Dims of oil box
+                       ) -> dict[str, float]:
         """set the oda box to the top edge of the water sections"""
         oda_length: float = stinfo.Constants.ODA_length + 1
         oda_box: dict[str, float] = oil_dims
@@ -298,7 +298,7 @@ class InFile:
 
 
 if __name__ == "__main__":
-    dims = boxd.BoxEdges(radius=10, net_charge=10)
-    in_file = InFile(radius=10, dimensions=dims)
-    # water_b = pakml.RunPackMol(inp_file=stinfo.Hydration.INP_FILE,
-                            #    out_file=stinfo.Hydration.OUT_FILE)
+    dims = boxd.BoxEdges(radius=0.1, net_charge=-18)
+    in_file = InFile(radius=0, dimensions=dims)
+    water_b = pakml.RunPackMol(inp_file=stinfo.Hydration.INP_FILE,
+                               out_file=stinfo.Hydration.OUT_FILE)
