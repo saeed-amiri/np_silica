@@ -3,6 +3,7 @@ rotate and order ODA in desired structure in an arbitrary area
 """
 
 import sys
+import pandas as pd
 
 
 class GetPdb:
@@ -11,12 +12,12 @@ class GetPdb:
                  fname: str  # PDB file
                  ) -> None:
         self.fname = fname
-        self._initiate()
+        self.pdb_df: pd.DataFrame = self._initiate()
 
-    def _initiate(self) -> None:
+    def _initiate(self) -> pd.DataFrame:
         data_lines: list[str] = self.get_data()
         parsed_lines = self.parse_lines(data_lines)
-        print(parsed_lines)
+        return self.mk_dataframe(parsed_lines)
 
     def get_data(self) -> list[str]:
         """read pdb file"""
@@ -29,13 +30,29 @@ class GetPdb:
              line != '&\n']
         return data_lines
 
-    def parse_lines(self,
-                    data_lines: list[str]
+    @staticmethod
+    def parse_lines(data_lines: list[str]
                     ) -> list[list[str]]:
         """split the lines"""
         splited_line: list[list[str]] = \
             [line.strip().split(' ') for line in data_lines]
         return [[i for i in item if i] for item in splited_line]
+
+    @staticmethod
+    def mk_dataframe(lines: list[list[str]]
+                     ) -> pd.DataFrame:
+        """make dataframe based on the columns name"""
+        columns: list[str] = ['ATOM',
+                              'atom_id',
+                              'atom_name',
+                              'residue_name',
+                              'residue_number',
+                              'x',
+                              'y',
+                              'z',
+                              'temp',
+                              'atom_symbol']
+        return pd.DataFrame(lines, columns=columns)
 
 
 if __name__ == "__main__":
