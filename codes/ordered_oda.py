@@ -166,16 +166,54 @@ class OrderOda(AlignOda):
         columns: list[str] = ['x', 'y', 'z']
         oda_xyz: np.ndarray = \
             self.aligbed_pdb[columns].astype(float).to_numpy()
-        n_x: int = 5
-        n_y: int = 6
+        radius: float = 30
+        n_x, n_y = self.calculate_nx_ny(a_x=220, a_y=220)
         lattice_points: list[tuple[float, ...]] = \
             self.generate_hexagonal_lattice(n_x, n_y)
+        excluded_lattice: list[tuple[float, ...]] = \
+            self.exclude_np_zrea(lattice_points, radius)
         oda_lattice = \
-            self.position_molecule_on_lattice(oda_xyz, lattice_points)
+            self.position_molecule_on_lattice(oda_xyz, excluded_lattice)
         new_df: pd.DataFrame = \
-            self.repeat_dataframe(self.aligbed_pdb, int(n_x*n_y))
+            self.repeat_dataframe(self.aligbed_pdb, len(excluded_lattice))
         new_pdb: pd.DataFrame = self.update_df(new_df, np.vstack(oda_lattice))
         self.write_to_pdb(new_pdb, 'structured.pdb')
+
+    def calculate_nx_ny(self,
+                        a_x: float,
+                        a_y: float,
+                        spacing: float = 4,
+                        scale_x: float = 1.5
+                        ) -> tuple[int, int]:
+        """find the number of points in the square area"""
+        # Rough estimate without considering exclusion zone
+        n_x_rough = int(np.ceil(a_x / (spacing * scale_x)))
+        n_y_rough = int(np.ceil(a_y / (spacing * np.sqrt(3))))
+        lattice_points = \
+            self.generate_hexagonal_lattice(n_x_rough, n_y_rough, spacing)
+
+        # Calculate final n_x and n_y
+        all_x = [point[0] for point in lattice_points]
+        all_y = [point[1] for point in lattice_points]
+
+        n_x = int(np.ceil(max(all_x) / (spacing * scale_x)))
+        n_y = int(np.ceil(max(all_y) / (spacing * np.sqrt(3))))
+
+        return n_x, n_y
+
+    @staticmethod
+    def exclude_np_zrea(lattice_points: list[tuple[float, ...]],
+                        radius: float
+                        ) -> list:
+        """
+        exclude the points which are inside the NP
+        """
+        excluded_lattice: list[tuple[float, ...]] = []
+        for point in lattice_points:
+            r_point = point[0]**2 + point[1]**2
+            if r_point > radius**2:
+                excluded_lattice.append(point)
+        return excluded_lattice
 
     def generate_hexagonal_lattice(self,
                                    n_x: int,  # Number in x dirction
@@ -205,7 +243,13 @@ class OrderOda(AlignOda):
                 y_i = spacing * np.sqrt(3) * i
                 z_i = z_offset
                 lattice_points.append((x_i, y_i, z_i))
-        return lattice_points
+        # Calculate centroid of the lattice points
+        centroid = np.mean(lattice_points, axis=0)
+
+        # Center the lattice points to (0, 0, 0)
+        centered_lattice_points: list[tuple[float, ...]] = \
+            [(x-centroid[0], y-centroid[1], z) for x, y, z in lattice_points]
+        return centered_lattice_points
 
     def position_molecule_on_lattice(self,
                                      molecule: np.ndarray,
