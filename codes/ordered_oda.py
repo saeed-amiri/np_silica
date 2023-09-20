@@ -181,6 +181,7 @@ class OrderOda(AlignOda):
                                    n_x: int,  # Number in x dirction
                                    n_y: int,
                                    spacing: float = 4,
+                                   scale_x: float = 1.5,
                                    z_offset=0) -> list[tuple[float, ...]]:
         """
         Generate a hexagonal lattice of size n x m with lattice constant a.
@@ -198,9 +199,9 @@ class OrderOda(AlignOda):
         for i in range(n_x):
             for j in range(n_y):
                 if i % 2 == 0:
-                    x_i = spacing * j
+                    x_i = spacing * j * scale_x
                 else:
-                    x_i = spacing * j + 0.5 * spacing
+                    x_i = spacing * j * scale_x + 0.5 * spacing
                 y_i = spacing * np.sqrt(3) * i
                 z_i = z_offset
                 lattice_points.append((x_i, y_i, z_i))
