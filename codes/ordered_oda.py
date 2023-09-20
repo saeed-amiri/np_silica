@@ -151,7 +151,7 @@ class AlignOda:
 
 class OrderOda(AlignOda):
     """
-    Order the oda in a hexagonal structure in a squre are
+    Order the oda in a hexagonal structure in a squre area
     """
     def __init__(self,
                  fname: str
