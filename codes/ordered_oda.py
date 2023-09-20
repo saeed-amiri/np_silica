@@ -3,6 +3,7 @@ rotate and order ODA in desired structure in an arbitrary area
 """
 
 import sys
+import numpy as np
 import pandas as pd
 
 
@@ -55,5 +56,31 @@ class GetPdb:
         return pd.DataFrame(lines, columns=columns)
 
 
+class AlignOda:
+    """
+    Align Oda to a desired axis
+    """
+    def __init__(self,
+                 fname: str
+                 ) -> None:
+        pdb_src = GetPdb(fname)
+        self._initiate(pdb_src)
+
+    def _initiate(self,
+                  pdb_src: "GetPdb"
+                  ) -> None:
+        oda_xyz: np.ndarray = self.get_xyz(pdb_src.pdb_df)
+        print(oda_xyz)
+
+    def get_xyz(self,
+                pdb_df: pd.DataFrame
+                ) -> np.ndarray:
+        """
+        get coordinates as floats
+        """
+        columns: list[str] = ['x', 'y', 'z']
+        return pdb_df[columns].astype(float).to_numpy()
+
+
 if __name__ == "__main__":
-    GetPdb(sys.argv[1])
+    AlignOda(sys.argv[1])
