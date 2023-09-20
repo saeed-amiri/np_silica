@@ -6,6 +6,7 @@ import sys
 import numpy as np
 import pandas as pd
 
+
 class GetPdb:
     """read and load main pdb data"""
     def __init__(self,
@@ -70,8 +71,9 @@ class AlignOda:
                   ) -> None:
         oda_xyz: np.ndarray = self.get_xyz(pdb_src.pdb_df)
         aligned_xyz = self.align_to_z_axis(oda_xyz)
-        aligbed_pdb: pd.DataFrame = self.update_df(pdb_src.pdb_df, aligned_xyz)
-        self.write_to_pdb(aligbed_pdb, 'aligned_oda.pdb')
+        self.aligbed_pdb: pd.DataFrame = \
+            self.update_df(pdb_src.pdb_df, aligned_xyz)
+        self.write_to_pdb(self.aligbed_pdb, 'aligned_oda.pdb')
 
     def get_xyz(self,
                 pdb_df: pd.DataFrame
@@ -147,6 +149,103 @@ class AlignOda:
                 f_out.write(atom_line)
 
 
+class OrderOda(AlignOda):
+    """
+    Order the oda in a hexagonal structure in a squre are
+    """
+    def __init__(self,
+                 fname: str
+                 ) -> None:
+        super().__init__(fname)
+        self.mk_structure()
+
+    def mk_structure(self) -> None:
+        """
+        prepare the area
+        """
+        columns: list[str] = ['x', 'y', 'z']
+        oda_xyz: np.ndarray = \
+            self.aligbed_pdb[columns].astype(float).to_numpy()
+        n_x: int = 5
+        n_y: int = 6
+        lattice_points: list[tuple[float, ...]] = \
+            self.generate_hexagonal_lattice(n_x, n_y)
+        oda_lattice = \
+            self.position_molecule_on_lattice(oda_xyz, lattice_points)
+        new_df: pd.DataFrame = \
+            self.repeat_dataframe(self.aligbed_pdb, int(n_x*n_y))
+        new_pdb: pd.DataFrame = self.update_df(new_df, np.vstack(oda_lattice))
+        self.write_to_pdb(new_pdb, 'structured.pdb')
+
+    def generate_hexagonal_lattice(self,
+                                   n_x: int,  # Number in x dirction
+                                   n_y: int,
+                                   spacing: float = 4,
+                                   z_offset=0) -> list[tuple[float, ...]]:
+        """
+        Generate a hexagonal lattice of size n x m with lattice constant a.
+
+        Parameters:
+        - n (int): Number of rows.
+        - m (int): Number of columns.
+        - a (float): Lattice constant.
+        - z_offset (float): Vertical offset.
+
+        Returns:
+        - list: List of (x, y, z) coordinates for the lattice sites.
+        """
+        lattice_points: list[tuple[float, ...]] = []
+        for i in range(n_x):
+            for j in range(n_y):
+                if i % 2 == 0:
+                    x_i = spacing * j
+                else:
+                    x_i = spacing * j + 0.5 * spacing
+                y_i = spacing * np.sqrt(3) * i
+                z_i = z_offset
+                lattice_points.append((x_i, y_i, z_i))
+        return lattice_points
+
+    def position_molecule_on_lattice(self,
+                                     molecule: np.ndarray,
+                                     lattice_points: list[tuple[float, ...]]
+                                     ) -> list[np.ndarray]:
+        """
+        Position the molecule at each site of the lattice.
+
+        Returns:
+        - list: List of molecules positioned at each lattice site.
+        """
+        # Calculate the centroid of the molecule
+        centroid: np.ndarray = np.mean(molecule, axis=0)
+
+        positioned_molecules: list[np.ndarray] = []
+        for point in lattice_points:
+            translation = np.array(point) - centroid
+            translated_molecule = molecule + translation
+            positioned_molecules.append(translated_molecule)
+
+        return positioned_molecules
+
+    @staticmethod
+    def repeat_dataframe(dframe: pd.DataFrame,
+                         n_rep: int
+                         ) -> pd.DataFrame:
+        """repeat the main dataframe"""
+        # Ensure 'atom_id' and 'residue_number' are integers
+        dframe['atom_id'] = dframe['atom_id'].astype(int)
+        dframe['residue_number'] = dframe['residue_number'].astype(int)
+
+        # Create a new dataframe by repeating the original dataframe `n` times
+        new_dframe = pd.concat([dframe] * n_rep, ignore_index=True)
+
+        # Compute offset for 'atom_id' & 'residue_number' from repeat number
+        ids = (new_dframe.index // len(dframe) * len(dframe)).values
+        new_dframe['atom_id'] += ids
+        new_dframe['residue_number'] += ids
+
+        return new_dframe
+
 
 if __name__ == "__main__":
-    AlignOda(sys.argv[1])
+    OrderOda(sys.argv[1])
