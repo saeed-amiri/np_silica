@@ -157,11 +157,12 @@ class OrderOda(AlignOda):
     """
 
     spacing: float = 8
-    scale_x: float = 1.7
+    scale_x: float = 1.5
     radius: float = 35
     z_offset: float = 5
     a_x: float = 400
     a_y: float = 400
+    desired_oda_nr: int = 200
     outputfile: str = 'ordered_ODA.pdb'
 
     def __init__(self,
@@ -182,11 +183,13 @@ class OrderOda(AlignOda):
             self.generate_hexagonal_lattice(n_x, n_y)
         excluded_lattice: list[tuple[float, ...]] = \
             self.exclude_np_zrea(lattice_points, self.radius)
-        print(f'Number of ODA is {len(excluded_lattice)}')
-        oda_lattice = \
-            self.position_molecule_on_lattice(oda_xyz, excluded_lattice)
-        new_df: pd.DataFrame = \
-            self.repeat_dataframe(self.aligbed_pdb, len(excluded_lattice))
+        lattice_with_desired_points: list[tuple[float, ...]] =\
+            self.check_drop_oda(excluded_lattice)
+        print(f'Number of ODA is {len(lattice_with_desired_points)}')
+        oda_lattice = self.position_molecule_on_lattice(
+            oda_xyz, lattice_with_desired_points)
+        new_df: pd.DataFrame = self.repeat_dataframe(
+            self.aligbed_pdb, len(lattice_with_desired_points))
         new_pdb: pd.DataFrame = self.update_df(new_df, np.vstack(oda_lattice))
         self.write_to_pdb(new_pdb, self.outputfile)
 
@@ -196,8 +199,8 @@ class OrderOda(AlignOda):
                         ) -> tuple[int, int]:
         """find the number of points in the square area"""
         # Rough estimate without considering exclusion zone
-        n_x_rough = int(np.ceil(a_x / (self.spacing * self.scale_x)))
-        n_y_rough = int(np.ceil(a_y / (self.spacing * np.sqrt(3))))
+        n_x_rough = int(a_x / (self.spacing * self.scale_x))
+        n_y_rough = int(a_y / (self.spacing * np.sqrt(3)))
         lattice_points = \
             self.generate_hexagonal_lattice(n_x_rough, n_y_rough)
 
@@ -223,6 +226,39 @@ class OrderOda(AlignOda):
             if r_point > radius**2:
                 excluded_lattice.append(point)
         return excluded_lattice
+
+    def check_drop_oda(self,
+                       lattice_points: list[tuple[float, ...]]
+                       ) -> list[tuple[float, ...]]:
+        """check the number and drop extra points if needed"""
+        if (oda_nr := len(lattice_points)) < self.desired_oda_nr:
+            print("Number of the ODA is less than expected value: "
+                  f"{oda_nr} < {self.desired_oda_nr}")
+            return lattice_points
+        if oda_nr == self.desired_oda_nr:
+            print("The expected number of ODA is created!")
+            return lattice_points
+        return self._drop_lattice_points(
+                lattice_points, oda_nr-self.desired_oda_nr)
+
+    @staticmethod
+    def _drop_lattice_points(lattice_points: list[tuple[float, ...]],
+                             drop_nr: int
+                             ) -> list[tuple[float, ...]]:
+        """drop extra ODA from list"""
+        print(f"{drop_nr} ODA dropped to get the expected number!")
+        xyz_arr: np.ndarray = np.array(lattice_points)
+        # Compute the Euclidean distance for each point to the origin
+        distances = np.linalg.norm(xyz_arr, axis=1)
+
+        # Find the indices of the n smallest distances
+        indices_to_remove: np.ndarray = \
+            np.argpartition(distances, drop_nr)[:drop_nr]
+
+        # Remove these indices from the array
+        filtered_arr: np.ndarray = \
+            np.delete(xyz_arr, indices_to_remove, axis=0)
+        return [tuple(row) for row in filtered_arr]
 
     def generate_hexagonal_lattice(self,
                                    n_x: int,  # Number in x dirction
