@@ -156,12 +156,12 @@ class OrderOda(AlignOda):
     Order the oda in a hexagonal structure in a squre area
     """
 
-    spacing: float = 8
-    scale_x: float = 1.5
+    spacing: float = 8.
+    scale_x: float = 1.7
     radius: float = 35
     z_offset: float = 5
-    a_x: float = 400
-    a_y: float = 400
+    a_x: float = 429
+    a_y: float = 429
     desired_oda_nr: int = 200
     outputfile: str = 'ordered_ODA.pdb'
 
