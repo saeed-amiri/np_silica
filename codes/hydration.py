@@ -32,12 +32,12 @@ if __name__ == '__main__':
                           dimensions=dims)
     water_box = pakml.RunPackMol(inp_file=stinfo.Hydration.INP_FILE,
                                  out_file=stinfo.Hydration.OUT_FILE)
-    read_box = rbox.GetWaterDf(in_file.num_water)
-    combined_box = merge.MergeAll(read_box, nano_p)
+    # read_box = rbox.GetWaterDf(in_file.num_water)
+    # combined_box = merge.MergeAll(read_box, nano_p)
     fout: str  # Name of the output file
     fout = f'boxed_{fname}'
-    write_lmp = wrlmp.WriteLmp(combined_box, output=fout)
-    write_lmp.write_lmp()
+    # write_lmp = wrlmp.WriteLmp(combined_box, output=fout)
+    # write_lmp.write_lmp()
     silica_pdb = itpdb.Call(fname=fname, num_ions=dims.num_mols['ion'])
     write_pdb = cpdb.InFile(silaniz_pdb=silica_pdb.pdb_file)
     pakml.RunPackMol(inp_file=stinfo.Hydration.WS_INP,
