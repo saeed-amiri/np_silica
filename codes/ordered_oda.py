@@ -190,7 +190,7 @@ class OrderOda(AlignOda):
     a_x: float = 429
     a_y: float = 429
     desired_oda_nr: int = 200
-    outputfile: str = f'ordered_ODA_{z_style}.pdb'
+    output: str = f'ordered_ODA_{z_style}.pdb'
 
     def __init__(self,
                  fname: str,
@@ -211,7 +211,7 @@ class OrderOda(AlignOda):
             f"\t\tDesired Numbers of ODA is `{self.desired_oda_nr}`\n"
             f"\t\tz_offset is `{self.z_offset}`\n"
             f"\t\tz_offset style is `{self.z_style}`\n"
-            f"\t\tOutput file of the final orderd ODA is `{self.fout}`\n\n"
+            f"\t\tOutput file of the final orderd ODA is `{self.output}`\n\n"
         )
 
     def mk_structure(self) -> None:
@@ -237,7 +237,7 @@ class OrderOda(AlignOda):
         new_df: pd.DataFrame = self.repeat_dataframe(
             self.aligbed_pdb, len(lattice_with_desired_points))
         new_pdb: pd.DataFrame = self.update_df(new_df, np.vstack(oda_lattice))
-        self.write_to_pdb(new_pdb, self.outputfile)
+        self.write_to_pdb(new_pdb, self.output)
 
     def mk_z_offset(self,
                     n_x: int,
@@ -385,16 +385,24 @@ class OrderOda(AlignOda):
                          ) -> pd.DataFrame:
         """repeat the main dataframe"""
         # Ensure 'atom_id' and 'residue_number' are integers
-        dframe['atom_id'] = dframe['atom_id'].astype(int)
-        dframe['residue_number'] = dframe['residue_number'].astype(int)
+        dframe = dframe.astype({'atom_id': int, 'residue_number': int})
 
-        # Create a new dataframe by repeating the original dataframe `n` times
-        new_dframe = pd.concat([dframe] * n_rep, ignore_index=True)
+        row_count_original: int = len(dframe)
 
-        # Compute offset for 'atom_id' & 'residue_number' from repeat number
-        ids = (new_dframe.index // len(dframe) * len(dframe)).values
-        new_dframe['atom_id'] += ids
-        new_dframe['residue_number'] += ids
+        tmp_list: list[pd.DataFrame] = []
+        for i in range(n_rep):
+            dframe_i = dframe.copy()
+            dframe_i['residue_number'] += 1 * i
+            dframe_i['atom_id'] += i * row_count_original
+            tmp_list.append(dframe_i)
+
+        new_dframe: pd.DataFrame = pd.concat([
+            dframe.assign(
+                residue_number=dframe['residue_number'] + i,
+                atom_id=dframe['atom_id'] + i * row_count_original
+            )
+            for i in range(n_rep)
+        ], ignore_index=True)
 
         return new_dframe
 
