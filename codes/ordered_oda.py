@@ -185,12 +185,12 @@ class OrderOda(AlignOda):
     spacing: float = 8.
     scale_x: float = 1.7
     radius: float = 35
-    z_offset: float = 5
-    z_style: str = 'normal'
+    z_offset: float = 10
+    z_style: str = 'random'
     a_x: float = 429
     a_y: float = 429
     desired_oda_nr: int = 200
-    outputfile: str = 'ordered_ODA.pdb'
+    outputfile: str = f'ordered_ODA_{z_style}.pdb'
 
     def __init__(self,
                  fname: str,
@@ -209,6 +209,8 @@ class OrderOda(AlignOda):
             f"\t\tSize of box in x is `{self.a_x}`, in y is `{self.a_y}`\n"
             f"\t\tThe radius for the nanoparticle is set to `{self.radius}`\n"
             f"\t\tDesired Numbers of ODA is `{self.desired_oda_nr}`\n"
+            f"\t\tz_offset is `{self.z_offset}`\n"
+            f"\t\tz_offset style is `{self.z_style}`\n"
             f"\t\tOutput file of the final orderd ODA is `{self.fout}`\n\n"
         )
 
@@ -220,8 +222,9 @@ class OrderOda(AlignOda):
         oda_xyz: np.ndarray = \
             self.aligbed_pdb[columns].astype(float).to_numpy()
         n_x, n_y = self.calculate_nx_ny(self.a_x, self.a_y)
+        z_offset_arr: np.ndarray = self.mk_z_offset(n_x, n_y)
         lattice_points: list[tuple[float, ...]] = \
-            self.generate_hexagonal_lattice(n_x, n_y)
+            self.generate_hexagonal_lattice(n_x, n_y, z_offset_arr)
         excluded_lattice: list[tuple[float, ...]] = \
             self.exclude_np_zrea(lattice_points, self.radius)
         lattice_with_desired_points: list[tuple[float, ...]] =\
@@ -236,6 +239,21 @@ class OrderOda(AlignOda):
         new_pdb: pd.DataFrame = self.update_df(new_df, np.vstack(oda_lattice))
         self.write_to_pdb(new_pdb, self.outputfile)
 
+    def mk_z_offset(self,
+                    n_x: int,
+                    n_y: int
+                    ) -> np.ndarray:
+        """create a n_x by n_y array to save the z_offset"""
+        z_offset_arr: np.ndarray = np.zeros((n_x, n_y))
+        if (style := self.z_style) == 'normal':
+            return z_offset_arr + self.z_offset
+        if style == 'zigzag':
+            z_offset_arr[::2, :] += self.z_offset
+            return z_offset_arr
+        if style == 'random':
+            return np.random.uniform(0, abs(self.z_offset), (n_x, n_y))
+        return z_offset_arr
+
     def calculate_nx_ny(self,
                         a_x: float,
                         a_y: float
@@ -245,7 +263,9 @@ class OrderOda(AlignOda):
         n_x_rough = int(a_x / (self.spacing * self.scale_x))
         n_y_rough = int(a_y / (self.spacing * np.sqrt(3)))
         lattice_points = \
-            self.generate_hexagonal_lattice(n_x_rough, n_y_rough)
+            self.generate_hexagonal_lattice(n_x_rough,
+                                            n_y_rough,
+                                            np.zeros((n_x_rough, n_y_rough)))
 
         # Calculate final n_x and n_y
         all_x = [point[0] for point in lattice_points]
@@ -311,7 +331,8 @@ class OrderOda(AlignOda):
 
     def generate_hexagonal_lattice(self,
                                    n_x: int,  # Number in x dirction
-                                   n_y: int
+                                   n_y: int,
+                                   z_offset_arr: np.ndarray
                                    ) -> list[tuple[float, ...]]:
         """
         Generate a hexagonal lattice of size n x m with lattice constant a.
@@ -327,7 +348,7 @@ class OrderOda(AlignOda):
                 else:
                     x_i = self.spacing * j * self.scale_x + 0.5 * self.spacing
                 y_i = self.spacing * np.sqrt(3) * i
-                z_i = self.z_offset
+                z_i = z_offset_arr[i, j]
                 lattice_points.append((x_i, y_i, z_i))
         # Calculate centroid of the lattice points
         centroid = np.mean(lattice_points, axis=0)
