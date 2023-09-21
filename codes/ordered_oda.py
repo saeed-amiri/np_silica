@@ -7,15 +7,22 @@ no test for it. Just did it for one request.
 import sys
 import numpy as np
 import pandas as pd
+import logger
 
 
 class GetPdb:
     """read and load main pdb data"""
+
+    info_msg: str = 'Message from GetPdb:\n'
+
     def __init__(self,
-                 fname: str  # PDB file
+                 fname: str,  # PDB file
+                 log: logger.logging.Logger
                  ) -> None:
         self.fname = fname
+        self.info_msg += f'\tReading `{self.fname}` ...\n'
         self.pdb_df: pd.DataFrame = self._initiate()
+        log.info(self.info_msg)
 
     def _initiate(self) -> pd.DataFrame:
         data_lines: list[str] = self.get_data()
@@ -62,20 +69,31 @@ class AlignOda:
     """
     Align Oda to a desired axis
     """
+
+    info_msg: str = "Message from AlignOda:\n"
+    fout: str = 'aligned_oda.pdb'
+    align_axis: str = 'z'
+
     def __init__(self,
-                 fname: str
+                 fname: str,
+                 log: logger.logging.Logger
                  ) -> None:
-        pdb_src = GetPdb(fname)
-        self._initiate(pdb_src)
+        pdb_src = GetPdb(fname, log)
+        self._initiate(pdb_src, log)
 
     def _initiate(self,
-                  pdb_src: "GetPdb"
+                  pdb_src: "GetPdb",
+                  log: logger.logging.Logger
                   ) -> None:
         oda_xyz: np.ndarray = self.get_xyz(pdb_src.pdb_df)
         aligned_xyz = self.align_to_z_axis(oda_xyz)
         self.aligbed_pdb: pd.DataFrame = \
             self.update_df(pdb_src.pdb_df, aligned_xyz)
-        self.write_to_pdb(self.aligbed_pdb, 'aligned_oda.pdb')
+        self.write_to_pdb(self.aligbed_pdb, self.fout)
+        self.info_msg += f'\tOda aligned along `{self.align_axis}` axis\n'
+        self.info_msg += f'\tOutput file is writen in `{self.fout}` \n'
+        log.info(self.info_msg)
+        self.info_msg = ''
 
     def get_xyz(self,
                 pdb_df: pd.DataFrame
@@ -86,34 +104,36 @@ class AlignOda:
         columns: list[str] = ['x', 'y', 'z']
         return pdb_df[columns].astype(float).to_numpy()
 
-    def align_to_z_axis(self, oda_xyz, align_axis='z'):
+    def align_to_z_axis(self,
+                        oda_xyz: np.ndarray
+                        ) -> np.ndarray:
         """
         aligning along axis
         """
         # Compute the centroid of the molecule
-        centroid = np.mean(oda_xyz, axis=0)
+        centroid: np.ndarray = np.mean(oda_xyz, axis=0)
 
         # Center the molecule at the origin
-        centered_xyz = oda_xyz - centroid
+        centered_xyz: np.ndarray = oda_xyz - centroid
 
         # Compute the inertia tensor
-        inertia_tensor = np.dot(centered_xyz.T, centered_xyz)
+        inertia_tensor: np.ndarray = np.dot(centered_xyz.T, centered_xyz)
 
         # Compute the eigenvalues and eigenvectors of the inertia tensor
         eigvals, eigvecs = np.linalg.eig(inertia_tensor)
         # Sort eigenvectors by eigenvalues in ascending order
-        sorted_indices = np.argsort(eigvals)
+        sorted_indices: np.ndarray = np.argsort(eigvals)
         # Depending on which axis you want to align to:
 
         # For x-axis: choose the eigenv correspond to largest eigenvalue
         # For y-axis: choose the eigenv correspond to second largest eigenvalue
         # For z-axis: choose the eigenv correspond to smallest eigenvalue
-        if align_axis == 'z':
+        if self.align_axis == 'z':
             rotation_matrix = eigvecs[:, sorted_indices]
-        if align_axis == 'y':
+        if self.align_axis == 'y':
             rotation_matrix = eigvecs[:, sorted_indices].T
             rotation_matrix[[0, 1]] = rotation_matrix[[1, 0]]
-        elif align_axis == 'x':
+        elif self.align_axis == 'x':
             rotation_matrix = eigvecs[:, sorted_indices].T
 
         # Ensure that the rotation matrix is right-handed
@@ -166,10 +186,24 @@ class OrderOda(AlignOda):
     outputfile: str = 'ordered_ODA.pdb'
 
     def __init__(self,
-                 fname: str
+                 fname: str,
+                 log: logger.logging.Logger
                  ) -> None:
-        super().__init__(fname)
+        super().__init__(fname, log)
+        self.info_msg: str = 'Messages From OrderOda:\n'
+        self._loging_attributs()
         self.mk_structure()
+        log.info(self.info_msg)
+
+    def _loging_attributs(self) -> None:
+        """just to save the constant to the log file"""
+        self.info_msg += (
+            "\tConstant values used to set the structure:\n"
+            f"\t\tSize of box in x is `{self.a_x}`, in y is `{self.a_y}`\n"
+            f"\t\tThe radius for the nanoparticle is set to `{self.radius}`\n"
+            f"\t\tDesired Numbers of ODA is `{self.desired_oda_nr}`\n"
+            f"\t\tOutput file of the final orderd ODA is `{self.fout}`\n\n"
+        )
 
     def mk_structure(self) -> None:
         """
@@ -185,7 +219,9 @@ class OrderOda(AlignOda):
             self.exclude_np_zrea(lattice_points, self.radius)
         lattice_with_desired_points: list[tuple[float, ...]] =\
             self.check_drop_oda(excluded_lattice)
-        print(f'Number of ODA is {len(lattice_with_desired_points)}')
+        msg: str = f'Number of ODA is `{len(lattice_with_desired_points)}`'
+        self.info_msg += f'\t{msg}\n'
+        print(msg)
         oda_lattice = self.position_molecule_on_lattice(
             oda_xyz, lattice_with_desired_points)
         new_df: pd.DataFrame = self.repeat_dataframe(
@@ -232,21 +268,27 @@ class OrderOda(AlignOda):
                        ) -> list[tuple[float, ...]]:
         """check the number and drop extra points if needed"""
         if (oda_nr := len(lattice_points)) < self.desired_oda_nr:
-            print("Number of the ODA is less than expected value: "
-                  f"{oda_nr} < {self.desired_oda_nr}")
+            msg = ("Number of the ODA is less than expected value: "
+                   f"`{oda_nr} < {self.desired_oda_nr}`")
+            self.info_msg += f'\t{msg}\n'
+            print(msg)
             return lattice_points
         if oda_nr == self.desired_oda_nr:
-            print("The expected number of ODA is created!")
+            msg = "The expected number of ODA is created!"
+            self.info_msg += f'\t{msg}\n'
+            print(msg)
             return lattice_points
         return self._drop_lattice_points(
                 lattice_points, oda_nr-self.desired_oda_nr)
 
-    @staticmethod
-    def _drop_lattice_points(lattice_points: list[tuple[float, ...]],
+    def _drop_lattice_points(self,
+                             lattice_points: list[tuple[float, ...]],
                              drop_nr: int
                              ) -> list[tuple[float, ...]]:
         """drop extra ODA from list"""
-        print(f"{drop_nr} ODA dropped to get the expected number!")
+        msg: str = f"`{drop_nr}` ODA dropped to get the expected number!"
+        self.info_msg += f'\t{msg}\n'
+        print(msg)
         xyz_arr: np.ndarray = np.array(lattice_points)
         # Compute the Euclidean distance for each point to the origin
         distances = np.linalg.norm(xyz_arr, axis=1)
@@ -266,12 +308,6 @@ class OrderOda(AlignOda):
                                    ) -> list[tuple[float, ...]]:
         """
         Generate a hexagonal lattice of size n x m with lattice constant a.
-
-        Parameters:
-        - n (int): Number of rows.
-        - m (int): Number of columns.
-        - a (float): Lattice constant.
-        - z_offset (float): Vertical offset.
 
         Returns:
         - list: List of (x, y, z) coordinates for the lattice sites.
@@ -336,4 +372,4 @@ class OrderOda(AlignOda):
 
 
 if __name__ == "__main__":
-    OrderOda(sys.argv[1])
+    OrderOda(sys.argv[1], log=logger.setup_logger(log_name='ordered_oda.log'))
