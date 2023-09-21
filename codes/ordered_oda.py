@@ -153,6 +153,12 @@ class OrderOda(AlignOda):
     """
     Order the oda in a hexagonal structure in a squre area
     """
+
+    spacing: float = 4.5
+    scale_x: float = 1.5
+    radius: float = 35
+    z_offset: float = 0
+
     def __init__(self,
                  fname: str
                  ) -> None:
@@ -166,12 +172,12 @@ class OrderOda(AlignOda):
         columns: list[str] = ['x', 'y', 'z']
         oda_xyz: np.ndarray = \
             self.aligbed_pdb[columns].astype(float).to_numpy()
-        radius: float = 30
         n_x, n_y = self.calculate_nx_ny(a_x=220, a_y=220)
         lattice_points: list[tuple[float, ...]] = \
             self.generate_hexagonal_lattice(n_x, n_y)
         excluded_lattice: list[tuple[float, ...]] = \
-            self.exclude_np_zrea(lattice_points, radius)
+            self.exclude_np_zrea(lattice_points, self.radius)
+        print(f'Number of ODA is {len(excluded_lattice)}')
         oda_lattice = \
             self.position_molecule_on_lattice(oda_xyz, excluded_lattice)
         new_df: pd.DataFrame = \
@@ -181,23 +187,21 @@ class OrderOda(AlignOda):
 
     def calculate_nx_ny(self,
                         a_x: float,
-                        a_y: float,
-                        spacing: float = 4,
-                        scale_x: float = 1.5
+                        a_y: float
                         ) -> tuple[int, int]:
         """find the number of points in the square area"""
         # Rough estimate without considering exclusion zone
-        n_x_rough = int(np.ceil(a_x / (spacing * scale_x)))
-        n_y_rough = int(np.ceil(a_y / (spacing * np.sqrt(3))))
+        n_x_rough = int(np.ceil(a_x / (self.spacing * self.scale_x)))
+        n_y_rough = int(np.ceil(a_y / (self.spacing * np.sqrt(3))))
         lattice_points = \
-            self.generate_hexagonal_lattice(n_x_rough, n_y_rough, spacing)
+            self.generate_hexagonal_lattice(n_x_rough, n_y_rough)
 
         # Calculate final n_x and n_y
         all_x = [point[0] for point in lattice_points]
         all_y = [point[1] for point in lattice_points]
 
-        n_x = int(np.ceil(max(all_x) / (spacing * scale_x)))
-        n_y = int(np.ceil(max(all_y) / (spacing * np.sqrt(3))))
+        n_x = int(np.ceil(max(all_x) / (self.spacing * self.scale_x)))
+        n_y = int(np.ceil(max(all_y) / (self.spacing * np.sqrt(3))))
 
         return n_x, n_y
 
@@ -217,10 +221,8 @@ class OrderOda(AlignOda):
 
     def generate_hexagonal_lattice(self,
                                    n_x: int,  # Number in x dirction
-                                   n_y: int,
-                                   spacing: float = 4,
-                                   scale_x: float = 1.5,
-                                   z_offset=0) -> list[tuple[float, ...]]:
+                                   n_y: int
+                                   ) -> list[tuple[float, ...]]:
         """
         Generate a hexagonal lattice of size n x m with lattice constant a.
 
@@ -237,11 +239,11 @@ class OrderOda(AlignOda):
         for i in range(n_x):
             for j in range(n_y):
                 if i % 2 == 0:
-                    x_i = spacing * j * scale_x
+                    x_i = self.spacing * j * self.scale_x
                 else:
-                    x_i = spacing * j * scale_x + 0.5 * spacing
-                y_i = spacing * np.sqrt(3) * i
-                z_i = z_offset
+                    x_i = self.spacing * j * self.scale_x + 0.5 * self.spacing
+                y_i = self.spacing * np.sqrt(3) * i
+                z_i = self.z_offset
                 lattice_points.append((x_i, y_i, z_i))
         # Calculate centroid of the lattice points
         centroid = np.mean(lattice_points, axis=0)
