@@ -1,5 +1,7 @@
 """
 rotate and order ODA in desired structure in an arbitrary area
+This script wrote in a couple hours! with help of chatGpt. There is
+no test for it. Just did it for one request.
 """
 
 import sys
@@ -154,10 +156,13 @@ class OrderOda(AlignOda):
     Order the oda in a hexagonal structure in a squre area
     """
 
-    spacing: float = 4.5
+    spacing: float = 8
     scale_x: float = 1.5
     radius: float = 35
     z_offset: float = 0
+    a_x: float = 400
+    a_y: float = 400
+    outputfile: str = 'ordered_ODA.pdb'
 
     def __init__(self,
                  fname: str
@@ -172,7 +177,7 @@ class OrderOda(AlignOda):
         columns: list[str] = ['x', 'y', 'z']
         oda_xyz: np.ndarray = \
             self.aligbed_pdb[columns].astype(float).to_numpy()
-        n_x, n_y = self.calculate_nx_ny(a_x=220, a_y=220)
+        n_x, n_y = self.calculate_nx_ny(self.a_x, self.a_y)
         lattice_points: list[tuple[float, ...]] = \
             self.generate_hexagonal_lattice(n_x, n_y)
         excluded_lattice: list[tuple[float, ...]] = \
@@ -183,7 +188,7 @@ class OrderOda(AlignOda):
         new_df: pd.DataFrame = \
             self.repeat_dataframe(self.aligbed_pdb, len(excluded_lattice))
         new_pdb: pd.DataFrame = self.update_df(new_df, np.vstack(oda_lattice))
-        self.write_to_pdb(new_pdb, 'structured.pdb')
+        self.write_to_pdb(new_pdb, self.outputfile)
 
     def calculate_nx_ny(self,
                         a_x: float,
