@@ -174,12 +174,19 @@ class AlignOda:
 class OrderOda(AlignOda):
     """
     Order the oda in a hexagonal structure in a squre area
+    In order to displace z along z axis, there are 3 options:
+        normal: z value is moved by z_offset, for all the ODAs,
+        zigzag: odd and even rows gets to different values. odd moves
+                by z_offset and even remain at zero,
+        random: Every Oda move by a random values (zero, abs(z_offset))
+    It is just for case of carshes in the running the flat ODA lattice!
     """
 
     spacing: float = 8.
     scale_x: float = 1.7
     radius: float = 35
     z_offset: float = 5
+    z_style: str = 'normal'
     a_x: float = 429
     a_y: float = 429
     desired_oda_nr: int = 200
