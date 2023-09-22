@@ -76,7 +76,7 @@ class WriteTop:
             if num:
                 if key == 'sol':
                     mol_name = stinfo.PdbMass.water_residue
-                    self.__write_mol_line(mol_name, net_charge, f_out)
+                    self.__write_mol_line(mol_name, num, f_out)
                 if key == 'ion':
                     mol_name = self.__check_ion(mol_nums, net_charge, num)
                     self.__write_mol_line(mol_name, np.abs(num), f_out)
