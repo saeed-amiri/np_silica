@@ -163,7 +163,7 @@ class AlignOda:
             for _, row in pdb_df.iterrows():
                 atom_line = \
                     (f"ATOM  {int(row['atom_id']):5d} "
-                     f"{row['atom_name']:<4s}{row['residue_name']:>3s}  "
+                     f"{row['atom_name']:<4s} {row['residue_name']:>3s}  "
                      f"{int(row['residue_number']):>4d}    "
                      f"{float(row['x']):8.3f}{float(row['y']):8.3f}"
                      f"{float(row['z']):8.3f}{float(row['temp']):6.2f}      "
@@ -182,9 +182,9 @@ class OrderOda(AlignOda):
     It is just for case of carshes in the running the flat ODA lattice!
     """
 
-    spacing: float = 8.
-    scale_x: float = 1.7
-    radius: float = 35
+    spacing: float = 9.45
+    scale_x: float = 1.4
+    radius: float = 0
     z_offset: float = 10
     z_style: str = 'random'
     a_x: float = 429
@@ -211,6 +211,8 @@ class OrderOda(AlignOda):
             f"\t\tDesired Numbers of ODA is `{self.desired_oda_nr}`\n"
             f"\t\tz_offset is `{self.z_offset}`\n"
             f"\t\tz_offset style is `{self.z_style}`\n"
+            f"\t\tSpacing is `{self.spacing}`\n"
+            f"\t\tScale_x is `{self.scale_x}`\n"
             f"\t\tOutput file of the final orderd ODA is `{self.output}`\n\n"
         )
 
