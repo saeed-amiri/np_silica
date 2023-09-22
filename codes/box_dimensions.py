@@ -215,7 +215,7 @@ class NumMols:
         # I will add the calculation later, but for now:
         odn_moles = stinfo.Hydration.N_ODAN
         print(f'{bcolors.OKCYAN}\tNumber of ODAN (unprotonated ODA) is '
-              f'set to "{odn_moles}" with total charge of `{odn_moles}`'
+              f'set to "{odn_moles}" with total charge of `zero`'
               f'{bcolors.ENDC}')
         return odn_moles
 
