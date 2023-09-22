@@ -168,7 +168,7 @@ class NumMols:
                   f'{bcolors.ENDC}')
         if num_ions > 0:
             print(f'{bcolors.CAUTION}'
-                  f'\tTotal charge of the system is `{charge_floor}`\n'
+                  f'\tTotal charge of the nanoprticles is `{charge_floor}`\n'
                   f'\tThe number of ions is set to "{num_ions}"'
                   f'{bcolors.ENDC}')
         return num_ions
