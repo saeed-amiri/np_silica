@@ -137,7 +137,7 @@ class AlignOda:
             rotation_matrix = eigvecs[:, sorted_indices].T
 
         # Ensure that the rotation matrix is right-handed
-        if np.linalg.det(rotation_matrix) < 0:
+        if np.linalg.det(rotation_matrix) > 0:
             rotation_matrix[:, -1] *= -1
 
         # Rotate molecule to align with z-axis
@@ -227,10 +227,14 @@ class OrderOda(AlignOda):
         z_offset_arr: np.ndarray = self.mk_z_offset(n_x, n_y)
         lattice_points: list[tuple[float, ...]] = \
             self.generate_hexagonal_lattice(n_x, n_y, z_offset_arr)
-        excluded_lattice: list[tuple[float, ...]] = \
-            self.exclude_np_zrea(lattice_points, self.radius)
-        lattice_with_desired_points: list[tuple[float, ...]] =\
-            self.check_drop_oda(excluded_lattice)
+        if self.radius >= 0:
+            excluded_lattice: list[tuple[float, ...]] = \
+                self.remove_points_inside_np(lattice_points, self.radius)
+            lattice_with_desired_points: list[tuple[float, ...]] =\
+                self.adjust_oda_count(excluded_lattice)
+        else:
+            excluded_lattice = lattice_with_desired_points = \
+                self.remove_points_outside_radius(lattice_points, self.radius)
         msg: str = f'Number of ODA is `{len(lattice_with_desired_points)}`'
         self.info_msg += f'\t{msg}\n'
         print(msg)
@@ -330,6 +334,20 @@ class OrderOda(AlignOda):
         filtered_arr: np.ndarray = \
             np.delete(xyz_arr, indices_to_remove, axis=0)
         return [tuple(row) for row in filtered_arr]
+
+    def remove_points_outside_radius(self,
+                                     lattice_points: list[tuple[float, ...]],
+                                     radius: float
+                                     ) -> list[tuple[float, ...]]:
+        """
+        exclude the points which are outside the radius
+        """
+        excluded_lattice: list[tuple[float, ...]] = []
+        for point in lattice_points:
+            r_point = point[0]**2 + point[1]**2
+            if r_point < radius**2:
+                excluded_lattice.append(point)
+        return excluded_lattice
 
     def generate_hexagonal_lattice(self,
                                    n_x: int,  # Number in x dirction
