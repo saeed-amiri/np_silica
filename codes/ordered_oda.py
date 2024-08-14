@@ -87,8 +87,10 @@ class AlignOda:
                   ) -> None:
         oda_xyz: np.ndarray = self.get_xyz(pdb_src.pdb_df)
         aligned_xyz = self.align_to_z_axis(oda_xyz)
-        self.aligbed_pdb: pd.DataFrame = \
+        aligned_pdb: pd.DataFrame = \
             self.update_df(pdb_src.pdb_df, aligned_xyz)
+        self.aligbed_pdb = self.check_nitrogen_is_down(aligned_pdb)
+
         self.write_to_pdb(self.aligbed_pdb, self.fout)
         self.info_msg += f'\tOda aligned along `{self.align_axis}` axis\n'
         self.info_msg += f'\tOutput file is writen in `{self.fout}` \n'
@@ -143,8 +145,8 @@ class AlignOda:
         # Rotate molecule to align with z-axis
         return np.dot(centered_xyz, rotation_matrix)
 
-    @staticmethod
-    def update_df(pdb_df: pd.DataFrame,
+    def update_df(self,
+                  pdb_df: pd.DataFrame,
                   aliged_xyz: np.ndarray
                   ) -> pd.DataFrame:
         """replace source dataframe with updated xyz poitions"""
@@ -152,6 +154,28 @@ class AlignOda:
         aliged_pdb: pd.DataFrame = pdb_df.copy()
         aliged_pdb[columns_to_replace] = aliged_xyz
         return aliged_pdb
+
+    def check_nitrogen_is_down(self,
+                               pdb_df: pd.DataFrame
+                               ) -> pd.DataFrame:
+        """check the nitrogen is down"""
+        # Check if 'NH3' is among the four atoms with the minimum 'z' values
+        sorted_df = pdb_df.sort_values(by='z')
+        top_four_atoms = sorted_df.head(4)
+        if 'NH2' not in top_four_atoms['atom_name'].values:
+            print("Nitrogen is already pointing down")
+            columns: list[str] = ['x', 'y', 'z']
+            oda_xyz: np.ndarray = \
+                pdb_df[columns].astype(float).to_numpy()
+            # Rotate the system by 180 degrees (pi radians)
+            rotation_matrix = np.array([
+                [1, 0, 0],
+                [0, 1, 0],
+                [0, 0, -1]
+            ])
+            oda_xyz = np.dot(oda_xyz, rotation_matrix)
+            pdb_df[columns] = oda_xyz
+        return pdb_df
 
     @staticmethod
     def write_to_pdb(pdb_df: pd.DataFrame,
