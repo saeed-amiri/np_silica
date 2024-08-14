@@ -279,9 +279,9 @@ class OrderOda(AlignOda):
         return n_x, n_y
 
     @staticmethod
-    def exclude_np_zrea(lattice_points: list[tuple[float, ...]],
-                        radius: float
-                        ) -> list:
+    def remove_points_inside_np(lattice_points: list[tuple[float, ...]],
+                                radius: float
+                                ) -> list:
         """
         exclude the points which are inside the NP
         """
@@ -292,9 +292,9 @@ class OrderOda(AlignOda):
                 excluded_lattice.append(point)
         return excluded_lattice
 
-    def check_drop_oda(self,
-                       lattice_points: list[tuple[float, ...]]
-                       ) -> list[tuple[float, ...]]:
+    def adjust_oda_count(self,
+                         lattice_points: list[tuple[float, ...]]
+                         ) -> list[tuple[float, ...]]:
         """check the number and drop extra points if needed"""
         if (oda_nr := len(lattice_points)) < self.desired_oda_nr:
             msg = ("Number of the ODA is less than expected value: "
