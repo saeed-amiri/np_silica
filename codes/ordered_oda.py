@@ -206,9 +206,12 @@ class OrderOda(AlignOda):
     It is just for case of carshes in the running the flat ODA lattice!
     """
 
-    spacing: float = 9.45
-    scale_x: float = 1.4
-    radius: float = 0
+    __slots__ = ('spacing', 'scale_x', 'radius', 'z_offset', 'z_style',
+                 'a_x', 'a_y', 'desired_oda_nr', 'rotation_angle', 'output')
+
+    spacing: float = 3.5
+    scale_x: float = 1.0
+    radius: float = -50  # if negetive the outisde of the circle is excluded
     z_offset: float = 10
     z_style: str = 'random'
     a_x: float = 429
